@@ -37,16 +37,42 @@ void SerialCLI() {
         }
       }
       if(digital){;}
+
+       else if(argStr.equalsIgnoreCase("sw1")) {
+        String argStrVal = argBuf[++n];
+        argVal = argStrVal.toInt();
+        if(argVal > 0){switchingPsi1 = argVal;}
+      }
+
+      else if(argStr.equalsIgnoreCase("sw2")) {
+        String argStrVal = argBuf[++n];
+        argVal = argStrVal.toInt();
+        if(argVal > 0){switchingPsi1 = argVal;}
+      }
+
       else if(argStr.equalsIgnoreCase("delay")) {
         String argStrVal = argBuf[++n];
         argVal = argStrVal.toInt();
         if(argVal > 0){delayTime = argVal;}
+      }
+
+      else if(argStr.equalsIgnoreCase("avg")) {
+        String argStrVal = argBuf[++n];
+        argVal = argStrVal.toInt();
+        if(argVal > 0){MOVING_AVG_SIZE = argVal;}
       }
    
       else if(argStr.equalsIgnoreCase("help") || argStr.equalsIgnoreCase("h")){
         printHelp();
       }
 
+      else if(argStr.equalsIgnoreCase("lsr")){
+        lsrReset = 1;
+      }
+      
+      else if(argStr.equalsIgnoreCase("c50setup")){
+        c50setup = !c50setup;
+      }
       else if(argStr.equalsIgnoreCase("raw")){
         rawPrint = !rawPrint;
       }
@@ -73,10 +99,14 @@ void SerialCLI() {
       else if(argStr.equalsIgnoreCase("pt")){
         printMode = (printMode == PT)?OFF:PT;
       }
+
       else if(argStr.equalsIgnoreCase("plot")){
         plot = !plot;
       }
-
+      else if(argStr.equalsIgnoreCase("err")){
+        Serial.println(lsrError);
+      }
+        
       else if(argStr.equalsIgnoreCase("pretty")){
         prettyPrint = !prettyPrint;
       }
@@ -125,11 +155,16 @@ void printHelp(){
   Serial.println("tt                 -> Print all TT values");
   Serial.println("printall           -> Print all data");
   Serial.println("delay              -> Designate print delay time in ms (default: 1000)");
+  Serial.println("sample             -> change polling sample quantity");
+  Serial.println("sw1                -> Change switching pressure 1");
+  Serial.println("sw2                -> Change switching pressure 2");
+  Serial.println("lsr                -> Virtually press lsr reset button for 500ms");
+  Serial.println("c50setup           -> paul's feature");
   Serial.println("pretty             -> Toggle print mode labeled lists <--> csv list");
   //Serial.println("keys               -> Toggle print mode labeled keys <--> csv list");
   Serial.println("raw                -> Toggle to print only raw values");
-  Serial.println("stop               -> Silence all printouts");
-  Serial.println("quiet              -> Silence all printouts");
+  Serial.println("plot               -> Toggle Plotting of all values using Arduino Serial Plotter");
+  Serial.println("stop/quiet         -> Silence all printouts");
   Serial.println("manual             -> Control all output manually");
   Serial.println("help/h             -> This help menu");
   Serial.println("###############################################");
@@ -138,9 +173,32 @@ void printHelp(){
 
 void dataPrint(unsigned long dly){
   if(plot){
+    Serial.print("AI_HYD_psig_PT561_HydraulicInlet2:");
     Serial.print(AI_HYD_psig_PT561_HydraulicInlet2);
-    Serial.print(" ");
-    Serial.println(DO_HYD_XV554_DCV2_A*2000);
+    Serial.print(" DO_HYD_XV554_DCV2_A:");
+    Serial.print(DO_HYD_XV554_DCV2_A*2000);
+    Serial.print(" DO_HYD_XV557_DCV2_B:");
+    Serial.print(DO_HYD_XV557_DCV2_B*2000);
+    Serial.print(" SwitchingPressure:");
+    Serial.print(switchingPsi1);
+    Serial.print(" AI_H2_psig_PT712_Stage1_DischargeTank:");
+    Serial.print(AI_H2_psig_PT712_Stage1_DischargeTank);
+    Serial.print(" AI_H2_psig_PT407_Stage3_Discharge:");
+    Serial.print(AI_H2_psig_PT407_Stage3_Discharge);
+    Serial.print(" AI_H2_psig_PT410_Output:");
+    Serial.print(AI_H2_psig_PT410_Output);
+    Serial.print(" AI_HYD_C_TT454_HydraulicTank:");
+    Serial.print(AI_HYD_C_TT454_HydraulicTank);
+    Serial.print(" AI_CLT_C_TT207_CoolantSupply2:");
+    Serial.print(AI_CLT_C_TT207_CoolantSupply2);
+    Serial.print(" AI_H2_C_TT715_Stage2SuctionTank:");
+    Serial.print(AI_H2_C_TT715_Stage2SuctionTank);
+    Serial.print(" AI_H2_C_TT520_Stage2Discharge:");
+    Serial.print(AI_H2_C_TT520_Stage2Discharge);
+    Serial.print(" AI_H2_C_TT521_Stage3Suction:");
+    Serial.println(AI_H2_C_TT521_Stage3Suction);
+    Serial.print(" AI_H2_C_TT522_Stage3Discharge:");
+    Serial.println(AI_H2_C_TT522_Stage3Discharge);
   }
   else if(millis() - dataPrintTimer > dly && dataPrintTimer){
     if(!printMode){return;}
@@ -148,34 +206,41 @@ void dataPrint(unsigned long dly){
     switch(printMode){
       case PACKET:
         for(int i = 0; i < TTsize;i++){
-          if(*TTdata[i].value != prevTT[i]){
+          if(*TTdata[i].value != TTdata[i].prev){
             if(msg != "{"){msg = msg + ",";}
             msg = msg + "\"" + TTdata[i].key + "\":" + *TTdata[i].value;
-            prevTT[i] = *TTdata[i].value;
+            TTdata[i].prev = *TTdata[i].value;
           }
         }
 
         for(int i = 0; i < PTsize;i++){
-          if(*PTdata[i].value != prevPT[i]){
+          if(*PTdata[i].value != PTdata[i].prev){
             if(msg != "{"){msg = msg + ",";}
             msg = msg + "\"" + PTdata[i].key + "\":" + *PTdata[i].value;
-            prevPT[i] = *PTdata[i].value;
+            PTdata[i].prev = *PTdata[i].value;
           }
         }
 
         for(int i = 0; i < DOsize;i++){
-          if(*DOdata[i].value != prevDO[i]){
+          if(*DOdata[i].value != DOdata[i].prev){
             if(msg != "{"){msg = msg + ",";}
             msg = msg + "\"" + DOdata[i].key + "\":" + *DOdata[i].value;
-            prevDO[i] = *DOdata[i].value;
+            DOdata[i].prev = *DOdata[i].value;
           }
         }
 
         for(int i = 0; i < DIsize;i++){
-          if(*DIdata[i].value != prevDI[i]){
+          if(*DIdata[i].value != DIdata[i].prev){
             if(msg != "{"){msg = msg + ",";}
             msg = msg + "\"" + DIdata[i].key + "\":" + *DIdata[i].value;
-            prevDI[i] = *DIdata[i].value;
+            DIdata[i].prev = *DIdata[i].value;
+          }
+        }
+        for(int i = 0; i < varSize;i++){
+          if(*varData[i].value != varData[i].prev){
+            if(msg != "{"){msg = msg + ",";}
+            msg = msg + "\"" + varData[i].key + "\":" + *varData[i].value;
+            varData[i].prev = *varData[i].value;
           }
         }
         if(msg != "{"){

@@ -1,4 +1,8 @@
 void daughterPrint(unsigned long dly){
+  sprintf(ln1,"C.%02d.CT.%02d.HT.%02d   ", cycleCnt, (int)AI_CLT_C_TT207_CoolantSupply2, (int)AI_HYD_C_TT454_HydraulicTank);
+  sprintf(ln2,"S2S.%03d.S2D.%03d   ", (int)AI_H2_C_TT715_Stage2SuctionTank, (int)AI_H2_C_TT520_Stage2Discharge);
+  sprintf(ln3,"S3S.%03d.S3D.%03d   ", (int)AI_H2_C_TT521_Stage3Suction, (int)AI_H2_C_TT522_Stage3Discharge);
+
   if(millis() - daughterPrintTimer > dly && daughterPrintTimer){
     daughterPrintTimer = millis();
     bigMatrix[0].writeInt(AI_HYD_psig_PT561_HydraulicInlet2);  // Write local pressure values to 7-seg screen
@@ -14,23 +18,42 @@ void daughterPrint(unsigned long dly){
   if(millis() - daughterPrintTimer2 > 2000 && daughterPrintTimer2){
     daughterTog = !daughterTog;
     daughterPrintTimer2 = millis();
+    if(scrollCnt < 2){scrollCnt++;}
+    else{scrollCnt = 0;}
   }
-  if(STATE < PAUSE){
-    lcd.setCursor(2, 1);
-    lcd.print("  ");
-    lcd.setCursor(2, 1);
-    lcd.print(highCycleCnt/2);
-    lcd.setCursor(7, 1);
-    lcd.print("  ");
-    lcd.setCursor(7, 1);
-    lcd.print((int)AI_HYD_C_TT454_HydraulicTank);
-    lcd.setCursor(12, 1);
-    lcd.print("  ");
-    lcd.setCursor(12, 1);
-    lcd.print((int)AI_CLT_C_TT107_CoolantSupply1);
+  
+  lcd.setCursor(0, 0);
+  if(DI_Comm_LSR_Local || !DI_Encl_ESTOP || STATE == FAULT){
+    switch(STATE){
+      case IDLE_OFF:
+        lcd.print("IDLE: ");
+        if(DI_Comm_LSR_Local){lcd.print("LSR Error     ");}
+      break;
+      case PAUSE:
+        lcd.print("PAUSED: ");
+        if(DI_Comm_LSR_Local){lcd.print("LSR Error     ");}
+      break;
+      case FAULT:
+        lcd.print("FAULT: ");
+        lcd.print(faultString);
+        lcd.print("        ");
+      break;
+      case ESTOP:
+        lcd.print("ESTOP! ");
+        if(DI_Comm_LSR_Local){lcd.print("LSR Error      ");}
+      break;
+      default:
+      break;
+    }
   }
+  else if(!scrollCnt){lcd.print(ln1);}
+  else if(scrollCnt == 1){lcd.print(ln2);}
+  else if(scrollCnt == 2){lcd.print(ln3);}
+  lcd.setCursor(0, 1);
+  if(!scrollCnt){lcd.print(ln2);}
+  else if(scrollCnt == 1){lcd.print(ln3);}
+  else if(scrollCnt == 2){lcd.print(ln1);}
 }
-
 
 double potToTemp(double potReading, double BCOEFFICIENT_VALUE) {
   double potResistance = 4096 / potReading - 1;
@@ -83,11 +106,39 @@ void flashDriver(){
 
 void i2cTransceive(){
   for(int i = 0; i < TTsize;i++){
-    if(TTdata[i].channel != -1){
+    if(TTdata[i].channel == -1){;
+     // TTdata[i].mcp.setFilterCoefficient(TTdata[i].coef);
+      if(TTdata[i].mcp == 1){
+        TTdata[i].rawTemp = mcp1.readThermocouple();
+      }
+      else if(TTdata[i].mcp == 2){
+        TTdata[i].rawTemp = mcp2.readThermocouple();
+      }
+      else if(TTdata[i].mcp == 3){
+        TTdata[i].rawTemp = mcp3.readThermocouple();
+      }
+      else if(TTdata[i].mcp == 4){
+        TTdata[i].rawTemp = mcp4.readThermocouple();
+      }
+      else if(TTdata[i].mcp == 5){
+        TTdata[i].rawTemp = mcp5.readThermocouple();
+      }
+      else if(TTdata[i].mcp == 6){
+        TTdata[i].rawTemp = mcp6.readThermocouple();
+      }
+      else{;}
+      if(0 < TTdata[i].mcp <= 6){
+        TTdata[i].avg.addValue(TTdata[i].rawTemp);
+        *TTdata[i].value = TTdata[i].avg.getAverage();
+      }
+    }
+    else if(TTdata[i].channel != -2){
       TTdata[i].raw = TTdata[i].adc.read(TTdata[i].channel,SD);
       TTdata[i].rawTemp = potToTemp(TTdata[i].raw,TTdata[i].coef);
       TTdata[i].avg.addValue(TTdata[i].rawTemp);
       *TTdata[i].value = TTdata[i].avg.getAverage();
+    }
+      
       /*
       if(TTdata[i].max != -1){
         if(*TTdata[i].value >= TTdata[i].max && !TTdata[i].overheat){
@@ -122,7 +173,6 @@ void i2cTransceive(){
             }
         }
       }*/
-    }
   }
   for(int i = 0; i < PTsize;i++){
     if(PTdata[i].channel != -1){
@@ -134,7 +184,7 @@ void i2cTransceive(){
         if(PTdata[i].max != -1){
           if(*PTdata[i].value >= PTdata[i].max && !PTdata[i].overPressure){
             PTdata[i].overPressure = true;
-            if(STATE <= PRODUCTION){
+            if(STATE == PRODUCTION && millis() - timer[0] > 4000){
               PREV_STATE = STATE;
               STATE = PAUSE;
             }
@@ -146,7 +196,7 @@ void i2cTransceive(){
           if(PTdata[i].min != -1){
             if(*PTdata[i].value < PTdata[i].min && !PTdata[i].overPressure){
               PTdata[i].overPressure = true;
-              if(STATE <= PRODUCTION){
+              if(STATE == PRODUCTION && millis() - timer[0] > 4000){
                 PREV_STATE = STATE;
                 STATE = PAUSE;
               }
@@ -174,6 +224,47 @@ void i2cSetup(){
   adc1.init();
   adc2.init();
   adc3.init();
+ 
+  if(!mcp1.begin(0x60)){
+    Serial.println("WARNING!! Couldnt detect mcp1(0x60)");
+  }
+  if(!mcp2.begin(0x61)){
+    Serial.println("WARNING!! Couldnt detect mcp2(0x61)");
+  }
+  if(!mcp3.begin(0x62)){
+    Serial.println("WARNING!! Couldnt detect mcp3(0x62)");
+  }
+  if(!mcp4.begin(0x63)){
+    Serial.println("WARNING!! Couldnt detect mcp4(0x63)");
+  }
+  if(!mcp5.begin(0x64)){
+    Serial.println("WARNING!! Couldnt detect mcp5(0x64)");
+  }
+  if(!mcp6.begin(0x65)){
+    Serial.println("WARNING!! Couldnt detect mcp6(0x65)");
+  }
+
+  mcp1.setADCresolution(MCP9600_ADCRESOLUTION_12);
+  mcp2.setADCresolution(MCP9600_ADCRESOLUTION_12);
+  mcp3.setADCresolution(MCP9600_ADCRESOLUTION_12);
+  mcp4.setADCresolution(MCP9600_ADCRESOLUTION_12);
+  mcp5.setADCresolution(MCP9600_ADCRESOLUTION_12);
+  mcp6.setADCresolution(MCP9600_ADCRESOLUTION_12);
+
+  mcp1.setThermocoupleType(MCP9600_TYPE_K);
+  mcp2.setThermocoupleType(MCP9600_TYPE_K);
+  mcp3.setThermocoupleType(MCP9600_TYPE_K);
+  mcp4.setThermocoupleType(MCP9600_TYPE_K);
+  mcp5.setThermocoupleType(MCP9600_TYPE_K);
+  mcp6.setThermocoupleType(MCP9600_TYPE_K);
+
+  mcp1.enable(true);
+  mcp2.enable(true);
+  mcp3.enable(true);
+  mcp4.enable(true);
+  mcp5.enable(true);
+  mcp6.enable(true);
+
 
   gpio1.begin();
   gpio1.pinMode(P0_1, INPUT_PULLUP, true);

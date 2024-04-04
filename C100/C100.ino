@@ -5,7 +5,7 @@ void setup() {
   //Serial4.begin(19200, SERIAL_8E1);
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200", "V2.0.0");
+  matrixSetup("C100", "V2.2.0");
   i2cSetup();
   // mbLocal.begin(OCI_MODBUS_ID, Serial4);
   // mbLocal.preTransmission(preTransmission);
@@ -15,12 +15,45 @@ void setup() {
   daughterPrintTimer = millis();
   Serial.println("OK");
   delay(3000);
+  printMode = PACKET;
 }
 
 void loop() {
   SerialCLI();
+  if(lsrReset){
+    if(lsrReset == 1){lsrReset = millis();DO_Comm_LSR_Reset = true;}
+    if(millis() - lsrReset > 1000){
+      DO_Comm_LSR_Reset = false;
+      lsrReset = 0;
+    }
+  }
+  //if(c50setup){ DO_HYD_XV554_DCV2_A = DO_H2_XV907_SuctionPreTank; }//added feature for paul
   //rs485Transceive();
   i2cTransceive();
+/*
+  if((!DI_HYD_LS000_HydraulicLevelSwitch || !DI_CLT_FS000_CoolantFlowSwitch || !DI_HYD_IS000_HydraulicFilterSwitch || !DI_Encl_ESTOP) && !DI_Comm_LSR_Local && lsrError == ""){
+    if(!DI_HYD_LS000_HydraulicLevelSwitch){
+      lsrError = lsrError + "DI_HYD_LS000_HydraulicLevelSwitch";
+    }
+    if(!DI_CLT_FS000_CoolantFlowSwitch){
+      if(lsrError != ""){lsrError = lsrError + ",";}
+      lsrError = lsrError + "DI_CLT_FS000_CoolantFlowSwitch";
+    }
+    if(!DI_HYD_IS000_HydraulicFilterSwitch){
+      if(lsrError != ""){lsrError = lsrError + ",";}
+      lsrError = lsrError + "DI_HYD_IS000_HydraulicFilterSwitch";
+    }
+    if(!DI_Encl_ESTOP){
+      if(lsrError != ""){lsrError = lsrError + ",";}
+      lsrError = lsrError + "DI_Encl_ESTOP";
+    }
+    delay(100);
+  }
+  else if(!DI_Comm_LSR_Local){lsrError = "";}
+  else if(DI_Comm_LSR_Local && lsrError == ""){
+    lsrError = "Unknown";
+  }*/
+
     
   if(!DI_Encl_ESTOP){STATE = ESTOP;}
   flashDriver();
@@ -45,26 +78,26 @@ void loop() {
       if(!timer[0]){
         timer[0] = millis();
         smallMatrix[2].displayPlay(false);
-        lcd.setCursor(0, 0);
-        lcd.print("                ");//clear top line
-        lcd.setCursor(0, 0);
-        lcd.print("IDLE: Ready");
+        //lcd.setCursor(0, 0);
+        //lcd.print("           ");//clear top line
+        //lcd.setCursor(0, 0);
+        //lcd.print("IDLE: Ready");
         DO_Encl_PilotGreen = true;
         DO_Encl_PilotRed = false;
         DO_Comm_LSR_Local = true;
         tog[0] = false;
-        lcd.setCursor(0, 1);
-        lcd.print("                ");//clear bottom line
-        lcd.setCursor(0, 1);
-        lcd.print("C:   H:   L:   ");
+        //lcd.setCursor(0, 1);
+        //lcd.print("                ");//clear bottom line
+        //lcd.setCursor(0, 1);
+        //lcd.print("C:   H:   L:   ");
       }
       if(DI_Comm_LSR_Local && !tog[0]){
         tog[0] = true;
         smallMatrix[2].displayPlay(true);
-        lcd.setCursor(0, 0);
-        lcd.print("                ");//clear top line
-        lcd.setCursor(0, 0);
-        lcd.print("IDLE: LSR lock");
+        //lcd.setCursor(0, 0);
+        //lcd.print("                ");//clear top line
+        //lcd.setCursor(0, 0);
+        //lcd.print("IDLE: LSR lock");
         DO_Encl_PilotGreen = false;
       }
       else if(!DI_Comm_LSR_Local && tog[0]){ timer[0] = 0; }
@@ -82,11 +115,12 @@ void loop() {
         timer[0] = millis();
         DO_HYD_PMP458_HydraulicPump1_Enable = true; //turn on hydraulic pump 1
         DO_HYD_PMP552_HydraulicPump2_Enable = true; //turn on hydraulic pump 2 
+        DO_H2_XV907_SuctionPreTank = true;
         flashGreen = 500;
-        lcd.setCursor(0, 1);
-        lcd.print("                ");//clear bottom line
-        lcd.setCursor(0, 1);
-        lcd.print("C:   H:   L:   ");
+        //lcd.setCursor(0, 1);
+        //lcd.print("                ");//clear bottom line
+        //lcd.setCursor(0, 1);
+        //lcd.print("C:   H:   L:   ");
       }
       if(millis() - timer[0] > 5000 && timer[0]){ //after 5 seconds
         if(!DI_HYD_IS000_HydraulicFilterSwitch){ //check filter switch
@@ -110,15 +144,16 @@ void loop() {
         firstHighSide = true;
         DO_HYD_XV460_DCV1_A = false;
         DO_HYD_XV463_DCV1_B = false;
-
+        timer[5] = millis();
         smallMatrix[2].displayPlay(false);
-        lcd.setCursor(0, 0);
-        lcd.print("                ");//clear top line
-        lcd.setCursor(0, 0);
-        lcd.print("Compressing...");
+        //lcd.setCursor(0, 0);
+        //lcd.print("                ");//clear top line
+        //lcd.setCursor(0, 0);
+        //lcd.print("Compressing...");
       }
       if(!timer[1]){timer[1] = millis();}
       if(millis() - timer[1] > 60000 && timer[1]){
+        cycleCnt = highCycleCnt/2;
         highCycleCnt = 0;
         lowCycleCnt = 0;
         timer[1] = 0;
@@ -148,11 +183,20 @@ void loop() {
         firstHighSide = false;
         timer[4] = millis();
       }
-      if(millis() - timer[4] > 500 && timer[4] && AI_HYD_psig_PT561_HydraulicInlet2 >= 1600){ //switching pressure
+      if(millis() - timer[4] > 500 && timer[4] && AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi1){ //switching pressure
         DO_HYD_XV554_DCV2_A = !DO_HYD_XV554_DCV2_A;
         DO_HYD_XV557_DCV2_B = !DO_HYD_XV557_DCV2_B;
+        timer[5] = millis();
         highCycleCnt++;
         timer[4] = millis();
+      }
+      if(millis() - timer[5] > 60000){
+        PREV_STATE = STATE;
+        STATE = IDLE_OFF;
+        //lcd.setCursor(11, 0);
+        //lcd.print("     ");//clear top line
+        //lcd.setCursor(11, 0);
+        //lcd.print("StkErr");
       }
     break;
 
@@ -168,10 +212,10 @@ void loop() {
           }
         }
         smallMatrix[2].displayPause(false);
-        lcd.setCursor(0, 0);
-        lcd.print("                ");//clear top line
-        lcd.setCursor(0, 0);
-        lcd.print(manualPause?"Manual Pause":"Pause");
+        //lcd.setCursor(0, 0);
+        //lcd.print("                ");//clear top line
+        //lcd.setCursor(0, 0);
+        //lcd.print(manualPause?"Manual Pause":"Pause");
       }
       j = 0;
       
@@ -204,18 +248,18 @@ void loop() {
       if(!timer[2]){timer[2] = millis();}
       if(millis() - timer[2] > 1000 && timer[2]){
         if(errMsg[l] != ""){
-          lcd.setCursor(0, 1);
-          lcd.print("                ");//clear top line
-          lcd.setCursor(0, 1);
-          lcd.print(errMsg[l]);
+          //lcd.setCursor(0, 1);
+          //lcd.print("                ");//clear top line
+          //lcd.setCursor(0, 1);
+          //lcd.print(errMsg[l]);
           errMsg[l++] = "";
         }
         else{
           l = 0;
-          lcd.setCursor(0, 1);
-          lcd.print("                ");//clear top line
-          lcd.setCursor(0, 1);
-          lcd.print("No Errors");
+          //lcd.setCursor(0, 1);
+          //lcd.print("                ");//clear top line
+          //lcd.setCursor(0, 1);
+          //lcd.print("No Errors");
         }
         
         timer[2] = millis();
@@ -247,10 +291,10 @@ void loop() {
         }
 
         smallMatrix[2].displayStop(false);
-        lcd.setCursor(0, 0);
-        lcd.print("                ");//clear top line
-        lcd.setCursor(0, 0);
-        lcd.print("Shutting Down...");
+        //lcd.setCursor(0, 0);
+        //lcd.print("                ");//clear top line
+        //lcd.setCursor(0, 0);
+        //lcd.print("Shutting Down...");
       }
       
       if(millis() - timer[0] > 30000 && timer[0]){
@@ -276,10 +320,10 @@ void loop() {
       if(!timer[0]){
         timer[0] = millis();
         smallMatrix[2].displayChar('M', false);
-        lcd.setCursor(0, 0);
-        lcd.print("                ");//clear top line
-        lcd.setCursor(0, 0);
-        lcd.print("MANUAL MODE");
+        //lcd.setCursor(0, 0);
+        //lcd.print("                ");//clear top line
+        //lcd.setCursor(0, 0);
+        //lcd.print("MANUAL MODE");
         Serial.println("manual");
       }
     break;
@@ -295,14 +339,14 @@ void loop() {
         flashRed = 1000;
 
         smallMatrix[2].displayStop(true);
-        lcd.setCursor(0, 0);
-        lcd.print("                ");//clear top line
-        lcd.setCursor(0, 0);
-        lcd.print("Faulted...");
-        lcd.setCursor(0, 1);
-        lcd.print("                ");//clear top line
-        lcd.setCursor(0, 1);
-        lcd.print(faultString);
+        //lcd.setCursor(0, 0);
+        //lcd.print("                ");//clear top line
+        //lcd.setCursor(0, 0);
+        //lcd.print("Faulted...");
+        //lcd.setCursor(0, 1);
+        //lcd.print("                ");//clear top line
+        //lcd.setCursor(0, 1);
+        //lcd.print(faultString);
       }
       
       if(DI_Encl_ButtonRed){PREV_STATE = STATE; STATE = IDLE_OFF;}
@@ -319,11 +363,11 @@ void loop() {
         DO_Encl_PilotRed = true;
         //flashRed = 200;
         smallMatrix[2].displayStop(false);
-        lcd.setCursor(0, 0);
-        lcd.print("                ");//clear top line
-        lcd.setCursor(0, 0);
-        lcd.print("ESTOP!");
-        DO_Comm_LSR_Local = false;
+        //lcd.setCursor(0, 0);
+        //lcd.print("                ");//clear top line
+        //lcd.setCursor(0, 0);
+        //lcd.print("ESTOP!");
+        //DO_Comm_LSR_Local = false;
       }
       for(int i = 0; i < DOsize;i++){
         if(DOdata[i].key.indexOf("PL") == -1){
@@ -345,6 +389,7 @@ void loop() {
     timer[1] = 0;
     timer[3] = 0;
     timer[4] = 0;
+    timer[5] = 0;
 
     DO_Encl_PilotRed = false;
     DO_Encl_PilotGreen = false;
