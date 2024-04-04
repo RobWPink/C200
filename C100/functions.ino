@@ -132,47 +132,34 @@ void i2cTransceive(){
         *TTdata[i].value = TTdata[i].avg.getAverage();
       }
     }
-    else if(TTdata[i].channel != -2){
+    else if(TTdata[i].channel != -1){
       TTdata[i].raw = TTdata[i].adc.read(TTdata[i].channel,SD);
       TTdata[i].rawTemp = potToTemp(TTdata[i].raw,TTdata[i].coef);
       TTdata[i].avg.addValue(TTdata[i].rawTemp);
-      *TTdata[i].value = TTdata[i].avg.getAverage();
+      *TTdata[i].value = TTdata[i].avg.getAverage();    
     }
       
-      /*
-      if(TTdata[i].max != -1){
-        if(*TTdata[i].value >= TTdata[i].max && !TTdata[i].overheat){
-          TTdata[i].overheat = true;
-          if(STATE >= PRODUCTION){
-            PREV_STATE = STATE;
-            STATE = PAUSE;
-          }
-        }
-        else if(*TTdata[i].value <= TTdata[i].recovery && TTdata[i].overheat){
-          TTdata[i].overheat = false;
-            if(PREV_STATE >= PRODUCTION){
-            STATE = PREV_STATE;
-            PREV_STATE = PAUSE;
-            }
-        }
+    if(TTdata[i].max != -1){
+      if(*TTdata[i].value >= TTdata[i].max && !TTdata[i].overheat){
+        TTdata[i].overheat = true;
+        if(STATE == PRODUCTION){STATE = PAUSE;}
       }
+      else if(*TTdata[i].value <= TTdata[i].maxRecovery && TTdata[i].overheat){
+        TTdata[i].overheat = false;
+          if(STATE == PAUSE){STATE = IDLE_ON;}
+      }
+    }
 
       if(TTdata[i].min != -1){
         if(*TTdata[i].value <= TTdata[i].min && !TTdata[i].overheat){
           TTdata[i].overheat = true;
-          if(STATE >= PRODUCTION){
-            PREV_STATE = STATE;
-            STATE = PAUSE;
-          }
+          if(STATE == PRODUCTION){STATE = PAUSE;}
         }
-        else if(*TTdata[i].value <= TTdata[i].recovery && TTdata[i].overheat){
+        else if(*TTdata[i].value <= TTdata[i].minRecovery && TTdata[i].overheat){
           TTdata[i].overheat = false;
-            if(PREV_STATE >= PRODUCTION){
-            STATE = PREV_STATE;
-            PREV_STATE = PAUSE;
-            }
+          if(STATE == PAUSE){STATE = IDLE_ON;}
         }
-      }*/
+      }
   }
   for(int i = 0; i < PTsize;i++){
     if(PTdata[i].channel != -1){
@@ -181,38 +168,37 @@ void i2cTransceive(){
         PTdata[i].mapped = map((int)PTdata[i].raw, PTdata[i].mapA, PTdata[i].mapB, PTdata[i].mapC, PTdata[i].mapD) + PTdata[i].offset;
         PTdata[i].avg.addValue(PTdata[i].mapped);
         *PTdata[i].value = PTdata[i].avg.getAverage();
-        if(PTdata[i].max != -1){
-          if(*PTdata[i].value >= PTdata[i].max && !PTdata[i].overPressure){
-            PTdata[i].overPressure = true;
-            if(STATE == PRODUCTION && millis() - timer[0] > 4000){
-              PREV_STATE = STATE;
-              STATE = PAUSE;
-            }
-          }
-          else if(*PTdata[i].value <= PTdata[i].recovery && PTdata[i].overPressure){
-            PTdata[i].overPressure = false;
-          }
-        }
-          if(PTdata[i].min != -1){
-            if(*PTdata[i].value < PTdata[i].min && !PTdata[i].overPressure){
-              PTdata[i].overPressure = true;
-              if(STATE == PRODUCTION && millis() - timer[0] > 4000){
-                PREV_STATE = STATE;
-                STATE = PAUSE;
-              }
-            }
-          else if(*PTdata[i].value <= PTdata[i].recovery && PTdata[i].overPressure){
-            PTdata[i].overPressure = false;
-          }
-        }
+      }
+    }
+    if(PTdata[i].max != -1){
+      if(*PTdata[i].value >= PTdata[i].max && !PTdata[i].overPressure){
+        PTdata[i].overPressure = true;
+        if(STATE == PRODUCTION){STATE = PAUSE;}
+      }
+      else if(*PTdata[i].value <= PTdata[i].maxRecovery && PTdata[i].overPressure){
+        PTdata[i].overPressure = false;
+        if(STATE == PAUSE){STATE = IDLE_ON;}
+      }
+    }
+
+    if(PTdata[i].min != -1){
+      if(*PTdata[i].value < PTdata[i].min && !PTdata[i].overPressure){
+        PTdata[i].overPressure = true;
+        if(STATE == PRODUCTION){STATE = PAUSE;}
+      }
+      else if(*PTdata[i].value <= PTdata[i].minRecovery && PTdata[i].overPressure){
+        PTdata[i].overPressure = false;
+        if(STATE == PAUSE){STATE = IDLE_ON;}
       }
     }
   }
+
   for(int i = 0; i < DIsize;i++){
     if(DIdata[i].addr != -1){
       DIdata[i].gpio.digitalRead(DIdata[i].addr,DIdata[i].value);
     }
   }
+
   for(int i = 0; i < DOsize;i++){
     if(DOdata[i].addr != -1){
       DOdata[i].gpio.digitalWrite(DOdata[i].addr,*DOdata[i].value);

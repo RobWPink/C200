@@ -60,6 +60,12 @@ void loop() {
   
   dataPrint(delayTime);
   daughterPrint(delayTime);
+
+  //variable max psi for discharge3 using suction2
+  if(AI_H2_psig_PT712_Stage1_DischargeTank > 1600){PTdata[1].max = 1.9893*AI_H2_psig_PT712_Stage1_DischargeTank + 7521.3;}
+  else{PTdata[1].max = 7.1429*AI_H2_psig_PT712_Stage1_DischargeTank - 657.14;}
+  if(PTdata[1].max > 0){PTdata[1].maxRecovery = PTdata[1].max - 250;}
+
   if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
     DO_CLT_PMP104_PMP204_CoolantPumps_Enable = DO_Comm_LSR_Local;
@@ -140,7 +146,6 @@ void loop() {
       if(!timer[0]){
         timer[0] = millis();
         flashGreen = 2000;
-        DO_H2_XV907_SuctionPreTank = true; //turn on suction solenoid valve
         firstHighSide = true;
         DO_HYD_XV460_DCV1_A = false;
         DO_HYD_XV463_DCV1_B = false;
@@ -270,11 +275,6 @@ void loop() {
           PREV_STATE = PAUSE;
           timer[0] = 0;
         }
-      }
-      else if(errDev[0] == "" && millis()-timer[0] > 1000 && timer[0]){
-        STATE = IDLE_ON;
-        PREV_STATE = PAUSE;
-        timer[0] = 0;
       }
 
     break;

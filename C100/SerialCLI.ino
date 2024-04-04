@@ -104,7 +104,19 @@ void SerialCLI() {
         plot = !plot;
       }
       else if(argStr.equalsIgnoreCase("err")){
-        Serial.println(lsrError);
+        if(lsrError != ""){
+          Serial.println(lsrError);
+        }
+        else{
+          Serial.println("No LSR Errors");
+        }
+        if(errMsg[0] == ""){Serial.println("No PAUSE Errors");}
+        else{
+          for(int h = 0; h < 30; h++){
+            if(errMsg[h] != ""){Serial.print(errMsg[h]);}
+            else{break;}
+          }
+        }
       }
         
       else if(argStr.equalsIgnoreCase("pretty")){
