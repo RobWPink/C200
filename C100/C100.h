@@ -61,7 +61,8 @@ enum prnt {
   DIGITAL_IN,
   DIGITAL_OUT,
   PT,
-  TT
+  TT,
+  debug
 } printMode;
 
 TwoWire i2c(20, 21);

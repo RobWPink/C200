@@ -18,7 +18,7 @@ void daughterPrint(unsigned long dly){
   if(millis() - daughterPrintTimer2 > 2000 && daughterPrintTimer2){
     daughterTog = !daughterTog;
     daughterPrintTimer2 = millis();
-    if(scrollCnt < 2){scrollCnt++;}
+    if(scrollCnt < 1){scrollCnt++;}
     else{scrollCnt = 0;}
   }
   
@@ -46,13 +46,11 @@ void daughterPrint(unsigned long dly){
       break;
     }
   }
-  else if(!scrollCnt){lcd.print(ln1);}
-  else if(scrollCnt == 1){lcd.print(ln2);}
-  else if(scrollCnt == 2){lcd.print(ln3);}
-  lcd.setCursor(0, 1);
-  if(!scrollCnt){lcd.print(ln2);}
+  //else if(!scrollCnt){lcd.print(ln1);}
+  else if(scrollCnt == 0){lcd.print(ln2);}
   else if(scrollCnt == 1){lcd.print(ln3);}
-  else if(scrollCnt == 2){lcd.print(ln1);}
+  lcd.setCursor(0, 1);
+  lcd.print(ln1);
 }
 
 double potToTemp(double potReading, double BCOEFFICIENT_VALUE) {

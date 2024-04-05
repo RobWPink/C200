@@ -5,7 +5,7 @@ void setup() {
   //Serial4.begin(19200, SERIAL_8E1);
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C100", "V2.2.0");
+  matrixSetup("C100", "V2.2.1");
   i2cSetup();
   // mbLocal.begin(OCI_MODBUS_ID, Serial4);
   // mbLocal.preTransmission(preTransmission);

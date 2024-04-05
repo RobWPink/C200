@@ -100,6 +100,10 @@ void SerialCLI() {
         printMode = (printMode == PT)?OFF:PT;
       }
 
+      else if(argStr.equalsIgnoreCase("debug")){
+        printMode = (printMode == debug)?OFF:debug;
+      }
+
       else if(argStr.equalsIgnoreCase("plot")){
         plot = !plot;
       }
@@ -167,7 +171,7 @@ void printHelp(){
   Serial.println("tt                 -> Print all TT values");
   Serial.println("printall           -> Print all data");
   Serial.println("delay              -> Designate print delay time in ms (default: 1000)");
-  Serial.println("sample             -> change polling sample quantity");
+  Serial.println("avg                -> change polling sample quantity");
   Serial.println("sw1                -> Change switching pressure 1");
   Serial.println("sw2                -> Change switching pressure 2");
   Serial.println("lsr                -> Virtually press lsr reset button for 500ms");
@@ -317,6 +321,33 @@ void dataPrint(unsigned long dly){
         Serial.println();
       break;
     
+    case debug:
+      Serial.print("firstHighSide: ");
+      Serial.println(firstHighSide);
+
+      Serial.print("timer4: ");
+      Serial.println(timer[4]);
+
+      Serial.print("DO_HYD_XV554_DCV2_A: ");
+      Serial.println(DO_HYD_XV554_DCV2_A);
+
+      Serial.print("DO_HYD_XV557_DCV2_B: ");
+      Serial.println(DO_HYD_XV557_DCV2_B);
+
+      Serial.print("hydraulic/switching: ");
+      Serial.print(AI_HYD_psig_PT561_HydraulicInlet2);
+      Serial.print(" / ");
+      Serial.println(switchingPsi1);
+
+      Serial.print("DO_HYD_XV557_DCV2_B: ");
+      Serial.println(DO_HYD_XV557_DCV2_B);
+
+      Serial.print("suction: ");
+      Serial.println(AI_H2_psig_PT712_Stage1_DischargeTank);
+      Serial.print("max discharge3: ");
+      Serial.println(PTdata[1].max);
+    break;
+
     default:
     break;
     }
