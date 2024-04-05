@@ -18,39 +18,35 @@ void daughterPrint(unsigned long dly){
   if(millis() - daughterPrintTimer2 > 2000 && daughterPrintTimer2){
     daughterTog = !daughterTog;
     daughterPrintTimer2 = millis();
-    if(scrollCnt < 1){scrollCnt++;}
-    else{scrollCnt = 0;}
+    scrollCnt = !scrollCnt;
+    lsrTog = !lsrTog;
   }
-  
-  lcd.setCursor(0, 0);
-  if(DI_Comm_LSR_Local || !DI_Encl_ESTOP || STATE == FAULT){
-    switch(STATE){
-      case IDLE_OFF:
-        lcd.print("IDLE: ");
-        if(DI_Comm_LSR_Local){lcd.print("LSR Error     ");}
-      break;
-      case PAUSE:
-        lcd.print("PAUSED: ");
-        if(DI_Comm_LSR_Local){lcd.print("LSR Error     ");}
-      break;
-      case FAULT:
-        lcd.print("FAULT: ");
-        lcd.print(faultString);
-        lcd.print("        ");
-      break;
-      case ESTOP:
-        lcd.print("ESTOP! ");
-        if(DI_Comm_LSR_Local){lcd.print("LSR Error      ");}
-      break;
-      default:
-      break;
+  if(!lcdTimer){lcdTimer = millis();}
+  if(millis() - lcdTimer > 1000 && lcdTimer){
+    lcdTimer = millis();
+    lcd.setCursor(0, 0);
+    if(DI_Comm_LSR_Local && !lsrTog){lcd.print(STATE);lcd.print(": LSR Error");}
+    if((lsrTog && DI_Comm_LSR_Local) || !DI_Comm_LSR_Local){
+      switch(STATE){
+        case PAUSE:
+          if(errMsg[errorCnt] != ""){
+            lcd.print(errMsg[errorCnt]);
+            errorCnt++;
+          }
+          else{errorCnt = 0;}
+        break;
+        case FAULT:
+          lcd.print(faultString);
+          lcd.print("        ");
+        break;
+        default:
+          lcd.print(scrollCnt?ln2:ln3);
+        break;
+      }
     }
+    lcd.setCursor(0, 1);
+    lcd.print(ln1);
   }
-  //else if(!scrollCnt){lcd.print(ln1);}
-  else if(scrollCnt == 0){lcd.print(ln2);}
-  else if(scrollCnt == 1){lcd.print(ln3);}
-  lcd.setCursor(0, 1);
-  lcd.print(ln1);
 }
 
 double potToTemp(double potReading, double BCOEFFICIENT_VALUE) {
@@ -135,7 +131,7 @@ void i2cTransceive(){
       TTdata[i].rawTemp = potToTemp(TTdata[i].raw,TTdata[i].coef);
       TTdata[i].avg.addValue(TTdata[i].rawTemp);
       *TTdata[i].value = TTdata[i].avg.getAverage();    
-    }
+    }/*
       
     if(TTdata[i].max != -1){
       if(*TTdata[i].value >= TTdata[i].max && !TTdata[i].overheat){
@@ -144,7 +140,7 @@ void i2cTransceive(){
       }
       else if(*TTdata[i].value <= TTdata[i].maxRecovery && TTdata[i].overheat){
         TTdata[i].overheat = false;
-          if(STATE == PAUSE){STATE = IDLE_ON;}
+          
       }
     }
 
@@ -155,9 +151,9 @@ void i2cTransceive(){
         }
         else if(*TTdata[i].value <= TTdata[i].minRecovery && TTdata[i].overheat){
           TTdata[i].overheat = false;
-          if(STATE == PAUSE){STATE = IDLE_ON;}
+          
         }
-      }
+      }*/
   }
   for(int i = 0; i < PTsize;i++){
     if(PTdata[i].channel != -1){
@@ -175,7 +171,6 @@ void i2cTransceive(){
       }
       else if(*PTdata[i].value <= PTdata[i].maxRecovery && PTdata[i].overPressure){
         PTdata[i].overPressure = false;
-        if(STATE == PAUSE){STATE = IDLE_ON;}
       }
     }
 
@@ -186,7 +181,6 @@ void i2cTransceive(){
       }
       else if(*PTdata[i].value <= PTdata[i].minRecovery && PTdata[i].overPressure){
         PTdata[i].overPressure = false;
-        if(STATE == PAUSE){STATE = IDLE_ON;}
       }
     }
   }

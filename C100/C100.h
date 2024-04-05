@@ -41,7 +41,12 @@ else{
 #define BCOEFFICIENT_d -2350
 #define BCOEFFICIENT_c -2650.4
 #define BCOEFFICIENT_e 3988
+/*
 
+add feature once discharge 3TT gets >130, slow down 
+stop at 150
+dispaly max discharge3 on C.
+*/
 enum state { IDLE_OFF,
              IDLE_ON,
              PRODUCTION,
@@ -89,7 +94,7 @@ char ln2[16] = {'\0'};
 char ln3[16] = {'\0'};
 
 String lsrError = "";
-int MOVING_AVG_SIZE = 5;
+int MOVING_AVG_SIZE = 150;
 int switchingPsi1 = 1950;
 int switchingPsi2 = 1600;
 struct vars{
@@ -124,17 +129,17 @@ bool prettyPrint, rawPrint, errorPrint = false;
 bool virtualRedButton, virtualGreenButton, virtualAmberButton = false;
 bool prevG,prevA,prevR = false;
 bool manualPause = false;
-bool manualMode = false;
-unsigned long holdR = 0;
+bool lsrTog, manualMode = false;
+unsigned long pauseTimer,holdR = 0;
 unsigned long timer[5] = { 0 };
 unsigned long flashTimer[3] = { 0 };
-unsigned long dataPrintTimer,daughterPrintTimer = 0;
+unsigned long lcdTimer,dataPrintTimer,daughterPrintTimer = 0;
 
 int flashGreen, flashAmber, flashRed = 0;
 int delayTime = 100;
 int cycleCnt = 0;
 int scrollCnt = 0;
-
+int errorCnt = 0;
 //double COMPRESSION_RATIO = 5.75;
 
 double AI_HYD_C_TT454_HydraulicTank = 0;
@@ -222,7 +227,7 @@ RunningAverage avgPT519(MOVING_AVG_SIZE);
 RunningAverage avgPT407(MOVING_AVG_SIZE);
 RunningAverage avgPT410(MOVING_AVG_SIZE);
 RunningAverage avgPT467(MOVING_AVG_SIZE);
-RunningAverage avgPT561(MOVING_AVG_SIZE);
+RunningAverage avgPT561(3);
 RunningAverage avgPT556(MOVING_AVG_SIZE);
 RunningAverage avgPT555(MOVING_AVG_SIZE);
 RunningAverage avgPT113(MOVING_AVG_SIZE);

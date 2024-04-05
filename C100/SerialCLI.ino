@@ -55,12 +55,6 @@ void SerialCLI() {
         argVal = argStrVal.toInt();
         if(argVal > 0){delayTime = argVal;}
       }
-
-      else if(argStr.equalsIgnoreCase("avg")) {
-        String argStrVal = argBuf[++n];
-        argVal = argStrVal.toInt();
-        if(argVal > 0){MOVING_AVG_SIZE = argVal;}
-      }
    
       else if(argStr.equalsIgnoreCase("help") || argStr.equalsIgnoreCase("h")){
         printHelp();
@@ -171,7 +165,6 @@ void printHelp(){
   Serial.println("tt                 -> Print all TT values");
   Serial.println("printall           -> Print all data");
   Serial.println("delay              -> Designate print delay time in ms (default: 1000)");
-  Serial.println("avg                -> change polling sample quantity");
   Serial.println("sw1                -> Change switching pressure 1");
   Serial.println("sw2                -> Change switching pressure 2");
   Serial.println("lsr                -> Virtually press lsr reset button for 500ms");
@@ -326,7 +319,7 @@ void dataPrint(unsigned long dly){
       Serial.println(firstHighSide);
 
       Serial.print("timer4: ");
-      Serial.println(timer[4]);
+      Serial.println(millis() - timer[4]);
 
       Serial.print("DO_HYD_XV554_DCV2_A: ");
       Serial.println(DO_HYD_XV554_DCV2_A);
@@ -339,8 +332,8 @@ void dataPrint(unsigned long dly){
       Serial.print(" / ");
       Serial.println(switchingPsi1);
 
-      Serial.print("DO_HYD_XV557_DCV2_B: ");
-      Serial.println(DO_HYD_XV557_DCV2_B);
+      Serial.print("STATE: ");
+      Serial.println(STATE);
 
       Serial.print("suction: ");
       Serial.println(AI_H2_psig_PT712_Stage1_DischargeTank);
