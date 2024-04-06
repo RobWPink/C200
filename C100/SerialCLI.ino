@@ -102,12 +102,6 @@ void SerialCLI() {
         plot = !plot;
       }
       else if(argStr.equalsIgnoreCase("err")){
-        if(lsrError != ""){
-          Serial.println(lsrError);
-        }
-        else{
-          Serial.println("No LSR Errors");
-        }
         if(errMsg[0] == ""){Serial.println("No PAUSE Errors");}
         else{
           for(int h = 0; h < 30; h++){
@@ -181,6 +175,7 @@ void printHelp(){
 }
 
 void dataPrint(unsigned long dly){
+  if(!dataPrintTimer){dataPrintTimer = millis();}
   if(plot){
     Serial.print("AI_HYD_psig_PT561_HydraulicInlet2:");
     Serial.print(AI_HYD_psig_PT561_HydraulicInlet2);
@@ -315,11 +310,14 @@ void dataPrint(unsigned long dly){
       break;
     
     case debug:
+      Serial.print("LoopTime: ");
+      Serial.println(loopTime);
+      
       Serial.print("firstHighSide: ");
       Serial.println(firstHighSide);
 
       Serial.print("timer4: ");
-      Serial.println(millis() - timer[4]);
+      Serial.println(timer[4]);
 
       Serial.print("DO_HYD_XV554_DCV2_A: ");
       Serial.println(DO_HYD_XV554_DCV2_A);

@@ -11,14 +11,14 @@ void setup() {
   // mbLocal.preTransmission(preTransmission);
   // mbLocal.postTransmission(postTransmission);
 
-  dataPrintTimer = millis();
-  daughterPrintTimer = millis();
   Serial.println("OK");
   delay(3000);
   printMode = PACKET;
 }
 
 void loop() {
+  if(!loopTimer){loopTimer = millis();}
+
   SerialCLI();
   if(lsrReset){
     if(lsrReset == 1){lsrReset = millis();DO_Comm_LSR_Reset = true;}
@@ -29,31 +29,7 @@ void loop() {
   }
   //if(c50setup){ DO_HYD_XV554_DCV2_A = DO_H2_XV907_SuctionPreTank; }//added feature for paul
   //rs485Transceive();
-  i2cTransceive();
-/*
-  if((!DI_HYD_LS000_HydraulicLevelSwitch || !DI_CLT_FS000_CoolantFlowSwitch || !DI_HYD_IS000_HydraulicFilterSwitch || !DI_Encl_ESTOP) && !DI_Comm_LSR_Local && lsrError == ""){
-    if(!DI_HYD_LS000_HydraulicLevelSwitch){
-      lsrError = lsrError + "DI_HYD_LS000_HydraulicLevelSwitch";
-    }
-    if(!DI_CLT_FS000_CoolantFlowSwitch){
-      if(lsrError != ""){lsrError = lsrError + ",";}
-      lsrError = lsrError + "DI_CLT_FS000_CoolantFlowSwitch";
-    }
-    if(!DI_HYD_IS000_HydraulicFilterSwitch){
-      if(lsrError != ""){lsrError = lsrError + ",";}
-      lsrError = lsrError + "DI_HYD_IS000_HydraulicFilterSwitch";
-    }
-    if(!DI_Encl_ESTOP){
-      if(lsrError != ""){lsrError = lsrError + ",";}
-      lsrError = lsrError + "DI_Encl_ESTOP";
-    }
-    delay(100);
-  }
-  else if(!DI_Comm_LSR_Local){lsrError = "";}
-  else if(DI_Comm_LSR_Local && lsrError == ""){
-    lsrError = "Unknown";
-  }*/
-
+  i2cTransceive(250);
     
   if(!DI_Encl_ESTOP){STATE = ESTOP;}
   flashDriver();
@@ -78,6 +54,24 @@ void loop() {
     }
   }
   //########################STATE MACHINE################################
+  if(STATE != CHANGED_STATE){ //reset state timer
+    timer[0] = 0;
+    timer[1] = 0;
+    timer[3] = 0;
+    timer[4] = 0;
+    timer[5] = 0;
+
+    DO_Encl_PilotRed = false;
+    DO_Encl_PilotGreen = false;
+    DO_Encl_PilotAmber = false;
+
+    flashGreen = 0;
+    flashRed = 0;
+    flashAmber = 0;
+
+    CHANGED_STATE = STATE;
+  }
+
   String errDev[30] = {""};
   switch(STATE){
     case IDLE_OFF:
@@ -116,8 +110,6 @@ void loop() {
         }
         else{STATE = PRODUCTION;}
       }
-
-
     break;
 
   //#####################################################################
@@ -177,14 +169,13 @@ void loop() {
         timer[0] = millis();
         flashAmber = 1000;
         for(int i = 0; i < DOsize;i++){
-          if((DOdata[i].key.indexOf("XV") >= -1 || DOdata[i].key.indexOf("PMP") >= -1 || DOdata[i].key.indexOf("PL") >= -1) && DOdata[i].key.indexOf("LSR") == -1 && DOdata[i].key.indexOf("CLT") == -1){
+          if((DOdata[i].key.indexOf("XV") >= -1 || DOdata[i].key.indexOf("PMP") >= -1 || DOdata[i].key.indexOf("PL") >= -1) && DOdata[i].key.indexOf("LSR") == -1 && DOdata[i].key.indexOf("XV907") == -1 && DOdata[i].key.indexOf("CLT") == -1){
             *DOdata[i].value = false;
           }
         }
         smallMatrix[2].displayPause(false);
       }
-      DO_HYD_XV554_DCV2_A = false;
-      DO_HYD_XV557_DCV2_B = false;
+      /*
       for(int i = 0;i > 30;i++){errDev[i] = "";}
 
       j = 0;
@@ -212,17 +203,18 @@ void loop() {
           errMsg[k][errMsg[k].length() - 1] = '\0'; //remove trailing space
           k++;
         }
-      }
+      }*/
       if(manualPause){
         if(DI_Encl_ButtonGreen && errDev[0] == ""){
           STATE = IDLE_ON;
           timer[0] = 0;
         }
       }
-      else if(errDev[0] == "" && millis() - timer[0] > 3000 && timer[0]){
-        STATE = IDLE_ON;
-        for(int i = 0;i > 30;i++){errMsg[i] = "";}
-        timer[0] = 0;
+      else if(millis() - timer[0] > 3*60000 && timer[0]){
+        for(int i = 0; i < PTsize;i++){
+          if(!PTdata[i].overPressure){STATE = IDLE_ON;}
+          else{ STATE = PAUSE; break; }
+        }
       }
 
     break;
@@ -308,21 +300,6 @@ void loop() {
       break;
   }
 
-  if(STATE != CHANGED_STATE){ //reset state timer
-    timer[0] = 0;
-    timer[1] = 0;
-    timer[3] = 0;
-    timer[4] = 0;
-    timer[5] = 0;
-
-    DO_Encl_PilotRed = false;
-    DO_Encl_PilotGreen = false;
-    DO_Encl_PilotAmber = false;
-
-    flashGreen = 0;
-    flashRed = 0;
-    flashAmber = 0;
-
-    CHANGED_STATE = STATE;
-  }
+  loopTime = millis() - loopTimer;
+  loopTimer = 0;
 }

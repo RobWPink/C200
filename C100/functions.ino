@@ -1,10 +1,40 @@
-void daughterPrint(unsigned long dly){
-  sprintf(ln1,"C.%02d.CT.%02d.HT.%02d   ", cycleCnt, (int)AI_CLT_C_TT207_CoolantSupply2, (int)AI_HYD_C_TT454_HydraulicTank);
-  sprintf(ln2,"S2S.%03d.S2D.%03d   ", (int)AI_H2_C_TT715_Stage2SuctionTank, (int)AI_H2_C_TT520_Stage2Discharge);
-  sprintf(ln3,"S3S.%03d.S3D.%03d   ", (int)AI_H2_C_TT521_Stage3Suction, (int)AI_H2_C_TT522_Stage3Discharge);
 
+void daughterPrint(unsigned long dly){
+  char ln1[16] = {' '};
+  char ln0[5][16] = {{' '},{' '},{' '},{' '},{' '}};
+  if(!twoTimer){twoTimer = millis();}
+  if(millis() - twoTimer > 2000 && twoTimer){
+    daughterTog = !daughterTog;
+    twoTimer = millis();
+    scrollCnt++;
+    sprintf(ln0[0],"S2S.%03d.S2D.%03d ", (int)AI_H2_C_TT715_Stage2SuctionTank, (int)AI_H2_C_TT520_Stage2Discharge);
+    sprintf(ln0[1],"S3S.%03d.S3D.%03d ", (int)AI_H2_C_TT521_Stage3Suction, (int)AI_H2_C_TT522_Stage3Discharge);
+    switch(STATE){
+      case PAUSE:
+        if(errMsg[0] != ""){ sprintf(ln0[2],"PAUSE: %s",errMsg[0]); }
+        else{ sprintf(ln0[2],"PAUSE: No Errors"); }
+      break;
+      case FAULT:
+        sprintf(ln0[2],"FAULT: %s",faultString);
+      break;
+      case ESTOP:
+        sprintf(ln0[2],"ESTOP!          ");
+      break;
+      default:
+      break;
+    }
+    lcd.setCursor(0, 0);
+    if(ln0[scrollCnt][0] == ' '){ scrollCnt = 0; }//reset scrollCnt
+    lcd.print(ln0[scrollCnt]);
+
+    lcd.setCursor(0, 1);
+    sprintf(ln1,"C%02dCT%02dHT%02dMX%03d", cycleCnt, (int)AI_CLT_C_TT207_CoolantSupply2, (int)AI_HYD_C_TT454_HydraulicTank, (int)PTdata[1].max/100);
+    lcd.print(ln1);
+  }
+  
+  if(!daughterPrintTimer){daughterPrintTimer = millis();}
   if(millis() - daughterPrintTimer > dly && daughterPrintTimer){
-    daughterPrintTimer = millis();
+    daughterPrintTimer = 0;
     bigMatrix[0].writeInt(AI_HYD_psig_PT561_HydraulicInlet2);  // Write local pressure values to 7-seg screen
     if(DO_HYD_XV554_DCV2_A){ smallMatrix[0].displayChar('2', false); }
     else if(DO_HYD_XV557_DCV2_B){ smallMatrix[0].displayChar('1', false); }
@@ -12,40 +42,6 @@ void daughterPrint(unsigned long dly){
     bigMatrix[1].writeInt(daughterTog?AI_H2_psig_PT410_Output:AI_H2_psig_PT407_Stage3_Discharge);
     smallMatrix[1].displayChar(daughterTog?'T':'D',false);
     bigMatrix[2].writeInt(AI_H2_psig_PT712_Stage1_DischargeTank);
-
-  }
-  if(!daughterPrintTimer2){daughterPrintTimer2 = millis();}
-  if(millis() - daughterPrintTimer2 > 2000 && daughterPrintTimer2){
-    daughterTog = !daughterTog;
-    daughterPrintTimer2 = millis();
-    scrollCnt = !scrollCnt;
-    lsrTog = !lsrTog;
-  }
-  if(!lcdTimer){lcdTimer = millis();}
-  if(millis() - lcdTimer > 1000 && lcdTimer){
-    lcdTimer = millis();
-    lcd.setCursor(0, 0);
-    if(DI_Comm_LSR_Local && !lsrTog){lcd.print(STATE);lcd.print(": LSR Error");}
-    if((lsrTog && DI_Comm_LSR_Local) || !DI_Comm_LSR_Local){
-      switch(STATE){
-        case PAUSE:
-          if(errMsg[errorCnt] != ""){
-            lcd.print(errMsg[errorCnt]);
-            errorCnt++;
-          }
-          else{errorCnt = 0;}
-        break;
-        case FAULT:
-          lcd.print(faultString);
-          lcd.print("        ");
-        break;
-        default:
-          lcd.print(scrollCnt?ln2:ln3);
-        break;
-      }
-    }
-    lcd.setCursor(0, 1);
-    lcd.print(ln1);
   }
 }
 
@@ -98,7 +94,7 @@ void flashDriver(){
 
 //void rs485Transceive(){;}
 
-void i2cTransceive(){
+void i2cTransceive(int ptInterval){
   for(int i = 0; i < TTsize;i++){
     if(TTdata[i].channel == -1){;
      // TTdata[i].mcp.setFilterCoefficient(TTdata[i].coef);
@@ -131,7 +127,7 @@ void i2cTransceive(){
       TTdata[i].rawTemp = potToTemp(TTdata[i].raw,TTdata[i].coef);
       TTdata[i].avg.addValue(TTdata[i].rawTemp);
       *TTdata[i].value = TTdata[i].avg.getAverage();    
-    }/*
+    }
       
     if(TTdata[i].max != -1){
       if(*TTdata[i].value >= TTdata[i].max && !TTdata[i].overheat){
@@ -149,41 +145,47 @@ void i2cTransceive(){
           TTdata[i].overheat = true;
           if(STATE == PRODUCTION){STATE = PAUSE;}
         }
-        else if(*TTdata[i].value <= TTdata[i].minRecovery && TTdata[i].overheat){
+        else if(*TTdata[i].value >= TTdata[i].minRecovery && TTdata[i].overheat){
           TTdata[i].overheat = false;
           
         }
-      }*/
+      }
   }
-  for(int i = 0; i < PTsize;i++){
-    if(PTdata[i].channel != -1){
-      PTdata[i].raw = PTdata[i].adc.read(PTdata[i].channel,SD);
-      if(PTdata[i].mapA != -1 && PTdata[i].mapB != -1 && PTdata[i].mapC != -1 && PTdata[i].mapD != -1){
-        PTdata[i].mapped = map((int)PTdata[i].raw, PTdata[i].mapA, PTdata[i].mapB, PTdata[i].mapC, PTdata[i].mapD) + PTdata[i].offset;
-        PTdata[i].avg.addValue(PTdata[i].mapped);
-        *PTdata[i].value = PTdata[i].avg.getAverage();
+  if(!dataTimer){dataTimer = millis();}
+  if(millis() - dataTimer > ptInterval){
+    for(int i = 0; i < PTsize;i++){
+      if(PTdata[i].channel != -1 || PTdata[i].key != "PT561"){
+        PTdata[i].raw = PTdata[i].adc.read(PTdata[i].channel,SD);
+        if(PTdata[i].mapA != -1 && PTdata[i].mapB != -1 && PTdata[i].mapC != -1 && PTdata[i].mapD != -1){
+          PTdata[i].mapped = map((int)PTdata[i].raw, PTdata[i].mapA, PTdata[i].mapB, PTdata[i].mapC, PTdata[i].mapD) + PTdata[i].offset; //read slowly
+          PTdata[i].avg.addValue(PTdata[i].mapped);
+          *PTdata[i].value = PTdata[i].avg.getAverage();
+        }
       }
-    }
-    if(PTdata[i].max != -1){
-      if(*PTdata[i].value >= PTdata[i].max && !PTdata[i].overPressure){
-        PTdata[i].overPressure = true;
-        if(STATE == PRODUCTION){STATE = PAUSE;}
+      if(PTdata[i].max != -1){
+        if(*PTdata[i].value >= PTdata[i].max && !PTdata[i].overPressure){
+          PTdata[i].overPressure = true;
+          if(STATE == PRODUCTION){STATE = PAUSE;}
+        }
+        else if(*PTdata[i].value <= PTdata[i].maxRecovery && PTdata[i].overPressure){
+          PTdata[i].overPressure = false;
+        }
       }
-      else if(*PTdata[i].value <= PTdata[i].maxRecovery && PTdata[i].overPressure){
-        PTdata[i].overPressure = false;
-      }
-    }
 
-    if(PTdata[i].min != -1){
-      if(*PTdata[i].value < PTdata[i].min && !PTdata[i].overPressure){
-        PTdata[i].overPressure = true;
-        if(STATE == PRODUCTION){STATE = PAUSE;}
-      }
-      else if(*PTdata[i].value <= PTdata[i].minRecovery && PTdata[i].overPressure){
-        PTdata[i].overPressure = false;
+      if(PTdata[i].min != -1){
+        if(*PTdata[i].value < PTdata[i].min && !PTdata[i].overPressure){
+          PTdata[i].overPressure = true;
+          if(STATE == PRODUCTION){STATE = PAUSE;}
+        }
+        else if(*PTdata[i].value >= PTdata[i].minRecovery && PTdata[i].overPressure){
+          PTdata[i].overPressure = false;
+        }
       }
     }
   }
+  PTdata[3].mapped = map((int)PTdata[3].raw, PTdata[3].mapA, PTdata[3].mapB, PTdata[3].mapC, PTdata[3].mapD) + PTdata[3].offset; //read quickly
+  PTdata[3].avg.addValue(PTdata[3].mapped);
+  *PTdata[3].value = PTdata[3].avg.getAverage();
 
   for(int i = 0; i < DIsize;i++){
     if(DIdata[i].addr != -1){
