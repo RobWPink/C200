@@ -210,7 +210,7 @@ void loop() {
           timer[0] = 0;
         }
       }
-      else if(millis() - timer[0] > 3*60000 && timer[0]){
+      else if(millis() - timer[0] > 5*60000 && timer[0]){
         for(int i = 0; i < PTsize;i++){
           if(!PTdata[i].overPressure){STATE = IDLE_ON;}
           else{ STATE = PAUSE; break; }

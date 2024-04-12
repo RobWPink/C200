@@ -245,10 +245,10 @@ struct tt {
   { "AI_H2_C_TT809_Stage1Discharge1", "TT809", 0, 0, avgTT809, &AI_H2_C_TT809_Stage1Discharge1,   0, -1, -1, -1, -1, 1, -1, 1, -1, false },      
   { "AI_H2_C_TT810_Stage1Discharge2", "TT810", 0, 0, avgTT810, &AI_H2_C_TT810_Stage1Discharge2,   0, -1, -1, -1, -1, 1, -1, 2, -1, false },      
   //{ "AI_H2_C_TT701_DischargePreTank", "TT701", 0, 0, avgTT701, &AI_H2_C_TT701_DischargePreTank, 0, -1, -1, -1, -1, 1, -1, -1, -1, false },
-  { "AI_H2_C_TT715_Stage2SuctionTank", "TT715", 0, 0, avgTT715, &AI_H2_C_TT715_Stage2SuctionTank, 0, -1, -1, 150, 140, 1, -1, 3, -1, false },    
-  { "AI_H2_C_TT520_Stage2Discharge", "TT520", 0, 0, avgTT520, &AI_H2_C_TT520_Stage2Discharge,     0, -1, -1, 150, 140, 1, -1, 4, -1, false },      
-  { "AI_H2_C_TT521_Stage3Suction", "TT521", 0, 0, avgTT521, &AI_H2_C_TT521_Stage3Suction,         0, -1, -1, 150, 140, 1, -1, 5, -1, false },        
-  { "AI_H2_C_TT522_Stage3Discharge", "TT522", 0, 0, avgTT522, &AI_H2_C_TT522_Stage3Discharge,     0, -1, -1, 150, 140, 1, -1, 6, -1, false }  
+  { "AI_H2_C_TT715_Stage2SuctionTank", "TT715", 0, 0, avgTT715, &AI_H2_C_TT715_Stage2SuctionTank, 0, -1, -1, 140, 130, 1, -1, 3, -1, false },    
+  { "AI_H2_C_TT520_Stage2Discharge", "TT520", 0, 0, avgTT520, &AI_H2_C_TT520_Stage2Discharge,     0, -1, -1, 140, 130, 1, -1, 4, -1, false },      
+  { "AI_H2_C_TT521_Stage3Suction", "TT521", 0, 0, avgTT521, &AI_H2_C_TT521_Stage3Suction,         0, -1, -1, 140, 130, 1, -1, 5, -1, false },        
+  { "AI_H2_C_TT522_Stage3Discharge", "TT522", 0, 0, avgTT522, &AI_H2_C_TT522_Stage3Discharge,     0, -1, -1, 140, 130, 1, -1, 6, -1, false }  
 };int TTsize = 9;
 
 struct pt {
