@@ -14,6 +14,7 @@ void setup() {
   Serial.println("OK");
   delay(3000);
   printMode = PACKET;
+  DO_Comm_LSR_Local = true;
 }
 
 void loop() {

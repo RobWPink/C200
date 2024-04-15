@@ -319,11 +319,11 @@ void dataPrint(unsigned long dly){
       Serial.print("STATE: ");
       Serial.println(STATE);
 
-      Serial.print("INTENSE1,2 STATEs: ");
+      Serial.print("INTENSE1/2 STATEs: ");
       Serial.print(INTENSE1);Serial.print(", ");
       Serial.println(INTENSE2);
 
-      Serial.print("intense timers");
+      Serial.print("intense timers: ");
       Serial.print(millis() - timer[3]);Serial.print(", ");
       Serial.println(millis() - timer[5]);
 

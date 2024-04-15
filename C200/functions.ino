@@ -38,7 +38,7 @@ void daughterPrint(unsigned long dly){
     bigMatrix[0].writeInt(daughterTog?AI_HYD_psig_PT467_HydraulicInlet1:AI_HYD_psig_PT561_HydraulicInlet2);
     smallMatrix[0].displayChar(daughterTog?'L':'H',false);
     bigMatrix[1].writeInt(daughterTog?AI_H2_psig_PT410_Stage3_DischargeTank:AI_H2_psig_PT407_Stage3_Discharge);
-    smallMatrix[2].displayChar(daughterTog?'T':'D',false);
+    smallMatrix[1].displayChar(daughterTog?'T':'D',false);
     bigMatrix[2].writeInt(AI_H2_psig_PT911_Stage1_SuctionTank);
   }
 }

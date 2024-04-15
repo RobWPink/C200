@@ -110,8 +110,14 @@ unsigned long timer[5] = { 0 };
 unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer,lsrReset,loopTimer,dataTimer,pauseTimer,holdR,lcdTimer,dataPrintTimer,daughterPrintTimer = 0;
 
-int switchingPsi1A, switchingPsi1B, switchingPsi2A, switchingPsi2B = 300;
-int switchingTime1A, switchingTime1B, switchingTime2A, switchingTime2B = 1500;
+int switchingPsi1A = 300;
+int switchingPsi1B = 300;
+int switchingPsi2A = 300;
+int switchingPsi2B = 300;
+int switchingTime1A = 1500;
+int switchingTime1B = 1500;
+int switchingTime2A = 1500;
+int switchingTime2B = 1500;
 double AI_HYD_C_TT454_HydraulicTank = 0;
 double AI_CLT_C_TT107_CoolantSupply1 = 0;
 double AI_CLT_C_TT207_CoolantSupply2 = 0;
