@@ -313,33 +313,39 @@ void dataPrint(unsigned long dly){
       break;
     
     case debug:
-      Serial.print("LoopTime: ");
+Serial.print("LoopTime: ");
       Serial.println(loopTime);
-      
-      Serial.print("firstHighSide: ");
-      Serial.println(firstHighSide);
-
-      Serial.print("timer4: ");
-      Serial.println(timer[4]);
-
-      Serial.print("DO_HYD_XV554_DCV2_A: ");
-      Serial.println(DO_HYD_XV554_DCV2_A);
-
-      Serial.print("DO_HYD_XV557_DCV2_B: ");
-      Serial.println(DO_HYD_XV557_DCV2_B);
-
-      Serial.print("hydraulic/switching: ");
-      Serial.print(AI_HYD_psig_PT561_HydraulicInlet2);
-      Serial.print(" / ");
-      Serial.println(switchingPsi1);
 
       Serial.print("STATE: ");
       Serial.println(STATE);
 
-      Serial.print("suction: ");
+      Serial.print("INTENSE1/2 STATEs: ");
+      Serial.print(INTENSE1);Serial.print(", ");
+      Serial.println(INTENSE2);
+
+      Serial.print("intense timers: ");
+      Serial.print(millis() - timer[3]);Serial.print(", ");
+      Serial.println(millis() - timer[5]);
+
+      Serial.print("DCV:1A,1B,2A,2B:");
+      Serial.print(DO_HYD_XV460_DCV1_A);
+      Serial.print(DO_HYD_XV463_DCV1_B);
+      Serial.print(DO_HYD_XV554_DCV2_A);
+      Serial.println(DO_HYD_XV557_DCV2_B);
+
+      Serial.print("inlets: ");
+      Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);Serial.print(", ");
+      Serial.println(AI_HYD_psig_PT561_HydraulicInlet2);
+
+      Serial.print("suctions: ");
+      Serial.print(AI_H2_psig_PT911_Stage1_SuctionTank);Serial.print(", ");
       Serial.println(AI_H2_psig_PT712_Stage1_DischargeTank);
-      Serial.print("max discharge3: ");
-      Serial.println(PTdata[1].max);
+
+      Serial.print("discharges: ");
+      Serial.print(AI_H2_psig_PT716_Stage1_Discharge);Serial.print(", ");
+      Serial.print(AI_H2_psig_PT519_Stage2_Discharge);Serial.print(", ");
+      Serial.print(AI_H2_psig_PT407_Stage3_Discharge);Serial.print(", ");
+      Serial.println(AI_H2_psig_PT410_Stage3_DischargeTank);
     break;
 
     default:

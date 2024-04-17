@@ -199,9 +199,6 @@ RunningAverage avgPT462(MOVING_AVG_SIZE);
 RunningAverage avgPMP458(MOVING_AVG_SIZE);
 RunningAverage avgFCU112(MOVING_AVG_SIZE);
 
-//   { "AI_H2_?_FM904_SuctionFlow", "FM904", 0, 0, 0, avgFM904, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, false },             //
-//   { "AI_H2_?_FM110_CoolantFlow1", "FM110", 0, 0, 0, avgFM110, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, false },            //
-
 struct vars{
   String name;
   String key;

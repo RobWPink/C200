@@ -1,25 +1,22 @@
 #include "C200.h"
 void setup() {
   Serial.begin(9600);
-  //Serial1.begin(19200, SERIAL_8E1);
-  //Serial4.begin(19200, SERIAL_8E1);
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200", "V2.2.3");
+  matrixSetup("C200", "V2.2.4");
   i2cSetup();
-  // mbLocal.begin(OCI_MODBUS_ID, Serial4);
-  // mbLocal.preTransmission(preTransmission);
-  // mbLocal.postTransmission(postTransmission);
 
   Serial.println("OK");
   delay(3000);
   printMode = PACKET;
+  DO_Comm_LSR_Local = true;
 }
 
 void loop() {
   if(!loopTimer){loopTimer = millis();}
 
   SerialCLI();
+  
   if(lsrReset){
     if(lsrReset == 1){lsrReset = millis();DO_Comm_LSR_Reset = true;}
     if(millis() - lsrReset > 1000){
@@ -27,8 +24,6 @@ void loop() {
       lsrReset = 0;
     }
   }
-  //if(c50setup){ DO_HYD_XV554_DCV2_A = DO_H2_XV907_SuctionPreTank; }//added feature for paul
-  //rs485Transceive();
   i2cTransceive(250);
     
   if(!DI_Encl_ESTOP){STATE = ESTOP;}
@@ -37,21 +32,11 @@ void loop() {
   dataPrint(delayTime);
   daughterPrint(delayTime);
 
-  //variable max psi for discharge3 using suction2
-  if(AI_H2_psig_PT712_Stage1_DischargeTank > 1600){PTdata[1].max = 1.9893*AI_H2_psig_PT712_Stage1_DischargeTank + 7521.3;}
-  else{PTdata[1].max = 7.1429*AI_H2_psig_PT712_Stage1_DischargeTank - 657.14;}
-  if(PTdata[1].max > 0){PTdata[1].maxRecovery = PTdata[1].max - 250;}
-/*
-  //variable max psi for discharge1 using suction1
-  if(AI_H2_psig_PT712_Stage1_DischargeTank > 1600){PTdata[1].max = 1.9893*AI_H2_psig_PT712_Stage1_DischargeTank + 7521.3;}
-  else{PTdata[1].max = 7.1429*AI_H2_psig_PT712_Stage1_DischargeTank - 657.14;}
-  if(PTdata[1].max > 0){PTdata[1].maxRecovery = PTdata[1].max - 250;}
-*/
   if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
-    DO_CLT_PMP104_PMP204_CoolantPumps_Enable = DO_Comm_LSR_Local;
-    DO_CLT_FCU112_CoolantFan1_Enable = DO_Comm_LSR_Local;
-    DO_CLT_FCU212_CoolantFan2_Enable = DO_Comm_LSR_Local;
+    DO_CLT_PMP104_PMP204_CoolantPumps_Enable = DI_Comm_LSR_Local;
+    DO_CLT_FCU112_CoolantFan1_Enable = DI_Comm_LSR_Local;
+    DO_CLT_FCU212_CoolantFan2_Enable = DI_Comm_LSR_Local;
     if(DI_Comm_LSR_Local && (STATE == PRODUCTION || STATE == PAUSE)){
       PREV_STATE = STATE;
       STATE = FAULT;
@@ -80,20 +65,11 @@ void loop() {
   String errDev[30] = {""};
   switch(STATE){
     case IDLE_OFF:
-      if(!timer[0]){
-        timer[0] = millis();
-        smallMatrix[2].displayPlay(false);
-        DO_Encl_PilotGreen = true;
-        DO_Encl_PilotRed = false;
-        DO_Comm_LSR_Local = true;
-        tog[0] = false;
-      }
-      if(DI_Comm_LSR_Local && !tog[0]){
-        tog[0] = true;
-        smallMatrix[2].displayPlay(true);
-        DO_Encl_PilotGreen = false;
-      }
-      else if(!DI_Comm_LSR_Local && tog[0]){ timer[0] = 0; }
+      if(!timer[0]){ timer[0] = millis(); }
+
+      smallMatrix[2].displayPlay(DI_Comm_LSR_Local);
+      DO_Encl_PilotGreen = !DI_Comm_LSR_Local;
+      DO_Encl_PilotAmber = DI_Comm_LSR_Local;
     
       if(DI_Encl_ButtonGreen || virtualGreenButton){ STATE = IDLE_ON; }
     break;
@@ -150,17 +126,6 @@ void loop() {
         else{STATE = SHUTDOWN;}
         holdR = 0;
       }
-
-      // if(INTENSE1 == PAUSE && INTENSE2 == PAUSE && !hydraulicSafetyTimer){
-      //   DO_HYD_PMP458_HydraulicPump1_Enable = false;
-      //   DO_HYD_PMP552_HydraulicPump2_Enable = false;
-      //   hydraulicSafetyTimer = millis();
-      // }
-      // else if((INTENSE1 != PAUSE || INTENSE2 != PAUSE) && millis() - hydraulicSafetyTimer > 5*60000 && hydraulicSafetyTimer){
-      //   DO_HYD_PMP458_HydraulicPump1_Enable = true;
-      //   DO_HYD_PMP552_HydraulicPump2_Enable = true;
-      //   hydraulicSafetyTimer = 0;
-      // }
       
       if(!timer[1]){timer[1] = millis();}
       if(millis() - timer[1] > 60000 && timer[1]){
@@ -318,7 +283,7 @@ void loop() {
           *DOdata[i].value = false;
         }
       }
-      if(DI_Encl_ESTOP){DO_Comm_LSR_Local = true;STATE = IDLE_OFF;}
+      if(DI_Encl_ESTOP){STATE = IDLE_OFF;}
     break;
 
   //#####################################################################
