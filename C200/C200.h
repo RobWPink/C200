@@ -65,12 +65,12 @@ TwoWire i2c(20, 21);
 //ModbusMaster mbLocal;
 PI4IOE5V6534Q gpio1(0x22, i2c);
 PI4IOE5V6534Q gpio2(0x23, i2c);
-// Adafruit_MCP9600 mcp1;
-// Adafruit_MCP9600 mcp2;
-// Adafruit_MCP9600 mcp3;
-// Adafruit_MCP9600 mcp4;
-// Adafruit_MCP9600 mcp5;
-// Adafruit_MCP9600 mcp6;
+Adafruit_MCP9600 mcp1;
+Adafruit_MCP9600 mcp2;
+Adafruit_MCP9600 mcp3;
+Adafruit_MCP9600 mcp4;
+Adafruit_MCP9600 mcp5;
+Adafruit_MCP9600 mcp6;
 
 ADS7828 adc1(0x48);
 ADS7828 adc2(0x49);
@@ -100,7 +100,7 @@ bool daughterTog, c50setup,lsrTog, manualPause, manualMode = false;
 unsigned long timer[5] = { 0 };
 unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer,lsrReset,loopTimer,dataTimer,pauseTimer,holdR,lcdTimer,dataPrintTimer,daughterPrintTimer = 0;
-
+uint8_t mcpExist = 0;
 
 double AI_HYD_C_TT454_HydraulicTank = 0;
 double AI_CLT_C_TT107_CoolantSupply1 = 0;
