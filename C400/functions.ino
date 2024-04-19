@@ -1,3 +1,4 @@
+
 void daughterPrint(unsigned long dly){
   char ln1[16] = {' '};
   char ln0[5][16] = {{' '},{' '},{' '},{' '},{' '}};
@@ -6,8 +7,8 @@ void daughterPrint(unsigned long dly){
     daughterTog = !daughterTog;
     twoTimer = millis();
     scrollCnt++;
-    sprintf(ln0[0],"S2S.%03d.S2D.%03d ", (int)AI_H2_C_TT715_Stage2_SuctionTank , (int)AI_H2_C_TT520_Stage2_Discharge );
-    sprintf(ln0[1],"S3S.%03d.S3D.%03d ", (int)AI_H2_C_TT521_Stage3_Suction , (int)AI_H2_C_TT522_Stage3_Discharge );
+    sprintf(ln0[0],"S2S.%03d.S2D.%03d ", (int)AI_H2_C_TT715_Stage2SuctionTank, (int)AI_H2_C_TT520_Stage2Discharge);
+    sprintf(ln0[1],"S3S.%03d.S3D.%03d ", (int)AI_H2_C_TT521_Stage3Suction, (int)AI_H2_C_TT522_Stage3Discharge);
     switch(STATE){
       case PAUSE:
         if(errMsg[0] != ""){ sprintf(ln0[2],"PAUSE: %s",errMsg[0]); }
@@ -27,7 +28,7 @@ void daughterPrint(unsigned long dly){
     lcd.print(ln0[scrollCnt]);
 
     lcd.setCursor(0, 1);
-    sprintf(ln1,"C%02dCT%02dHT%02dMX%03d", highCycleCnt_, (AI_CLT_C_TT207_CoolantSupply2 >= 0)?(int)AI_CLT_C_TT207_CoolantSupply2:0, (AI_HYD_C_TT454_HydraulicTank >= 0)?(int)AI_HYD_C_TT454_HydraulicTank:0, (int)PTdata[1].max/100);
+    sprintf(ln1,"C%02dCT%02dHT%02dMX%03d", cycleCnt, (int)AI_CLT_C_TT207_CoolantSupply2, (int)AI_HYD_C_TT454_HydraulicTank, (int)PTdata[1].max/100);
     lcd.print(ln1);
   }
   
@@ -38,7 +39,7 @@ void daughterPrint(unsigned long dly){
     if(DO_HYD_XV554_DCV2_A){ smallMatrix[0].displayChar('2', false); }
     else if(DO_HYD_XV557_DCV2_B){ smallMatrix[0].displayChar('1', false); }
     else{ smallMatrix[0].halfMatrix(false,false); }
-    bigMatrix[1].writeInt(daughterTog?AI_H2_psig_PT410_Stage3_DischargeTank:AI_H2_psig_PT407_Stage3_Discharge );
+    bigMatrix[1].writeInt(daughterTog?AI_H2_psig_PT410_Output:AI_H2_psig_PT407_Stage3_Discharge);
     smallMatrix[1].displayChar(daughterTog?'T':'D',false);
     bigMatrix[2].writeInt(AI_H2_psig_PT712_Stage1_DischargeTank);
   }
@@ -95,28 +96,28 @@ void flashDriver(){
 
 void i2cTransceive(int ptInterval){
   for(int i = 0; i < TTsize;i++){
-    if(TTdata[i].channel == -1){
+    if(TTdata[i].channel == -1){;
      // TTdata[i].mcp.setFilterCoefficient(TTdata[i].coef);
-       if(TTdata[i].mcp == 1 && !bitRead(mcpExist,0)){
+      if(TTdata[i].mcp == 1){
         TTdata[i].rawTemp = mcp1.readThermocouple();
       }
-      else if(TTdata[i].mcp == 2 && !bitRead(mcpExist,1)){
+      else if(TTdata[i].mcp == 2){
         TTdata[i].rawTemp = mcp2.readThermocouple();
       }
-      else if(TTdata[i].mcp == 3 && !bitRead(mcpExist,2)){
+      else if(TTdata[i].mcp == 3){
         TTdata[i].rawTemp = mcp3.readThermocouple();
       }
-      else if(TTdata[i].mcp == 4 && !bitRead(mcpExist,3)){
+      else if(TTdata[i].mcp == 4){
         TTdata[i].rawTemp = mcp4.readThermocouple();
       }
-      else if(TTdata[i].mcp == 5 && !bitRead(mcpExist,4)){
+      else if(TTdata[i].mcp == 5){
         TTdata[i].rawTemp = mcp5.readThermocouple();
       }
-      else if(TTdata[i].mcp == 6 && !bitRead(mcpExist,5)){
+      else if(TTdata[i].mcp == 6){
         TTdata[i].rawTemp = mcp6.readThermocouple();
       }
       else{;}
-      if(0 < TTdata[i].mcp <= 6 && !bitRead(mcpExist,TTdata[i].mcp)){
+      if(0 < TTdata[i].mcp <= 6){
         TTdata[i].avg.addValue(TTdata[i].rawTemp);
         *TTdata[i].value = TTdata[i].avg.getAverage();
       }
@@ -127,44 +128,33 @@ void i2cTransceive(int ptInterval){
       TTdata[i].avg.addValue(TTdata[i].rawTemp);
       *TTdata[i].value = TTdata[i].avg.getAverage();    
     }
-    if(TTdata[i].max != -1 && TTdata[i].pause != -1){
+      
+    if(TTdata[i].max != -1){
       if(*TTdata[i].value >= TTdata[i].max && !TTdata[i].overheat){
         TTdata[i].overheat = true;
-        if(STATE == PRODUCTION){
-          if(!TTdata[i].pause){ INTENSE1 = PAUSE; INTENSE2 = PAUSE; }
-          else{
-            if(TTdata[i].pause == 1){INTENSE1 = PAUSE;}
-            else if(TTdata[i].pause == 2){INTENSE2 = PAUSE;}
-            else{Serial.println("pause state error");}
-          }
-        }
+        if(STATE == PRODUCTION){STATE = PAUSE;}
       }
       else if(*TTdata[i].value <= TTdata[i].maxRecovery && TTdata[i].overheat){
         TTdata[i].overheat = false;
+          
       }
     }
 
-    if(TTdata[i].min != -1){
-      if(*TTdata[i].value < TTdata[i].min && !TTdata[i].overheat){
-        TTdata[i].overheat = true;
-        if(STATE == PRODUCTION){
-          if(!TTdata[i].pause){ INTENSE1 = PAUSE; INTENSE2 = PAUSE; }
-          else{
-            if(TTdata[i].pause == 1){INTENSE1 = PAUSE;}
-            else if(TTdata[i].pause == 2){INTENSE2 = PAUSE;}
-            else{Serial.println("pause state error");}
-          }
+      if(TTdata[i].min != -1){
+        if(*TTdata[i].value <= TTdata[i].min && !TTdata[i].overheat){
+          TTdata[i].overheat = true;
+          if(STATE == PRODUCTION){STATE = PAUSE;}
+        }
+        else if(*TTdata[i].value >= TTdata[i].minRecovery && TTdata[i].overheat){
+          TTdata[i].overheat = false;
+          
         }
       }
-      else if(*TTdata[i].value >= TTdata[i].minRecovery && TTdata[i].overheat){
-        TTdata[i].overheat = false;
-      }
-    }
   }
   if(!dataTimer){dataTimer = millis();}
   if(millis() - dataTimer > ptInterval){
     for(int i = 0; i < PTsize;i++){
-      if(PTdata[i].channel != -1 || PTdata[i].key != "PT467" || PTdata[i].key != "PT561"){
+      if(PTdata[i].channel != -1 || PTdata[i].key != "PT561"){
         PTdata[i].raw = PTdata[i].adc.read(PTdata[i].channel,SD);
         if(PTdata[i].mapA != -1 && PTdata[i].mapB != -1 && PTdata[i].mapC != -1 && PTdata[i].mapD != -1){
           PTdata[i].mapped = map((int)PTdata[i].raw, PTdata[i].mapA, PTdata[i].mapB, PTdata[i].mapC, PTdata[i].mapD) + PTdata[i].offset; //read slowly
@@ -172,17 +162,10 @@ void i2cTransceive(int ptInterval){
           *PTdata[i].value = PTdata[i].avg.getAverage();
         }
       }
-      if(PTdata[i].max != -1 && PTdata[i].pause != -1){
+      if(PTdata[i].max != -1){
         if(*PTdata[i].value >= PTdata[i].max && !PTdata[i].overPressure){
           PTdata[i].overPressure = true;
-          if(STATE == PRODUCTION){
-            if(!PTdata[i].pause){ INTENSE1 = PAUSE; INTENSE2 = PAUSE; }
-            else{
-              if(PTdata[i].pause == 1){INTENSE1 = PAUSE;}
-              else if(PTdata[i].pause == 2){INTENSE2 = PAUSE;}
-              else{Serial.println("pause state error");}
-            }
-          }
+          if(STATE == PRODUCTION){STATE = PAUSE;}
         }
         else if(*PTdata[i].value <= PTdata[i].maxRecovery && PTdata[i].overPressure){
           PTdata[i].overPressure = false;
@@ -192,14 +175,7 @@ void i2cTransceive(int ptInterval){
       if(PTdata[i].min != -1){
         if(*PTdata[i].value < PTdata[i].min && !PTdata[i].overPressure){
           PTdata[i].overPressure = true;
-          if(STATE == PRODUCTION){
-            if(!PTdata[i].pause){ INTENSE1 = PAUSE; INTENSE2 = PAUSE; }
-            else{
-              if(PTdata[i].pause == 1){INTENSE1 = PAUSE;}
-              else if(PTdata[i].pause == 2){INTENSE2 = PAUSE;}
-              else{Serial.println("pause state error");}
-            }
-          }
+          if(STATE == PRODUCTION){STATE = PAUSE;}
         }
         else if(*PTdata[i].value >= PTdata[i].minRecovery && PTdata[i].overPressure){
           PTdata[i].overPressure = false;
@@ -228,65 +204,40 @@ void i2cSetup(){
   adc1.init();
   adc2.init();
   adc3.init();
- if(!mcp1.begin(0x60)){
+ 
+  if(!mcp1.begin(0x60)){
     Serial.println("WARNING!! Couldnt detect mcp1(0x60)");
-    bitSet(mcpExist,0);
   }
-  else{
-    mcp1.setADCresolution(MCP9600_ADCRESOLUTION_12);
-    mcp1.setThermocoupleType(MCP9600_TYPE_K);
-    mcp1.enable(true);
-  }
-
   if(!mcp2.begin(0x61)){
     Serial.println("WARNING!! Couldnt detect mcp2(0x61)");
-    bitSet(mcpExist,1);
   }
-  else{
-    mcp2.setADCresolution(MCP9600_ADCRESOLUTION_12);
-    mcp2.setThermocoupleType(MCP9600_TYPE_K);
-    mcp2.enable(true);
-  }
-
   if(!mcp3.begin(0x62)){
     Serial.println("WARNING!! Couldnt detect mcp3(0x62)");
-    bitSet(mcpExist,2);
   }
-  else{
-    mcp3.setADCresolution(MCP9600_ADCRESOLUTION_12);
-    mcp3.setThermocoupleType(MCP9600_TYPE_K);
-    mcp3.enable(true);
-  }
-
   if(!mcp4.begin(0x63)){
     Serial.println("WARNING!! Couldnt detect mcp4(0x63)");
-    bitSet(mcpExist,3);
   }
-  else{
-    mcp4.setADCresolution(MCP9600_ADCRESOLUTION_12);
-    mcp4.setThermocoupleType(MCP9600_TYPE_K);
-    mcp4.enable(true);
-  }
-
   if(!mcp5.begin(0x64)){
     Serial.println("WARNING!! Couldnt detect mcp5(0x64)");
-    bitSet(mcpExist,4);
   }
-  else{
-    mcp5.setADCresolution(MCP9600_ADCRESOLUTION_12);
-    mcp5.setThermocoupleType(MCP9600_TYPE_K);
-    mcp5.enable(true);
-  }
-  
   if(!mcp6.begin(0x65)){
     Serial.println("WARNING!! Couldnt detect mcp6(0x65)");
-    bitSet(mcpExist,5);
   }
-  else{
-    mcp6.setADCresolution(MCP9600_ADCRESOLUTION_12);
-    mcp6.setThermocoupleType(MCP9600_TYPE_K);
-    mcp6.enable(true);
-  }
+
+  mcp1.setADCresolution(MCP9600_ADCRESOLUTION_12);
+  mcp2.setADCresolution(MCP9600_ADCRESOLUTION_12);
+  mcp3.setADCresolution(MCP9600_ADCRESOLUTION_12);
+  mcp4.setADCresolution(MCP9600_ADCRESOLUTION_12);
+  mcp5.setADCresolution(MCP9600_ADCRESOLUTION_12);
+  mcp6.setADCresolution(MCP9600_ADCRESOLUTION_12);
+
+  mcp1.setThermocoupleType(MCP9600_TYPE_K);
+  mcp2.setThermocoupleType(MCP9600_TYPE_K);
+  mcp3.setThermocoupleType(MCP9600_TYPE_K);
+  mcp4.setThermocoupleType(MCP9600_TYPE_K);
+  mcp5.setThermocoupleType(MCP9600_TYPE_K);
+  mcp6.setThermocoupleType(MCP9600_TYPE_K);
+
   mcp1.enable(true);
   mcp2.enable(true);
   mcp3.enable(true);

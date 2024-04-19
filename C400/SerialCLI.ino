@@ -72,30 +72,30 @@ void SerialCLI() {
       }
 
       else if(argStr.equalsIgnoreCase("packet")){
-        printMode = (printMode == PACKET)?NONE:PACKET;
+        printMode = (printMode == PACKET)?OFF:PACKET;
       }
 
       else if(argStr.equalsIgnoreCase("alldata")){
-        printMode = (printMode == ALL)?NONE:ALL;
+        printMode = (printMode == ALL)?OFF:ALL;
       }
 
       else if(argStr.equalsIgnoreCase("di")){
-        printMode = (printMode == DIGITAL_IN)?NONE:DIGITAL_IN;
+        printMode = (printMode == DIGITAL_IN)?OFF:DIGITAL_IN;
       }
 
       else if(argStr.equalsIgnoreCase("do")){
-        printMode = (printMode == DIGITAL_OUT)?NONE:DIGITAL_OUT;
+        printMode = (printMode == DIGITAL_OUT)?OFF:DIGITAL_OUT;
       }
       else if(argStr.equalsIgnoreCase("tt")){
-        printMode = (printMode == TT)?NONE:TT;
+        printMode = (printMode == TT)?OFF:TT;
       }
 
       else if(argStr.equalsIgnoreCase("pt")){
-        printMode = (printMode == PT)?NONE:PT;
+        printMode = (printMode == PT)?OFF:PT;
       }
 
       else if(argStr.equalsIgnoreCase("debug")){
-        printMode = (printMode == debug)?NONE:debug;
+        printMode = (printMode == debug)?OFF:debug;
       }
 
       else if(argStr.equalsIgnoreCase("plot")){
@@ -131,7 +131,7 @@ void SerialCLI() {
       // }
 
       else if(argStr.equalsIgnoreCase("stop") || argStr.equalsIgnoreCase("quiet")){
-        printMode = NONE;
+        printMode = OFF;
       }
 
       else{
@@ -189,20 +189,20 @@ void dataPrint(unsigned long dly){
     Serial.print(AI_H2_psig_PT712_Stage1_DischargeTank);
     Serial.print(" AI_H2_psig_PT407_Stage3_Discharge:");
     Serial.print(AI_H2_psig_PT407_Stage3_Discharge);
-    Serial.print(" AI_H2_psig_PT410_Stage3_DischargeTank :");
-    Serial.print(AI_H2_psig_PT410_Stage3_DischargeTank );
+    Serial.print(" AI_H2_psig_PT410_Output:");
+    Serial.print(AI_H2_psig_PT410_Output);
     Serial.print(" AI_HYD_C_TT454_HydraulicTank:");
     Serial.print(AI_HYD_C_TT454_HydraulicTank);
     Serial.print(" AI_CLT_C_TT207_CoolantSupply2:");
     Serial.print(AI_CLT_C_TT207_CoolantSupply2);
-    Serial.print(" AI_H2_C_TT715_Stage2_SuctionTank  :");
-    Serial.print(AI_H2_C_TT715_Stage2_SuctionTank  );
-    Serial.print(" AI_H2_C_TT520_Stage2_Discharge :");
-    Serial.print(AI_H2_C_TT520_Stage2_Discharge );
-    Serial.print(" AI_H2_C_TT521_Stage3_Suction :");
-    Serial.println(AI_H2_C_TT521_Stage3_Suction );
-    Serial.print(" AI_H2_C_TT522_Stage3_Discharge :");
-    Serial.println(AI_H2_C_TT522_Stage3_Discharge );
+    Serial.print(" AI_H2_C_TT715_Stage2SuctionTank:");
+    Serial.print(AI_H2_C_TT715_Stage2SuctionTank);
+    Serial.print(" AI_H2_C_TT520_Stage2Discharge:");
+    Serial.print(AI_H2_C_TT520_Stage2Discharge);
+    Serial.print(" AI_H2_C_TT521_Stage3Suction:");
+    Serial.println(AI_H2_C_TT521_Stage3Suction);
+    Serial.print(" AI_H2_C_TT522_Stage3Discharge:");
+    Serial.println(AI_H2_C_TT522_Stage3Discharge);
   }
   else if(millis() - dataPrintTimer > dly && dataPrintTimer){
     if(!printMode){return;}
@@ -313,14 +313,11 @@ void dataPrint(unsigned long dly){
       Serial.print("LoopTime: ");
       Serial.println(loopTime);
       
-      Serial.print("STATE: ");
-      Serial.println(STATE);
-
-      Serial.print("Intensifier STATE: ");
-      Serial.println(INTENSE2);
+      Serial.print("firstHighSide: ");
+      Serial.println(firstHighSide);
 
       Serial.print("timer4: ");
-      Serial.println(millis() - timer[4]);
+      Serial.println(timer[4]);
 
       Serial.print("DO_HYD_XV554_DCV2_A: ");
       Serial.println(DO_HYD_XV554_DCV2_A);
@@ -331,7 +328,10 @@ void dataPrint(unsigned long dly){
       Serial.print("hydraulic/switching: ");
       Serial.print(AI_HYD_psig_PT561_HydraulicInlet2);
       Serial.print(" / ");
-      Serial.println(switchingPsi2);
+      Serial.println(switchingPsi1);
+
+      Serial.print("STATE: ");
+      Serial.println(STATE);
 
       Serial.print("suction: ");
       Serial.println(AI_H2_psig_PT712_Stage1_DischargeTank);

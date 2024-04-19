@@ -1,16 +1,16 @@
 #include "C400.h"
 void setup() {
   Serial.begin(9600);
+
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C400", "V0.1.1");
+  matrixSetup("C400 Longview", "V0.0.1");
   i2cSetup();
 
   Serial.println("OK");
-  DO_Comm_LSR_Local = true;
   delay(3000);
   printMode = PACKET;
- 
+  DO_Comm_LSR_Local = true;
 }
 
 void loop() {
@@ -24,6 +24,7 @@ void loop() {
       lsrReset = 0;
     }
   }
+
   i2cTransceive(250);
     
   if(!DI_Encl_ESTOP){STATE = ESTOP;}
@@ -31,6 +32,7 @@ void loop() {
   
   dataPrint(delayTime);
   daughterPrint(delayTime);
+
   //variable max psi for discharge3 using suction2
   if(AI_H2_psig_PT712_Stage1_DischargeTank > 1600){PTdata[1].max = 2.8571*AI_H2_psig_PT712_Stage1_DischargeTank + 6128.6;} //different from burbank
   else{PTdata[1].max = 7.1429*AI_H2_psig_PT712_Stage1_DischargeTank - 657.14;}
@@ -38,9 +40,9 @@ void loop() {
 
   if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
-    DO_CLT_PMP104_PMP204_CoolantPumps_Enable = DI_Comm_LSR_Local;
-    DO_CLT_FCU112_CoolantFan1_Enable = DI_Comm_LSR_Local;
-    DO_CLT_FCU212_CoolantFan2_Enable = DI_Comm_LSR_Local;
+    DO_CLT_PMP104_PMP204_CoolantPumps_Enable = DO_Comm_LSR_Local;
+    DO_CLT_FCU112_CoolantFan1_Enable = DO_Comm_LSR_Local;
+    DO_CLT_FCU212_CoolantFan2_Enable = DO_Comm_LSR_Local;
     if(DI_Comm_LSR_Local && (STATE == PRODUCTION || STATE == PAUSE)){
       PREV_STATE = STATE;
       STATE = FAULT;
@@ -102,21 +104,18 @@ void loop() {
     case PRODUCTION:
       if(!timer[0]){
         timer[0] = millis();
-        flashGreen = 1000;
-        //DO_HYD_XV460_DCV1_A = false;
-        //DO_HYD_XV463_DCV1_B = false;
-        DO_HYD_XV554_DCV2_A = false;
-        DO_HYD_XV557_DCV2_B = false;
-        //INTENSE1 = START;
-        INTENSE2 = START;
+        flashGreen = 2000;
+        firstHighSide = true;
+        DO_HYD_XV460_DCV1_A = false;
+        DO_HYD_XV463_DCV1_B = false;
         timer[5] = millis();
+        smallMatrix[2].displayPlay(false);
       }
       if(!timer[1]){timer[1] = millis();}
       if(millis() - timer[1] > 60000 && timer[1]){
-        highCycleCnt_ = highCycleCnt/2;
-        //lowCycleCnt_ = lowCycleCnt/2;
+        cycleCnt = highCycleCnt/2;
         highCycleCnt = 0;
-        //lowCycleCnt = 0;
+        lowCycleCnt = 0;
         timer[1] = 0;
       }
 
@@ -128,52 +127,83 @@ void loop() {
       if(!DI_Encl_ButtonRed && prevR){
         prevR = false;
         if(millis() - holdR < 5000 && holdR){
-          INTENSE2 = PAUSE;
+          STATE = PAUSE;
           manualPause = true;
         }
         else{STATE = SHUTDOWN;}
         holdR = 0;
       }
-
-      switch(INTENSE2){
-        case OFF:
-          DO_HYD_XV554_DCV2_A = false;
-          DO_HYD_XV557_DCV2_B = false;
-        break;
-        
-        case START:
-          DO_HYD_XV554_DCV2_A = true;
-          DO_HYD_XV557_DCV2_B = false;
-          timer[4] = millis();
-          smallMatrix[2].displayHollowPlay(false);
-          INTENSE2 = ON;
-        break;
-
-        case ON:
-          if(millis() - timer[4] > 500 && timer[4] && AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2){ //switching pressure
-            DO_HYD_XV554_DCV2_A = !DO_HYD_XV554_DCV2_A;
-            DO_HYD_XV557_DCV2_B = !DO_HYD_XV557_DCV2_B;
-            timer[4] = millis();
-            highCycleCnt++;
-          }
-          if(millis() - timer[4] > 60000){ STATE = IDLE_OFF; }
-        break;
-
-        case PAUSE:
-          DO_HYD_XV554_DCV2_A = false;
-          DO_HYD_XV557_DCV2_B = false;
-          smallMatrix[2].displayPause(false);
-          for(int i = 0; i < PTsize;i++){
-            if(!manualPause && PTdata[i].overPressure && (PTdata[i].pause == 2 || !PTdata[i].pause)){
-              break;
-            }
-          }
-          INTENSE2 = START;
-        break;
-
-        default:
-        break;
+      if(firstHighSide){
+        DO_HYD_XV554_DCV2_A = true;
+        DO_HYD_XV557_DCV2_B = false;
+        firstHighSide = false;
+        timer[4] = millis();
       }
+      if(millis() - timer[4] > 500 && timer[4] && AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi1){ //switching pressure
+        DO_HYD_XV554_DCV2_A = !DO_HYD_XV554_DCV2_A;
+        DO_HYD_XV557_DCV2_B = !DO_HYD_XV557_DCV2_B;
+        timer[5] = millis();
+        highCycleCnt++;
+        timer[4] = millis();
+      }
+      if(millis() - timer[5] > 60000){ STATE = IDLE_OFF; }
+    break;
+
+  //#####################################################################
+
+    case PAUSE:
+      if(!timer[0]){
+        timer[0] = millis();
+        flashAmber = 1000;
+        for(int i = 0; i < DOsize;i++){
+          if((DOdata[i].key.indexOf("XV") >= -1 || DOdata[i].key.indexOf("PMP") >= -1 || DOdata[i].key.indexOf("PL") >= -1) && DOdata[i].key.indexOf("LSR") == -1 && DOdata[i].key.indexOf("XV907") == -1 && DOdata[i].key.indexOf("CLT") == -1){
+            *DOdata[i].value = false;
+          }
+        }
+        smallMatrix[2].displayPause(false);
+      }
+      /*
+      for(int i = 0;i > 30;i++){errDev[i] = "";}
+
+      j = 0;
+      for(int i = 0; i < TTsize;i++){
+        if(TTdata[i].overheat){
+          errDev[j++] = TTdata[i].key + ":" + (int)*TTdata[i].value + " ";
+          break;
+        }
+      }
+
+      for(int i = 0; i < PTsize;i++){
+        if(PTdata[i].overPressure){
+          errDev[j++] = PTdata[i].key + ":" + (int)*PTdata[i].value + " ";
+          break;
+        }
+      }
+
+      k = 0;
+      for(int i = 0; i < 30;i++){
+        if(errDev[i] = ""){break;}
+        if(errDev[i].length() + errMsg[k].length() - 1 < 16){ //-1 is for space at the end of each
+          errMsg[k] = errMsg[k] + errDev[i];
+        }
+        else{
+          errMsg[k][errMsg[k].length() - 1] = '\0'; //remove trailing space
+          k++;
+        }
+      }*/
+      if(manualPause){
+        if(DI_Encl_ButtonGreen && errDev[0] == ""){
+          STATE = IDLE_ON;
+          timer[0] = 0;
+        }
+      }
+      else if(millis() - timer[0] > 5*60000 && timer[0]){
+        for(int i = 0; i < PTsize;i++){
+          if(!PTdata[i].overPressure){STATE = IDLE_ON;}
+          else{ STATE = PAUSE; break; }
+        }
+      }
+
     break;
 
   //#####################################################################
@@ -224,7 +254,7 @@ void loop() {
         for(int i = 0; i < DOsize;i++){
           *DOdata[i].value = false;
         }
-        flashRed = 500;
+        flashRed = 1000;
         smallMatrix[2].displayStop(true);
       }
       
@@ -247,7 +277,7 @@ void loop() {
           *DOdata[i].value = false;
         }
       }
-      if(DI_Encl_ESTOP){STATE = IDLE_OFF;}
+      if(DI_Encl_ESTOP){DO_Comm_LSR_Local = true;STATE = IDLE_OFF;}
     break;
 
   //#####################################################################
