@@ -102,6 +102,8 @@ unsigned long timer[5] = { 0 };
 unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer,lsrReset,loopTimer,dataTimer,pauseTimer,holdR,lcdTimer,dataPrintTimer,daughterPrintTimer = 0;
 uint8_t mcpExist = 0;
+double Stage1_Compression_RATIO = 6.5;
+//double Stage2_Compression_RATIO = 6.5;
 
 double AI_HYD_C_TT454_HydraulicTank = 0;
 double AI_CLT_C_TT107_CoolantSupply1 = 0;

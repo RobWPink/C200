@@ -4,7 +4,7 @@ void setup() {
   RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200", "V2.2.5");
+  matrixSetup("C200 Longview", "V0.1.2");
   i2cSetup();
 
   Serial.println("OK");
@@ -25,13 +25,17 @@ void loop() {
       lsrReset = 0;
     }
   }
-  i2cTransceive(250);
+  i2cTransceive(delayTime);
     
   if(!DI_Encl_ESTOP){STATE = ESTOP;}
   flashDriver();
   
   dataPrint(delayTime);
   daughterPrint(delayTime);
+
+  //never go above 6.5/1 s1s/s2s
+  PTdata[2].max = AI_H2_psig_PT911_Stage1_SuctionTank*Stage1_Compression_RATIO;
+  PTdata[2].maxRecovery =  PTdata[2].max - 50;
 
   if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
