@@ -47,7 +47,7 @@ void SerialCLI() {
       else if(argStr.equalsIgnoreCase("sw2")) {
         String argStrVal = argBuf[++n];
         argVal = argStrVal.toInt();
-        if(argVal > 0){switchingPsi1 = argVal;}
+        if(argVal > 0){switchingPsi2 = argVal;}
       }
 
       else if(argStr.equalsIgnoreCase("delay")) {

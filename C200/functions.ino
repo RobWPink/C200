@@ -42,7 +42,7 @@ void daughterPrint(unsigned long dly){
     bigMatrix[2].writeInt(AI_H2_psig_PT911_Stage1_SuctionTank);
   }
 }
-
+//never go above 6/1 s1s/s2s
 double potToTemp(double potReading, double BCOEFFICIENT_VALUE) {
   double potResistance = 4096 / potReading - 1;
   potResistance = SERIESRESISTOR / potResistance;  //Convert Pot Reading to resistance

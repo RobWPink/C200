@@ -10,7 +10,7 @@ void setup() {
   Serial.println("OK");
   delay(3000);
   printMode = PACKET;
-  DO_Comm_LSR_Local = true;
+  
 }
 
 void loop() {
@@ -35,9 +35,9 @@ void loop() {
 
   if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
-    DO_CLT_PMP104_PMP204_CoolantPumps_Enable = DI_Comm_LSR_Local;
-    DO_CLT_FCU112_CoolantFan1_Enable = DI_Comm_LSR_Local;
-    DO_CLT_FCU212_CoolantFan2_Enable = DI_Comm_LSR_Local;
+    DO_CLT_PMP104_PMP204_CoolantPumps_Enable = !DI_Comm_LSR_Local;
+    DO_CLT_FCU112_CoolantFan1_Enable = !DI_Comm_LSR_Local;
+    DO_CLT_FCU212_CoolantFan2_Enable = !DI_Comm_LSR_Local;
     if(DI_Comm_LSR_Local && (STATE == PRODUCTION || STATE == PAUSE)){
       PREV_STATE = STATE;
       STATE = FAULT;
@@ -67,7 +67,7 @@ void loop() {
   switch(STATE){
     case IDLE_OFF:
       if(!timer[0]){ timer[0] = millis(); }
-
+      DO_Comm_LSR_Local = true;
       smallMatrix[2].displayPlay(DI_Comm_LSR_Local);
       DO_Encl_PilotGreen = !DI_Comm_LSR_Local;
       DO_Encl_PilotAmber = DI_Comm_LSR_Local;
@@ -151,7 +151,7 @@ void loop() {
         break;
 
         case ON:
-          if(millis() - timer[3] > 500 && timer[3] && AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1){ //switching pressure
+          if(millis() - timer[3] > 1500 && timer[3] && AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1){ //switching pressure
             DO_HYD_XV460_DCV1_A = !DO_HYD_XV460_DCV1_A;
             DO_HYD_XV463_DCV1_B = !DO_HYD_XV463_DCV1_B;
             timer[3] = millis();
@@ -189,7 +189,7 @@ void loop() {
         break;
 
         case ON:
-          if(millis() - timer[4] > 500 && timer[4] && AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2){ //switching pressure
+          if(millis() - timer[4] > 1500 && timer[4] && AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2){ //switching pressure
             DO_HYD_XV554_DCV2_A = !DO_HYD_XV554_DCV2_A;
             DO_HYD_XV557_DCV2_B = !DO_HYD_XV557_DCV2_B;
             timer[4] = millis();
