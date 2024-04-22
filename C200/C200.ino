@@ -1,9 +1,10 @@
 #include "C200.h"
 void setup() {
   Serial.begin(9600);
+  RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200", "V2.2.4");
+  matrixSetup("C200", "V2.2.5");
   i2cSetup();
 
   Serial.println("OK");
@@ -16,7 +17,7 @@ void loop() {
   if(!loopTimer){loopTimer = millis();}
 
   SerialCLI();
-  
+  RPCtransceive();
   if(lsrReset){
     if(lsrReset == 1){lsrReset = millis();DO_Comm_LSR_Reset = true;}
     if(millis() - lsrReset > 1000){

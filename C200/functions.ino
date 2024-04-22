@@ -90,7 +90,58 @@ void flashDriver(){
   }
 }
 
-//void rs485Transceive(){;}
+String parseString(String data, char separator, int index){
+  int found = 0;
+  int strIndex[] = { 0, -1 };
+  int maxIndex = data.length() - 1;
+
+  for (int i = 0; i <= maxIndex && found <= index; i++) {
+    if (data.charAt(i) == separator || i == maxIndex) {
+      found++;
+      strIndex[0] = strIndex[1] + 1;
+      strIndex[1] = (i == maxIndex) ? i+1 : i;
+    }
+  }
+  return found > index ? data.substring(strIndex[0], strIndex[1]) : "\0";
+}
+
+void RPCtransceive(){
+  String rhe28msg = "";
+  String redmsg = "";
+  String msg = ""; 
+  if(millis() - twoTimer > 2000 && twoTimer){
+    while(RPC.available()){ msg = RPC.readStringUntil('\n'); }
+    rhe28msg = parseString(msg,'$',0);
+    redmsg = parseString(msg,'$',1);
+
+    if(rhe28msg.indexOf("RHE28:") == 0){
+      rhe28msg.remove(rhe28msg.indexOf("RHE28:"),6);
+      if(rhe28msg.indexOf("ERROR:") >= 0){
+        rhe28msg.remove(rhe28msg.indexOf("ERROR:"),6);
+        Serial.print("Revieving Error: ");Serial.println(rhe28msg);
+      }
+      else{
+        AI_H2_KGPM_RHE28_Flow = parseString(rhe28msg,',',0).toFloat();
+        AI_H2_C_RHE28_Temp = parseString(rhe28msg,',',1).toFloat();
+        AI_H2_psig_RHE28_Pressure = parseString(rhe28msg,',',2).toFloat();
+        AI_H2_KGPD_RHE28_Total = parseString(rhe28msg,',',3).toFloat();
+      }
+    }
+    if(redmsg.indexOf("RED:") == 0){
+      redmsg.remove(redmsg.indexOf("RED:"),4);
+      if(redmsg.indexOf("ERROR:") >= 0){
+        redmsg.remove(redmsg.indexOf("ERROR:"),6);
+        Serial.print("Revieving Error: ");Serial.println(redmsg);
+      }
+      else{
+        AI_H2_KGPM_RED_Flow = parseString(redmsg,',',0).toFloat();
+        AI_H2_C_RED_Temp = parseString(redmsg,',',1).toFloat();
+        AI_H2_psig_RED_Pressure = parseString(redmsg,',',2).toFloat();
+        AI_H2_KGPD_RED_Total = parseString(redmsg,',',3).toFloat();
+      }
+    }
+  }
+}
 
 void i2cTransceive(int ptInterval){
 

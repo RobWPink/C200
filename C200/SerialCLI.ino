@@ -97,8 +97,8 @@ void SerialCLI() {
         printMode = (printMode == PT)?NONE:PT;
       }
 
-      else if(argStr.equalsIgnoreCase("debug")){
-        printMode = (printMode == debug)?NONE:debug;
+      else if(argStr.equalsIgnoreCase("DEBUG")){
+        printMode = (printMode == DEBUG)?NONE:DEBUG;
       }
 
       else if(argStr.equalsIgnoreCase("plot")){
@@ -312,7 +312,7 @@ void dataPrint(unsigned long dly){
         Serial.println();
       break;
     
-    case debug:
+    case DEBUG:
 Serial.print("LoopTime: ");
       Serial.println(loopTime);
 

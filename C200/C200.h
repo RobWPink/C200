@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include <SPI.h>
+#include <RPC.h>
 #include <ADS7828.h>
 #include <PI4IOE5V6534Q.h>
 #include <Adafruit_I2CDevice.h>
@@ -58,7 +59,7 @@ enum prnt {
   DIGITAL_OUT,
   PT,
   TT,
-  debug
+  DEBUG
 } printMode;
 
 TwoWire i2c(20, 21);
@@ -168,6 +169,14 @@ uint8_t DO_HYD_PMP458_HydraulicPump1_Enable = 0;
 uint8_t DO_HYD_PMP552_HydraulicPump2_Enable = 0;
 uint8_t DO_CLT_PMP104_PMP204_CoolantPumps_Enable = 0;
 
+float AI_H2_KGPM_RHE28_Flow = 0;
+float AI_H2_C_RHE28_Temp = 0;
+float AI_H2_psig_RHE28_Pressure = 0;
+float AI_H2_KGPD_RHE28_Total = 0;
+float AI_H2_KGPM_RED_Flow = 0;
+float AI_H2_C_RED_Temp = 0;
+float AI_H2_psig_RED_Pressure = 0;
+float AI_H2_KGPD_RED_Total = 0;
 
 RunningAverage avgTT454(MOVING_AVG_SIZE);
 RunningAverage avgTT107(MOVING_AVG_SIZE);
@@ -208,6 +217,33 @@ struct vars{
   {"SwitchingPressure1","SWPSI1",&switchingPsi1,0},
   {"SwitchingPressure2","SWPSI2",&switchingPsi2,0},
 };int varSize = 2;
+
+struct fm {
+  String name;
+  String key;
+  float* value;
+};
+
+struct dev {
+  String name;
+  uint8_t ID;
+  double baud;
+  fm flowData[4];
+  
+} flowMeters[] = {
+  {"RHE28",3,19200,{
+    {"AI_H2_KGPM_RHE28_Flow","RHE28F",&AI_H2_KGPM_RHE28_Flow},
+    {"AI_H2_C_RHE28_Temp","RHE28T",&AI_H2_C_RHE28_Temp},
+    {"AI_H2_psig_RHE28_Pressure","RHE28P",&AI_H2_psig_RHE28_Pressure},
+    {"AI_H2_KGPD_RHE28_Total","RHE28O",&AI_H2_KGPD_RHE28_Total}
+  }},
+  {"RED",1,19200,{
+    {"AI_H2_KGPM_RED_Flow","RHE28F",&AI_H2_KGPM_RED_Flow},
+    {"AI_H2_C_RED_Temp","RHE28T",&AI_H2_C_RED_Temp},
+    {"AI_H2_psig_RED_Pressure","RHE28P",&AI_H2_psig_RED_Pressure},
+    {"AI_H2_KGPD_RED_Total","RHE28O",&AI_H2_KGPD_RED_Total}
+  }}
+};
 
 struct tt {
   String name;
