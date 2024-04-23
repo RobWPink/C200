@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include <SPI.h>
+#include <RPC.h>
 #include <ADS7828.h>
 #include <PI4IOE5V6534Q.h>
 #include <Adafruit_I2CDevice.h>
@@ -58,19 +59,21 @@ enum prnt {
   DIGITAL_OUT,
   PT,
   TT,
-  debug
+  FM,
+  VAR,
+  DEBUG
 } printMode;
 
 TwoWire i2c(20, 21);
 //ModbusMaster mbLocal;
 PI4IOE5V6534Q gpio1(0x22, i2c);
 PI4IOE5V6534Q gpio2(0x23, i2c);
-// Adafruit_MCP9600 mcp1;
-// Adafruit_MCP9600 mcp2;
-// Adafruit_MCP9600 mcp3;
-// Adafruit_MCP9600 mcp4;
-// Adafruit_MCP9600 mcp5;
-// Adafruit_MCP9600 mcp6;
+Adafruit_MCP9600 mcp1;
+Adafruit_MCP9600 mcp2;
+Adafruit_MCP9600 mcp3;
+Adafruit_MCP9600 mcp4;
+Adafruit_MCP9600 mcp5;
+Adafruit_MCP9600 mcp6;
 
 ADS7828 adc1(0x48);
 ADS7828 adc2(0x49);
@@ -83,8 +86,7 @@ String faultString = "";
 String errMsg[30] = {""};
 double loopTime = 0;
 
-int XXX = 0; //NEEDS TO BE REMOVED
-
+uint8_t mcpExist = 0;
 int prevDischarge1,prevDischarge2 = 0;
 int prevSuction1,prevSuction2 = 0;
 int spiked1A, spiked1B, spiked2A, spiked2B = 0;
@@ -110,6 +112,10 @@ unsigned long timer[5] = { 0 };
 unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer,lsrReset,loopTimer,dataTimer,pauseTimer,holdR,lcdTimer,dataPrintTimer,daughterPrintTimer = 0;
 
+int deadHeadPsi1A = 0;
+int deadHeadPsi1B = 0;
+int deadHeadPsi2A = 0;
+int deadHeadPsi2B = 0;
 int switchingPsi1A = 300;
 int switchingPsi1B = 300;
 int switchingPsi2A = 300;
@@ -184,6 +190,14 @@ uint8_t DO_HYD_PMP458_HydraulicPump1_Enable = 0;
 uint8_t DO_HYD_PMP552_HydraulicPump2_Enable = 0;
 uint8_t DO_CLT_PMP104_PMP204_CoolantPumps_Enable = 0;
 
+float AI_H2_KGPM_RHE28_Flow = 0;
+float AI_H2_C_RHE28_Temp = 0;
+float AI_H2_psig_RHE28_Pressure = 0;
+float AI_H2_KGPD_RHE28_Total = 0;
+float AI_H2_KGPM_RED_Flow = 0;
+float AI_H2_C_RED_Temp = 0;
+float AI_H2_psig_RED_Pressure = 0;
+float AI_H2_KGPD_RED_Total = 0;
 
 RunningAverage avgTT454(MOVING_AVG_SIZE);
 RunningAverage avgTT107(MOVING_AVG_SIZE);
@@ -215,15 +229,16 @@ RunningAverage avgPT462(MOVING_AVG_SIZE);
 RunningAverage avgPMP458(MOVING_AVG_SIZE);
 RunningAverage avgFCU112(MOVING_AVG_SIZE);
 
-//   { "AI_H2_?_FM904_SuctionFlow", "FM904", 0, 0, 0, avgFM904, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, false },             //
-//   { "AI_H2_?_FM110_CoolantFlow1", "FM110", 0, 0, 0, avgFM110, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, false },            //
-
 struct vars{
   String name;
   String key;
   int* value;
   int prev;
 } varData[] = {
+  {"DeadHeadPressure1A","DHPSI1A",&deadHeadPsi1A,0},
+  {"DeadHeadPressure1B","DHPSI1B",&deadHeadPsi1B,0},
+  {"DeadHeadPressure2A","DHPSI2A",&deadHeadPsi2A,0},
+  {"DeadHeadPressure2B","DHPSI2B",&deadHeadPsi2B,0},
   {"SwitchingPressure1A","SWPSI1A",&switchingPsi1A,0},
   {"SwitchingPressure1B","SWPSI1B",&switchingPsi1B,0},
   {"SwitchingPressure2A","SWPSI2A",&switchingPsi2A,0},
@@ -232,7 +247,35 @@ struct vars{
   {"SwitchingTime1B","SWTM1B",&switchingTime1B,0},
   {"SwitchingTime2A","SWTM2A",&switchingTime2A,0},
   {"SwitchingTime2B","SWTM2B",&switchingTime2B,0}
-};int varSize = 8;
+};int varSize = 12;
+
+struct fm {
+  String name;
+  String key;
+  float* value;
+  float prev;
+};
+
+struct dev {
+  String name;
+  uint8_t ID;
+  double baud;
+  fm flowData[4];
+  
+} flowMeters[] = {
+  {"RHE28",3,19200,{
+    {"AI_H2_KGPM_RHE28_Flow","RHE28F",&AI_H2_KGPM_RHE28_Flow,0},
+    {"AI_H2_C_RHE28_Temp","RHE28T",&AI_H2_C_RHE28_Temp,0},
+    {"AI_H2_psig_RHE28_Pressure","RHE28P",&AI_H2_psig_RHE28_Pressure,0},
+    {"AI_H2_KGPD_RHE28_Total","RHE28O",&AI_H2_KGPD_RHE28_Total,0}
+  }},
+  {"RED",1,19200,{
+    {"AI_H2_KGPM_RED_Flow","RHE28F",&AI_H2_KGPM_RED_Flow,0},
+    {"AI_H2_C_RED_Temp","RHE28T",&AI_H2_C_RED_Temp,0},
+    {"AI_H2_psig_RED_Pressure","RHE28P",&AI_H2_psig_RED_Pressure,0},
+    {"AI_H2_KGPD_RED_Total","RHE28O",&AI_H2_KGPD_RED_Total,0}
+  }}
+};
 
 struct tt {
   String name;

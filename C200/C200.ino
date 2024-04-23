@@ -1,16 +1,11 @@
 #include "C200.h"
 void setup() {
   Serial.begin(9600);
-  //Serial1.begin(19200, SERIAL_8E1);
-  //Serial4.begin(19200, SERIAL_8E1);
+  RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200", "V2.3.0");
+  matrixSetup("C200", "V0.2.1");
   i2cSetup();
-  // mbLocal.begin(OCI_MODBUS_ID, Serial4);
-  // mbLocal.preTransmission(preTransmission);
-  // mbLocal.postTransmission(postTransmission);
-
   Serial.println("OK");
   delay(3000);
   printMode = PACKET;
@@ -22,7 +17,8 @@ void loop() {
   if(!loopTimer){loopTimer = millis();}
 
   SerialCLI();
-
+  RPCtransceive();
+  
   if(lsrReset){ //button press for LSR reset
     if(lsrReset == 1){lsrReset = millis();DO_Comm_LSR_Reset = true;}
     if(millis() - lsrReset > 1000){
@@ -41,11 +37,11 @@ void loop() {
   dataPrint(delayTime);
   daughterPrint(delayTime);
 
-  if(STATE != MANUAL_CONTROL){
+if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
-    DO_CLT_PMP104_PMP204_CoolantPumps_Enable = DI_Comm_LSR_Local;
-    DO_CLT_FCU112_CoolantFan1_Enable = DI_Comm_LSR_Local;
-    DO_CLT_FCU212_CoolantFan2_Enable = DI_Comm_LSR_Local;
+    DO_CLT_PMP104_PMP204_CoolantPumps_Enable = !DI_Comm_LSR_Local;
+    DO_CLT_FCU112_CoolantFan1_Enable = !DI_Comm_LSR_Local;
+    DO_CLT_FCU212_CoolantFan2_Enable = !DI_Comm_LSR_Local;
     if(DI_Comm_LSR_Local && (STATE == PRODUCTION || STATE == PAUSE)){
       PREV_STATE = STATE;
       STATE = FAULT;
@@ -76,6 +72,7 @@ void loop() {
       if(!timer[0]){ timer[0] = millis(); }
 
       smallMatrix[2].displayPlay(DI_Comm_LSR_Local);
+      DO_Comm_LSR_Local = true;
       DO_Encl_PilotGreen = !DI_Comm_LSR_Local;
       DO_Encl_PilotAmber = DI_Comm_LSR_Local;
     
@@ -164,12 +161,28 @@ void loop() {
         break;
 
         case START:
-          side1 = false;
-          INTENSE1 = ON;
-          switchingTime1A = 1500;
-          switchingTime1B = 1500;
-          //prevDischarge1 = AI_H2_psig_PT716_Stage1_Discharge;
-          //prevSuction1 = AI_H2_psig_PT911_Stage1_SuctionTank;
+          if(!deadHeadPsi1A){
+            if(!timer[2]){timer[2] = millis();DO_HYD_XV460_DCV1_A = true;DO_HYD_XV463_DCV1_B = false;}
+            if(millis() - timer[2] > 5000 && timer[2]){
+              deadHeadPsi1A = AI_HYD_psig_PT467_HydraulicInlet1;
+              DO_HYD_XV460_DCV1_A = false;
+              timer[2] = 0;
+            }
+          }
+          else if(!deadHeadPsi1B){
+            if(!timer[2]){timer[2] = millis();DO_HYD_XV463_DCV1_B = true;DO_HYD_XV460_DCV1_A = false;}
+            if(millis() - timer[2] > 5000 && timer[2]){
+              deadHeadPsi1B = AI_HYD_psig_PT467_HydraulicInlet1;
+              DO_HYD_XV463_DCV1_B = false;
+              timer[2] = 0;
+            }
+          }
+          else{
+            INTENSE1 = ON;
+            side1 = false;
+            switchingTime1A = 1500;
+            switchingTime1B = 1500;
+          }
           timer[3] = 0;
         break;
 
@@ -182,8 +195,8 @@ void loop() {
             side1?DO_HYD_XV463_DCV1_B:DO_HYD_XV460_DCV1_A = false; //turn off solenoid
             if(millis() - timer[3] > switchingTime1 && timer[3]){ //before even thinking about switching sides, check if minimum time has passed
               if(warmpUp1){
-                if(millis() - timer[3] > switchingTime1 + 100){ //wait to see if the pressure spikes
-                  if(AI_HYD_psig_PT467_HydraulicInlet1 >= 2000){ //deadheaded
+                if(millis() - timer[3] > switchingTime1 + 50){ //wait to see if the pressure spikes
+                  if(AI_HYD_psig_PT467_HydraulicInlet1 >= side1?deadHeadPsi1B:deadHeadPsi1A - 100){ //deadheaded
                     switchingPsi1 = switchingPsi1 - 10;
                     spiked1 = 1; //switch from incrementing to fine tune decrementing
                   }
@@ -200,33 +213,12 @@ void loop() {
                 }
               }
               else{ //if not during warmup sequence
-              /*
-                if(!timer[4]){timer[4] = millis();}
-                if(millis() - timer[4] > 3000){
-                  suctionDelta1 = AI_H2_psig_PT911_Stage1_SuctionTank - prevSuction1;
-                  dischargeDelta1 = AI_H2_psig_PT716_Stage1_Discharge - prevDischarge1;
-                  switchingPsi1 = switchingPsi1 - suctionDelta1*XXX; //NEEDS INCREMENT MULTIPLIER!!!!!
-                  switchingPsi1 = switchingPsi1 + dischargeDelta1*XXX; //NEEDS INCREMENT MULTIPLIER!!!!!
-                  
-                  if(AI_H2_psig_PT716_Stage1_Discharge >= 1400){
-                    if(AI_H2_psig_PT716_Stage1_Discharge - prevDischarge1 > 5){
-                      switchingTime1 = switchingTime1 + 250;
-                    }
-                    else if(prevDischarge1 - AI_H2_psig_PT716_Stage1_Discharge > 5){
-                      switchingTime1 = switchingTime1 - (switchingTime1 >= 1500+250)?250:0;
-                    }
-                  }
-                  else{switchingTime1 = 1500;}
-                  prevDischarge1 = AI_H2_psig_PT716_Stage1_Discharge;
-                  timer[4] = 0;
-                }*/
                 side1 = !side1;
                 lowCycleCnt++;
                 timer[3] = 0;
               }
             }
           }
-          //if(millis() - timer[3] > 60000){ STATE = IDLE_OFF; }
         break;
 
         case PAUSE:
@@ -251,12 +243,28 @@ void loop() {
         break;
         
         case START:
-          side2 = false;
-          if(AI_H2_psig_PT712_Stage1_DischargeTank >= 1350){INTENSE2 = ON;} //make sure not to even start compressing until stage 1 discharge tank (stage 2 suction) is at minimum 1350psi
-          switchingTime2A = 1500; //reset switching time delays
-          switchingTime2B = 1500;
-          //prevDischarge2 = AI_H2_psig_PT407_Stage3_Discharge;
-          //prevSuction2 = AI_H2_psig_PT712_Stage1_DischargeTank;
+          if(!deadHeadPsi2A){
+            if(!timer[7]){timer[7] = millis();DO_HYD_XV554_DCV2_A = true;DO_HYD_XV557_DCV2_B = false;}
+            if(millis() - timer[7] > 5000 && timer[7]){
+              deadHeadPsi2A = AI_HYD_psig_PT561_HydraulicInlet2;
+              DO_HYD_XV554_DCV2_A = false;
+              timer[7] = 0;
+            }
+          }
+          else if(!deadHeadPsi2B){
+            if(!timer[7]){timer[7] = millis();DO_HYD_XV557_DCV2_B = true;DO_HYD_XV554_DCV2_A = false;}
+            if(millis() - timer[7] > 5000 && timer[7]){
+              deadHeadPsi2B = AI_HYD_psig_PT561_HydraulicInlet2;
+              DO_HYD_XV557_DCV2_B = false;
+              timer[7] = 0;
+            }
+          }
+          else{
+            side2 = false;
+            if(AI_H2_psig_PT712_Stage1_DischargeTank >= 1350){INTENSE2 = ON;} //make sure not to even start compressing until stage 1 discharge tank (stage 2 suction) is at minimum 1350psi
+            switchingTime2A = 1500; //reset switching time delays
+            switchingTime2B = 1500;
+          }
           timer[5] = 0;
         break;
 
@@ -265,12 +273,12 @@ void loop() {
           switchingTime2 = side2?switchingTime2B:switchingTime2A; //choose side A or side B
           spiked2 = side2?spiked2B:spiked2A; //choose side A or side B
           if(!timer[5]){timer[5] = millis();side2?DO_HYD_XV557_DCV2_B:DO_HYD_XV554_DCV2_A = true;} //open solenoid and start timer
-          if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi2){ //check if we reached switching pressure
+          if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2){ //check if we reached switching pressure
             side2?DO_HYD_XV557_DCV2_B:DO_HYD_XV554_DCV2_A = false; //turn off solenoid
             if(millis() - timer[5] > switchingTime2 && timer[5]){ //before even thinking about switching sides, check if minimum time has passed
               if(warmUp2){ //are we in the warmp up phase?
-                if(millis() - timer[5] > switchingTime2 + 100){ //wait to see if the pressure spikes
-                  if(AI_HYD_psig_PT467_HydraulicInlet1 >= 2000){ //deadheaded
+                if(millis() - timer[5] > switchingTime2 + 50){ //wait to see if the pressure spikes
+                  if(AI_HYD_psig_PT561_HydraulicInlet2 >= side2?deadHeadPsi2B:deadHeadPsi2A - 100){ //deadheaded
                     switchingPsi2 = switchingPsi2 - 10;
                     spiked2 = 1; //switch from incrementing to fine tune decrementing
                   }
@@ -287,22 +295,12 @@ void loop() {
                 }
               }
               else{ //if not during warmup sequence
-              /*
-                if(!timer[6]){timer[6] = millis();}
-                if(millis() - timer[6] > 3000){
-                  suctionDelta2 = AI_H2_psig_PT911_Stage1_SuctionTank - prevSuction2;
-                  dischargeDelta2 = AI_H2_psig_PT716_Stage1_Discharge - prevDischarge2;
-                  switchingPsi2 = switchingPsi2 - suctionDelta2*XXX; //NEEDS INCREMENT MULTIPLIER!!!!!
-                  switchingPsi2 = switchingPsi2 + dischargeDelta2*XXX; //NEEDS INCREMENT MULTIPLIER!!!!!
-                  timer[6] = 0;
-                }*/
                 side2 = !side2;
                 highCycleCnt++;
                 timer[5] = 0;
               }
             }
           }
-          //if(millis() - timer[5] > 60000){ STATE = IDLE_OFF; }
         break;
 
         case PAUSE:

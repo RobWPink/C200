@@ -38,16 +38,26 @@ void SerialCLI() {
       }
       if(digital){;}
 
-       else if(argStr.equalsIgnoreCase("sw1")) {
+      else if(argStr.equalsIgnoreCase("sw1a")) {
         String argStrVal = argBuf[++n];
         argVal = argStrVal.toInt();
-        if(argVal > 0){switchingPsi1 = argVal;}
+        if(argVal > 0){switchingPsi1A = argVal;}
+      }
+      else if(argStr.equalsIgnoreCase("sw1b")) {
+        String argStrVal = argBuf[++n];
+        argVal = argStrVal.toInt();
+        if(argVal > 0){switchingPsi1B = argVal;}
       }
 
-      else if(argStr.equalsIgnoreCase("sw2")) {
+      else if(argStr.equalsIgnoreCase("sw2a")) {
         String argStrVal = argBuf[++n];
         argVal = argStrVal.toInt();
-        if(argVal > 0){switchingPsi1 = argVal;}
+        if(argVal > 0){switchingPsi2A = argVal;}
+      }
+      else if(argStr.equalsIgnoreCase("sw2b")) {
+        String argStrVal = argBuf[++n];
+        argVal = argStrVal.toInt();
+        if(argVal > 0){switchingPsi2B = argVal;}
       }
 
       else if(argStr.equalsIgnoreCase("delay")) {
@@ -64,9 +74,6 @@ void SerialCLI() {
         lsrReset = 1;
       }
       
-      else if(argStr.equalsIgnoreCase("c50setup")){
-        c50setup = !c50setup;
-      }
       else if(argStr.equalsIgnoreCase("raw")){
         rawPrint = !rawPrint;
       }
@@ -75,9 +82,9 @@ void SerialCLI() {
         printMode = (printMode == PACKET)?NONE:PACKET;
       }
 
-      else if(argStr.equalsIgnoreCase("alldata")){
-        printMode = (printMode == ALL)?NONE:ALL;
-      }
+      // else if(argStr.equalsIgnoreCase("alldata")){
+      //   printMode = (printMode == ALL)?NONE:ALL;
+      // }
 
       else if(argStr.equalsIgnoreCase("di")){
         printMode = (printMode == DIGITAL_IN)?NONE:DIGITAL_IN;
@@ -86,24 +93,35 @@ void SerialCLI() {
       else if(argStr.equalsIgnoreCase("do")){
         printMode = (printMode == DIGITAL_OUT)?NONE:DIGITAL_OUT;
       }
+
       else if(argStr.equalsIgnoreCase("tt")){
         printMode = (printMode == TT)?NONE:TT;
-      }
-      else if(argStr.equalsIgnoreCase("gbn")){
-        virtualGreenButton = !virtualGreenButton;
       }
 
       else if(argStr.equalsIgnoreCase("pt")){
         printMode = (printMode == PT)?NONE:PT;
       }
 
+      else if(argStr.equalsIgnoreCase("var")){
+        printMode = (printMode == VAR)?NONE:VAR;
+      }
+
+      else if(argStr.equalsIgnoreCase("fm")){
+        printMode = (printMode == FM)?NONE:FM;
+      }
+
+      else if(argStr.equalsIgnoreCase("gbn")){
+        virtualGreenButton = !virtualGreenButton;
+      }
+
       else if(argStr.equalsIgnoreCase("debug")){
-        printMode = (printMode == debug)?NONE:debug;
+        printMode = (printMode == DEBUG)?NONE:DEBUG;
       }
 
       else if(argStr.equalsIgnoreCase("plot")){
         plot = !plot;
       }
+
       else if(argStr.equalsIgnoreCase("err")){
         if(errMsg[0] == ""){Serial.println("No PAUSE Errors");}
         else{
@@ -117,6 +135,7 @@ void SerialCLI() {
       else if(argStr.equalsIgnoreCase("pretty")){
         prettyPrint = !prettyPrint;
       }
+
       else if(argStr.equalsIgnoreCase("manual")){
         manualMode = !manualMode;
         if(manualMode){
@@ -128,10 +147,6 @@ void SerialCLI() {
           PREV_STATE = IDLE_OFF;
         }
       }
-
-      // else if(argStr.equalsIgnoreCase("keys")){
-      //   keyPrint = !keyPrint;
-      // }
 
       else if(argStr.equalsIgnoreCase("stop") || argStr.equalsIgnoreCase("quiet")){
         printMode = NONE;
@@ -146,6 +161,26 @@ void SerialCLI() {
 
 void printHelp(){
   Serial.println("################## HELP MENU ##################");
+  Serial.println("off                -> Turn off ALL devices");
+  Serial.println("packet             -> Print data in standardized packet format");
+  Serial.println("di                 -> Print all gpio digital inputs");
+  Serial.println("do                 -> Print all gpio digital outputs");
+  Serial.println("pt                 -> Print all PT values");
+  Serial.println("tt                 -> Print all TT values");
+  Serial.println("fm                 -> Print all Flow meter values");
+  Serial.println("var                -> Print all adaptive variables");
+  Serial.println("delay              -> Designate print delay time in ms (default: 1000)");
+  Serial.println("sw1a               -> Change switching pressure 1a");
+  Serial.println("sw1b               -> Change switching pressure 1b");
+  Serial.println("sw2a               -> Change switching pressure 2a");
+  Serial.println("sw2b               -> Change switching pressure 2b");
+  Serial.println("lsr                -> Virtually press lsr reset button for 500ms");
+  Serial.println("pretty             -> Toggle print mode labeled lists <--> csv list");
+  Serial.println("raw                -> Toggle to print only raw values");
+  Serial.println("plot               -> Toggle Plotting of all values using Arduino Serial Plotter");
+  Serial.println("stop/quiet         -> Silence all printouts");
+  Serial.println("manual             -> Control all output manually");
+  Serial.println("help/h             -> This help menu");
   for(int i = 0; i < DOsize; i++){
     String cc = DOdata[i].key;
     for(int b = 1;b < (19 - cc.length());b++){
@@ -154,58 +189,49 @@ void printHelp(){
     cc = cc + "-> Toggle " + DOdata[i].name;
     Serial.println(cc);
   }
-  Serial.println("off                -> Turn off ALL devices");
-  Serial.println("packet             -> Print data in standardized packet format");
-  Serial.println("di                 -> Print all gpio digital inputs");
-  Serial.println("do                 -> Print all gpio digital outputs");
-  Serial.println("pt                 -> Print all PT values");
-  Serial.println("tt                 -> Print all TT values");
-  Serial.println("printall           -> Print all data");
-  Serial.println("delay              -> Designate print delay time in ms (default: 1000)");
-  Serial.println("sw1                -> Change switching pressure 1");
-  Serial.println("sw2                -> Change switching pressure 2");
-  Serial.println("lsr                -> Virtually press lsr reset button for 500ms");
-  Serial.println("c50setup           -> paul's feature");
-  Serial.println("pretty             -> Toggle print mode labeled lists <--> csv list");
-  //Serial.println("keys               -> Toggle print mode labeled keys <--> csv list");
-  Serial.println("raw                -> Toggle to print only raw values");
-  Serial.println("plot               -> Toggle Plotting of all values using Arduino Serial Plotter");
-  Serial.println("stop/quiet         -> Silence all printouts");
-  Serial.println("manual             -> Control all output manually");
-  Serial.println("help/h             -> This help menu");
   Serial.println("###############################################");
 
 }
 
 void dataPrint(unsigned long dly){
   if(!dataPrintTimer){dataPrintTimer = millis();}
+  
   if(plot){
-    Serial.print("AI_HYD_psig_PT561_HydraulicInlet2:");
-    Serial.print(AI_HYD_psig_PT561_HydraulicInlet2);
-    Serial.print(" DO_HYD_XV554_DCV2_A:");
-    Serial.print(DO_HYD_XV554_DCV2_A*2000);
-    Serial.print(" DO_HYD_XV557_DCV2_B:");
-    Serial.print(DO_HYD_XV557_DCV2_B*2000);
-    Serial.print(" SwitchingPressure:");
-    Serial.print(switchingPsi1);
-    Serial.print(" AI_H2_psig_PT712_Stage1_DischargeTank:");
-    Serial.print(AI_H2_psig_PT712_Stage1_DischargeTank);
-    Serial.print(" AI_H2_psig_PT407_Stage3_Discharge:");
-    Serial.print(AI_H2_psig_PT407_Stage3_Discharge);
-    Serial.print(" AI_H2_psig_PT410_Stage3_DischargeTank:");
-    Serial.print(AI_H2_psig_PT410_Stage3_DischargeTank);
-    Serial.print(" AI_HYD_C_TT454_HydraulicTank:");
-    Serial.print(AI_HYD_C_TT454_HydraulicTank);
-    Serial.print(" AI_CLT_C_TT207_CoolantSupply2:");
-    Serial.print(AI_CLT_C_TT207_CoolantSupply2);
-    Serial.print(" AI_H2_C_TT715_Stage_2SuctionTank:");
-    Serial.print(AI_H2_C_TT715_Stage2_SuctionTank);
-    Serial.print(" AI_H2_C_TT520_Stage2_Discharge:");
-    Serial.print(AI_H2_C_TT520_Stage2_Discharge);
-    Serial.print(" AI_H2_C_TT521_Stage3_Suction:");
-    Serial.println(AI_H2_C_TT521_Stage3_Suction);
-    Serial.print(" AI_H2_C_TT522_Stage3_Discharge:");
-    Serial.println(AI_H2_C_TT522_Stage3_Discharge);
+    String msgA = "";
+    String msgB = "";
+    String msgC = "";
+    String msgD = "";
+    String msgE = "";
+    String msgF = "";
+    for(int i = 0; i < TTsize;i++){
+      msgA = msgA + "\"" + TTdata[i].key + "\":" + *TTdata[i].value + ",";
+    }
+    for(int i = 0; i < PTsize;i++){
+      msgB = msgB + PTdata[i].key + ":" + *PTdata[i].value + ",";
+    }
+    for(int i = 0; i < 2;i++){
+      for(int j = 0; j < 4;j++){
+        msgC = msgC + flowMeters[i].flowData[j].key + ":" + *flowMeters[i].flowData[j].value + ",";
+      }
+    }
+    for(int i = 0; i < varSize;i++){
+      msgD = msgD + varData[i].key + ":" + *varData[i].value + ",";
+    }
+    for(int i = 0; i < DOsize;i++){
+      msgE = msgE + DOdata[i].key + ":" + *DOdata[i].value + ",";
+    }
+    for(int i = 0; i < DIsize;i++){
+      msgF = msgF + DIdata[i].key + ":" + *DIdata[i].value + ",";
+    }
+    msgF.remove(msgF.length()-1,1);//get rid of extra comma
+
+    Serial.print(msgA);
+    Serial.print(msgB);
+    Serial.print(msgC);
+    Serial.print(msgD);
+    Serial.print(msgE);
+    Serial.println(msgF);
+
   }
   else if(millis() - dataPrintTimer > dly && dataPrintTimer){
     if(!printMode){return;}
@@ -243,6 +269,17 @@ void dataPrint(unsigned long dly){
             DIdata[i].prev = *DIdata[i].value;
           }
         }
+        
+        for(int i = 0; i < 2; i++){
+          for(int j = 0; j < 4; j++){
+            if(*flowMeters[i].flowData[j].value != flowMeters[i].flowData[j].prev){
+              if(msg != "{"){msg = msg + ",";}
+              msg = msg + "\"" + flowMeters[i].flowData[j].key + "\":" + *flowMeters[i].flowData[j].value;
+              flowMeters[i].flowData[j].prev = *flowMeters[i].flowData[j].value;
+            }
+          }
+        }
+
         for(int i = 0; i < varSize;i++){
           if(*varData[i].value != varData[i].prev){
             if(msg != "{"){msg = msg + ",";}
@@ -284,6 +321,35 @@ void dataPrint(unsigned long dly){
         Serial.println();
       break;
 
+      case VAR:
+        for(int i = 0; i < varSize; i++){
+          if(prettyPrint){
+            Serial.print("\"");
+            Serial.print(varData[i].name);
+            Serial.print("\": ");
+          }
+          Serial.print(*varData[i].value);
+          if(prettyPrint){ Serial.println(); }
+          else{ Serial.print(", "); }
+        }
+        Serial.println();
+      break;
+
+      case FM:
+        for(int i = 0; i < 2; i++){
+          for(int j = 0; j < 4; j++){
+            if(prettyPrint){
+              Serial.print("\"");
+              Serial.print(flowMeters[i].flowData[j].name);
+              Serial.print("\": ");
+            }
+            Serial.print(*flowMeters[i].flowData[j].value);
+            if(prettyPrint){ Serial.println(); }
+            else{ Serial.print(", "); }
+          }
+        }
+      break;
+
       case DIGITAL_IN:
         for(int i = 0; i < DIsize; i++){
           if(prettyPrint){
@@ -312,10 +378,18 @@ void dataPrint(unsigned long dly){
         Serial.println();
       break;
     
-    case debug:
+    case DEBUG:
       Serial.print("LoopTime: ");
       Serial.println(loopTime);
-
+      Serial.print("FlowMeter:");
+      for(int i = 0; i < 2; i++){
+        for(int j = 0; j < 4; j++){
+          Serial.print(*flowMeters[i].flowData[j].value);
+          Serial.print(",");
+        }
+        if(i < 1){Serial.print("|||");}
+      }
+      
       Serial.print("STATE: ");
       Serial.println(STATE);
 
