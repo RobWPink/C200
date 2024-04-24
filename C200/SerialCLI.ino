@@ -398,8 +398,8 @@ void dataPrint(unsigned long dly){
       Serial.println(INTENSE2);
 
       Serial.print("intense timers: ");
-      Serial.print(millis() - timer[3]);Serial.print(", ");
-      Serial.println(millis() - timer[5]);
+      Serial.print(millis() - timer[2]);Serial.print(", ");
+      Serial.println(millis() - timer[3]);
 
       Serial.print("DCV:1A,1B,2A,2B:");
       Serial.print(DO_HYD_XV460_DCV1_A);
@@ -418,6 +418,25 @@ void dataPrint(unsigned long dly){
       Serial.print(switchingTime1B);Serial.print(", ");
       Serial.print(switchingTime2A);Serial.print(", ");
       Serial.println(switchingTime2B);
+
+      Serial.print("deadHeadPsi:1A,1B,2A,2B: ");
+      Serial.print(deadHeadPsi1A);Serial.print(", ");
+      Serial.print(deadHeadPsi1B);Serial.print(", ");
+      Serial.print(deadHeadPsi2A);Serial.print(", ");
+      Serial.println(deadHeadPsi2B);
+
+      Serial.print("spiked:1A,1B,2A,2B: ");
+      Serial.print(spiked1A);Serial.print(", ");
+      Serial.print(spiked1B);Serial.print(", ");
+      Serial.print(spiked2A);Serial.print(", ");
+      Serial.println(spiked2B);
+
+      Serial.print("warmUp:1A,1B,2A,2B: ");
+      Serial.print(warmUp1A);Serial.print(", ");
+      Serial.print(warmUp1B);Serial.print(", ");
+      Serial.print(warmUp2A);Serial.print(", ");
+      Serial.println(warmUp2B);
+
 
       Serial.print("inlets: ");
       Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);Serial.print(", ");

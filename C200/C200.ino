@@ -4,7 +4,7 @@ void setup() {
   RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200_Longview", "V0.2.1");
+  matrixSetup("C200_Longview", "V0.3.0");
   i2cSetup();
   Serial.println("OK");
   delay(3000);
@@ -37,12 +37,12 @@ void loop() {
   dataPrint(delayTime);
   daughterPrint(delayTime);
 
-if(STATE != MANUAL_CONTROL){
+  if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
     DO_CLT_PMP104_PMP204_CoolantPumps_Enable = !DI_Comm_LSR_Local;
     DO_CLT_FCU112_CoolantFan1_Enable = !DI_Comm_LSR_Local;
     DO_CLT_FCU212_CoolantFan2_Enable = !DI_Comm_LSR_Local;
-    if(DI_Comm_LSR_Local && (STATE == PRODUCTION || STATE == PAUSE)){
+    if(DI_Comm_LSR_Local && STATE == PRODUCTION){
       PREV_STATE = STATE;
       STATE = FAULT;
       faultString = "LSR Error";
@@ -187,7 +187,7 @@ if(STATE != MANUAL_CONTROL){
           if(!timer[2]){ timer[2] = millis();DO_HYD_XV460_DCV1_A = true;DO_HYD_XV463_DCV1_B = false;} 
           if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){ //check if we reached switching pressure
             DO_HYD_XV460_DCV1_A = false; //turn off solenoid
-            if(millis() - timer[2] > switchingTime1A && timer[2]){ //before even thinking about switching sides, check if minimum time has passed
+            if(millis() - timer[2] > 1500 && timer[2]){ //before even thinking about switching sides, check if minimum time has passed
               if(!warmUp1A){
                 if(AI_HYD_psig_PT467_HydraulicInlet1 >= (deadHeadPsi1A-switchingPsi1A)/3 + switchingPsi1A){ //deadheaded
                   switchingPsi1A = switchingPsi1A - 10; // fine tune decrement
@@ -431,5 +431,4 @@ if(STATE != MANUAL_CONTROL){
 
   loopTime = millis() - loopTimer;
   loopTimer = 0;
-  Serial.println();
 }
