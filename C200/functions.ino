@@ -10,10 +10,6 @@ void daughterPrint(unsigned long dly){
     sprintf(ln0[0],"S2S.%03d.S2D.%03d ", (int)AI_H2_C_TT715_Stage2_SuctionTank, (int)AI_H2_C_TT520_Stage2_Discharge);
     sprintf(ln0[1],"S3S.%03d.S3D.%03d ", (int)AI_H2_C_TT521_Stage3_Suction, (int)AI_H2_C_TT522_Stage3_Discharge);
     switch(STATE){
-      case PAUSE:
-        if(errMsg[0] != ""){ sprintf(ln0[2],"PAUSE: %s",errMsg[0]); }
-        else{ sprintf(ln0[2],"PAUSE: No Errors"); }
-      break;
       case FAULT:
         sprintf(ln0[2],"FAULT: %s",faultString);
       break;
@@ -22,6 +18,10 @@ void daughterPrint(unsigned long dly){
       break;
       default:
       break;
+    }
+    if(manualPause){
+      if(errMsg[0] != ""){ sprintf(ln0[2],"PAUSE: %s",errMsg[0]); }
+      else{ sprintf(ln0[2],"PAUSE: No Errors"); }
     }
     lcd.setCursor(0, 0);
     if(ln0[scrollCnt][0] == ' '){ scrollCnt = 0; }//reset scrollCnt

@@ -33,12 +33,31 @@ high side: y = 2.0196x + 5581.4
 #define BCOEFFICIENT_c -2650.4
 #define BCOEFFICIENT_e 3988
 
+//warm up phase:
+//start
+//set all switchingPSI to 300
+//stroke side a 
+//wait until 1500ms from start of stroke
+//continually check inlet for switchingPSI
+//once switchingPSI reached wait 100ms
+//check if inlet at or greater than 2000
+//if not, increment switchingPSI by 100
+//if so, wait until next a stroke and decrement switchingPSI by 10
+  //once switchingPSI reached wait 100ms
+  //check if inlet at or greater than 2000
+  //if so, go back to decrement by switchingPSI 10
+  //if not, check this stroke 3 more times, before moving to normal mode
+//stroke side b, go back to "wait until 1500ms"
+
 enum comp{
   OFF,
   START,
-  ON,
+  DEADHEAD1,
+  DEADHEAD2,
+  SIDE_A,
+  SIDE_B,
   PAUSE
-}INTENSE1,INTENSE2;
+}INTENSE1,INTENSE2,PREV1,PREV2;
 
 enum state { IDLE_OFF,
              IDLE_ON,
@@ -104,9 +123,9 @@ bool strokeLowSide, strokeHighSide = false;
 bool plot, prettyPrint, rawPrint, errorPrint = false;
 bool virtualRedButton, virtualGreenButton, virtualAmberButton = false;
 bool prevG,prevA,prevR = false;
-bool daughterTog, c50setup,lsrTog, manualPause, manualMode = false;
-bool warmUp1,warmUp2 = true;
-bool side1,side2 = false;
+bool daughterTog, lsrTog, manualPause, manualMode = false;
+bool warmUp1A,warmUp1B,warmUp2A,warmUp2B = false;
+
 unsigned long timer[10] = { 0 };
 unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer,lsrReset,loopTimer,dataTimer,pauseTimer,holdR,lcdTimer,dataPrintTimer,daughterPrintTimer = 0;

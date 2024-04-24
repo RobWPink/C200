@@ -52,10 +52,9 @@ if(STATE != MANUAL_CONTROL){
   if(STATE != CHANGED_STATE){ //reset state timer
     timer[0] = 0;
     timer[1] = 0;
+    timer[2] = 0;
     timer[3] = 0;
-    timer[4] = 0;
-    timer[5] = 0;
-    timer[7] = 0;
+
 
     DO_Encl_PilotRed = false;
     DO_Encl_PilotGreen = false;
@@ -144,22 +143,17 @@ if(STATE != MANUAL_CONTROL){
         lowCycleCnt = 0;
         timer[1] = 0;
       }
-//warm up phase:
-//start
-//set all switchingPSI to 300
-//stroke side a 
-//wait until 1500ms from start of stroke
-//continually check inlet for switchingPSI
-//once switchingPSI reached wait 100ms
-//check if inlet at or greater than 2000
-//if not, increment switchingPSI by 100
-//if so, wait until next a stroke and decrement switchingPSI by 10
-  //once switchingPSI reached wait 100ms
-  //check if inlet at or greater than 2000
-  //if so, go back to decrement by switchingPSI 10
-  //if not, check this stroke 3 more times, before moving to normal mode
-//stroke side b, go back to "wait until 1500ms"
 
+      //#########################################################
+      //####################### LOW SIDE ########################
+      //#########################################################
+
+      if(INTENSE1 != PREV1){
+        timer[2] = 0;
+        DO_HYD_XV460_DCV1_A = false;
+        DO_HYD_XV463_DCV1_B = false;
+        PREV1 = INTENSE1;
+      }
       switch(INTENSE1){
         case OFF:
           DO_HYD_XV460_DCV1_A = false;
@@ -167,79 +161,76 @@ if(STATE != MANUAL_CONTROL){
         break;
 
         case START:
-          if(!deadHeadPsi1A){
-            Serial.print("01,");
-            if(!timer[3]){timer[3] = millis();DO_HYD_XV460_DCV1_A = true;DO_HYD_XV463_DCV1_B = false;}
-            if(millis() - timer[3] > 5000 && timer[3]){
-              deadHeadPsi1A = AI_HYD_psig_PT467_HydraulicInlet1;
-              DO_HYD_XV460_DCV1_A = false;
-              timer[3] = 0;
-            }
-          }
-          else if(!deadHeadPsi1B){
-            Serial.print("02,");
-            if(!timer[3]){timer[3] = millis();DO_HYD_XV463_DCV1_B = true;DO_HYD_XV460_DCV1_A = false;}
-            if(millis() - timer[3] > 5000 && timer[3]){
-              deadHeadPsi1B = AI_HYD_psig_PT467_HydraulicInlet1;
-              DO_HYD_XV463_DCV1_B = false;
-              warmUp1 = true;
-              timer[3] = 0;
-            }
-          }
-          else{
-            INTENSE1 = ON;
-            side1 = false;
-            switchingTime1A = 1500;
-            switchingTime1B = 1500;
-            Serial.println("1");
-            timer[3] = 0;
-          }
-          
+        if(!deadHeadPsi1A || !deadHeadPsi1B){INTENSE1 = DEADHEAD1;}
+        else{INTENSE1 = SIDE_A;}
         break;
 
-        case ON:
-          Serial.print("2,");
-          if(!timer[3]){timer[3] = millis(); (side1?DO_HYD_XV463_DCV1_B:DO_HYD_XV460_DCV1_A) = true;}
-          Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);
-          if(AI_HYD_psig_PT467_HydraulicInlet1 >= (side1?switchingPsi1B:switchingPsi1A)){ //check if we reached switching pressure
-            (side1?DO_HYD_XV463_DCV1_B:DO_HYD_XV460_DCV1_A) = false; //turn off solenoid
-            if(millis() - timer[3] > (side1?switchingTime1B:switchingTime1A) && timer[3]){ //before even thinking about switching sides, check if minimum time has passed
-              Serial.print(",4,");
-              if(warmUp1){
-                Serial.print("4.5,");
-                if(millis() - timer[3] > (side1?switchingTime1B:switchingTime1A) + 50){ //wait to see if the pressure spikes
-                  Serial.print("5,");
-                  timer[3] = 0;
-                  if(AI_HYD_psig_PT467_HydraulicInlet1 >= (side1?deadHeadPsi1B:deadHeadPsi1A) - 100){ //deadheaded
-                    Serial.print("6a,");
-                    (side1?switchingPsi1B:switchingPsi1A) = (side1?switchingPsi1B:switchingPsi1A) - 10;
-                    (side1?spiked1B:spiked1A) = 1; //switch from incrementing to fine tune decrementing
+        case DEADHEAD1:
+          if(!timer[2]){timer[2] = millis();DO_HYD_XV460_DCV1_A = true;}
+          if(millis() - timer[2] > 5000 && timer[2]){
+            deadHeadPsi1A = AI_HYD_psig_PT467_HydraulicInlet1;
+            DO_HYD_XV460_DCV1_A = false;
+            INTENSE1 = DEADHEAD2;
+          }
+        break;
+
+        case DEADHEAD2:
+          if(!timer[2]){timer[2] = millis();DO_HYD_XV463_DCV1_B = true;}
+          if(millis() - timer[2] > 5000 && timer[2]){
+            deadHeadPsi1B = AI_HYD_psig_PT467_HydraulicInlet1;
+            DO_HYD_XV463_DCV1_B = false;
+            INTENSE1 = SIDE_A;
+          }
+        break;
+
+        case SIDE_A:
+          if(!timer[2]){ timer[2] = millis();DO_HYD_XV460_DCV1_A = true;DO_HYD_XV463_DCV1_B = false;} 
+          if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){ //check if we reached switching pressure
+            DO_HYD_XV460_DCV1_A = false; //turn off solenoid
+            if(millis() - timer[2] > switchingTime1A && timer[2]){ //before even thinking about switching sides, check if minimum time has passed
+              if(!warmUp1A){
+                if(AI_HYD_psig_PT467_HydraulicInlet1 >= (deadHeadPsi1A-switchingPsi1A)/3 + switchingPsi1A){ //deadheaded
+                  switchingPsi1A = switchingPsi1A - 10; // fine tune decrement
+                  spiked1A = 1; //switch from incrementing to fine tune decrementing
+                }
+                else{
+                  if(!spiked1A){switchingPsi1A = switchingPsi1A + 100; } //increment if we arent finetuning 
+                  else{
+                    if(spiked1A > 3){warmUp1A = true;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
+                    else{spiked1A++;} //we didnt deadhead this time after finetuning 
                   }
-                  else{ //didnt deadhead
-                    Serial.print("6b,");
-                    if(!(side1?spiked1B:spiked1A)){ (side1?switchingPsi1B:switchingPsi1A) = (side1?switchingPsi1B:switchingPsi1A) + 100; } //increment if we arent finetuning 
-                    else{
-                      Serial.print("7,");
-                      if((side1?spiked1B:spiked1A) > 3){warmUp1 = false;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
-                      else{(side1?spiked1B:spiked1A)++;} //we didnt deadhead this time after finetuning 
-                    }
-                  }
-                  Serial.print("###################################");
-                  side1 = !side1;
-                  lowCycleCnt++;
-                  
                 }
               }
-              else{ //if not during warmup sequence
-                Serial.print("8");
-                side1 = !side1;
-                lowCycleCnt++;
-                timer[3] = 0;
-              }
+              lowCycleCnt++; //reached end of cycle time, switch sides 
+              INTENSE1 = SIDE_B;
             }
           }
         break;
 
+        case SIDE_B:
+          if(!timer[2]){ timer[2] = millis();DO_HYD_XV460_DCV1_A = false;DO_HYD_XV463_DCV1_B = true;} 
+          if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B){ //check if we reached switching pressure
+            DO_HYD_XV463_DCV1_B = false; //turn off solenoid
+            if(millis() - timer[2] > switchingTime1B && timer[2]){ //before even thinking about switching sides, check if minimum time has passed
+              if(!warmUp1B){
+                if(AI_HYD_psig_PT467_HydraulicInlet1 >= (deadHeadPsi1B-switchingPsi1B)/3 + switchingPsi1B){ //deadheaded
+                  switchingPsi1B = switchingPsi1B - 10; // fine tune decrement
+                  spiked1B = 1; //switch from incrementing to fine tune decrementing
+                }
+                else{
+                  if(!spiked1B){switchingPsi1B = switchingPsi1B + 100; } //increment if we arent finetuning 
+                  else{
+                    if(spiked1B > 3){warmUp1B = true;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
+                    else{spiked1B++;} //we didnt deadhead this time after finetuning 
+                  }
+                }
+              }
+              lowCycleCnt++; //reached end of cycle time, switch sides 
+              INTENSE1 = SIDE_A;
+            }
+          }
+        break;
+       
         case PAUSE:
           DO_HYD_XV460_DCV1_A = false;
           DO_HYD_XV463_DCV1_B = false;
@@ -248,94 +239,115 @@ if(STATE != MANUAL_CONTROL){
               break;
             }
           }
-          INTENSE1 = START;
+          INTENSE1 = SIDE_A;
         break;
 
         default:
         break;
       }
 
+      //#########################################################
+      //####################### HIGH SIDE #######################
+      //#########################################################
+
+      if(INTENSE2 != PREV2){
+        timer[3] = 0;
+        DO_HYD_XV554_DCV2_A = false;
+        DO_HYD_XV557_DCV2_B = false;
+        PREV2 = INTENSE2;
+      }
       switch(INTENSE2){
         case OFF:
           DO_HYD_XV554_DCV2_A = false;
           DO_HYD_XV557_DCV2_B = false;
         break;
-        
+
         case START:
-          if(!deadHeadPsi2A){
-            if(!timer[7]){timer[7] = millis();DO_HYD_XV554_DCV2_A = true;DO_HYD_XV557_DCV2_B = false;}
-            if(millis() - timer[7] > 5000 && timer[7]){
-              deadHeadPsi2A = AI_HYD_psig_PT561_HydraulicInlet2;
-              DO_HYD_XV554_DCV2_A = false;
-              timer[7] = 0;
-            }
-          }
-          else if(!deadHeadPsi2B){
-            if(!timer[7]){timer[7] = millis();DO_HYD_XV557_DCV2_B = true;DO_HYD_XV554_DCV2_A = false;}
-            if(millis() - timer[7] > 5000 && timer[7]){
-              deadHeadPsi2B = AI_HYD_psig_PT561_HydraulicInlet2;
-              DO_HYD_XV557_DCV2_B = false;
-              warmUp2 = true;
-              timer[7] = 0;
-            }
-          }
-          else{
-            side2 = false;
-            INTENSE2 = ON;
-            //if(AI_H2_psig_PT712_Stage1_DischargeTank >= 1350){INTENSE2 = ON;} //make sure not to even start compressing until stage 1 discharge tank (stage 2 suction) is at minimum 1350psi
-            switchingTime2A = 1500;
-            switchingTime2B = 1500;
-          }
-          timer[5] = 0;
+        if(!deadHeadPsi2A || !deadHeadPsi2B){INTENSE2 = DEADHEAD1;}
+        else{INTENSE2 = SIDE_A;}
         break;
 
-        case ON:
-          if(!timer[5]){timer[5] = millis();(side2?DO_HYD_XV557_DCV2_B:DO_HYD_XV554_DCV2_A) = true;} //open solenoid and start timer
-          if(AI_HYD_psig_PT561_HydraulicInlet2 >= (side2?switchingPsi2B:switchingPsi2A)){ //check if we reached switching pressure
-            (side2?DO_HYD_XV557_DCV2_B:DO_HYD_XV554_DCV2_A) = false; //turn off solenoid
-            if(millis() - timer[5] > (side2?switchingTime2B:switchingTime2A) && timer[5]){ //before even thinking about switching sides, check if minimum time has passed
-              if(warmUp2){ //are we in the warmp up phase?
-                if(millis() - timer[5] > (side2?switchingTime2B:switchingTime2A) + 50){ //wait to see if the pressure spikes
-                  if(AI_HYD_psig_PT561_HydraulicInlet2 >= (side2?deadHeadPsi2B:deadHeadPsi2A) - 100){ //deadheaded
-                    (side2?switchingPsi2B:switchingPsi2A) = (side2?switchingPsi2B:switchingPsi2A) - 10;
-                    (side2?spiked2B:spiked2A) = 1; //switch from incrementing to fine tune decrementing
+        case DEADHEAD1:
+          if(!timer[3]){timer[3] = millis();DO_HYD_XV554_DCV2_A = true;}
+          if(millis() - timer[3] > 5000 && timer[3]){
+            deadHeadPsi2A = AI_HYD_psig_PT561_HydraulicInlet2;
+            DO_HYD_XV554_DCV2_A = false;
+            INTENSE2 = DEADHEAD2;
+          }
+        break;
+
+        case DEADHEAD2:
+          if(!timer[3]){timer[3] = millis();DO_HYD_XV557_DCV2_B = true;}
+          if(millis() - timer[3] > 5000 && timer[3]){
+            deadHeadPsi2B = AI_HYD_psig_PT561_HydraulicInlet2;
+            DO_HYD_XV557_DCV2_B = false;
+            INTENSE2 = SIDE_A;
+          }
+        break;
+
+        case SIDE_A:
+          if(!timer[3]){ timer[3] = millis();DO_HYD_XV554_DCV2_A = true;DO_HYD_XV557_DCV2_B = false;} 
+          if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2A){ //check if we reached switching pressure
+            DO_HYD_XV554_DCV2_A = false; //turn off solenoid
+            if(millis() - timer[3] > switchingTime2A && timer[3]){ //before even thinking about switching sides, check if minimum time has passed
+              if(!warmUp2A){
+                if(AI_HYD_psig_PT561_HydraulicInlet2 >= (deadHeadPsi2A-switchingPsi2A)/3 + switchingPsi2A){ //deadheaded
+                  switchingPsi2A = switchingPsi2A - 10; // fine tune decrement
+                  spiked2A = 1; //switch from incrementing to fine tune decrementing
+                }
+                else{
+                  if(!spiked2A){switchingPsi2A = switchingPsi2A + 100; } //increment if we arent finetuning 
+                  else{
+                    if(spiked2A > 3){warmUp2A = true;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
+                    else{spiked2A++;} //we didnt deadhead this time after finetuning 
                   }
-                  else{ //didnt deadhead
-                    if(!(side2?spiked2B:spiked2A)){ (side2?switchingPsi2B:switchingPsi2A) = (side2?switchingPsi2B:switchingPsi2A) + 100; } //increment if we arent finetuning 
-                    else{
-                      if((side2?spiked2B:spiked2A) > 3){warmUp2 = false;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
-                      else{(side2?spiked2B:spiked2A)++;} //we didnt deadhead this time after finetuning 
-                    }
-                  }
-                  side2 = !side2;
-                  highCycleCnt++;
-                  timer[5] = 0;
                 }
               }
-              else{ //if not during warmup sequence
-                side2 = !side2;
-                highCycleCnt++;
-                timer[5] = 0;
-              }
+              lowCycleCnt++; //reached end of cycle time, switch sides 
+              INTENSE2 = SIDE_B;
             }
           }
         break;
 
+        case SIDE_B:
+          if(!timer[3]){ timer[3] = millis();DO_HYD_XV554_DCV2_A = false;DO_HYD_XV557_DCV2_B = true;} 
+          if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2B){ //check if we reached switching pressure
+            DO_HYD_XV557_DCV2_B = false; //turn off solenoid
+            if(millis() - timer[3] > switchingTime2B && timer[3]){ //before even thinking about switching sides, check if minimum time has passed
+              if(!warmUp2B){
+                if(AI_HYD_psig_PT561_HydraulicInlet2 >= (deadHeadPsi2B-switchingPsi2B)/3 + switchingPsi2B){ //deadheaded
+                  switchingPsi2B = switchingPsi2B - 10; // fine tune decrement
+                  spiked2B = 1; //switch from incrementing to fine tune decrementing
+                }
+                else{
+                  if(!spiked2B){switchingPsi2B = switchingPsi2B + 100; } //increment if we arent finetuning 
+                  else{
+                    if(spiked2B > 3){warmUp2B = true;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
+                    else{spiked2B++;} //we didnt deadhead this time after finetuning 
+                  }
+                }
+              }
+              lowCycleCnt++; //reached end of cycle time, switch sides 
+              INTENSE2 = SIDE_A;
+            }
+          }
+        break;
+       
         case PAUSE:
           DO_HYD_XV554_DCV2_A = false;
           DO_HYD_XV557_DCV2_B = false;
           for(int i = 0; i < PTsize;i++){
-            if(!manualPause && PTdata[i].overPressure && (PTdata[i].pause == 2 || !PTdata[i].pause)){
+            if(!manualPause && PTdata[i].overPressure && (PTdata[i].pause == 1 || !PTdata[i].pause)){
               break;
             }
           }
-          INTENSE2 = START;
+          INTENSE2 = SIDE_A;
         break;
 
         default:
         break;
       }
-    break;
+
 
   //#####################################################################
     case SHUTDOWN:
@@ -358,8 +370,8 @@ if(STATE != MANUAL_CONTROL){
         }
         timer[0] = 0;
         timer[1] = 0;
+        timer[2] = 0;
         timer[3] = 0;
-        timer[5] = 0;
         DO_CLT_PMP104_PMP204_CoolantPumps_Enable = false;
         STATE = IDLE_OFF;
       }
