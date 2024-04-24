@@ -199,38 +199,39 @@ if(STATE != MANUAL_CONTROL){
 
         case ON:
           Serial.print("2,");
-          if(!timer[3]){timer[3] = millis(); side1?DO_HYD_XV463_DCV1_B:DO_HYD_XV460_DCV1_A = true;}
+          if(!timer[3]){timer[3] = millis(); (side1?DO_HYD_XV463_DCV1_B:DO_HYD_XV460_DCV1_A) = true;}
           Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);
-          if(AI_HYD_psig_PT467_HydraulicInlet1 >= side1?switchingPsi1B:switchingPsi1A){ //check if we reached switching pressure
-            side1?DO_HYD_XV463_DCV1_B:DO_HYD_XV460_DCV1_A = false; //turn off solenoid
-            if(millis() - timer[3] > side1?switchingTime1B:switchingTime1A && timer[3]){ //before even thinking about switching sides, check if minimum time has passed
+          if(AI_HYD_psig_PT467_HydraulicInlet1 >= (side1?switchingPsi1B:switchingPsi1A)){ //check if we reached switching pressure
+            (side1?DO_HYD_XV463_DCV1_B:DO_HYD_XV460_DCV1_A) = false; //turn off solenoid
+            if(millis() - timer[3] > (side1?switchingTime1B:switchingTime1A) && timer[3]){ //before even thinking about switching sides, check if minimum time has passed
               Serial.print(",4,");
               if(warmUp1){
                 Serial.print("4.5,");
-                if(millis() - timer[3] > side1?switchingTime1B:switchingTime1A + 50){ //wait to see if the pressure spikes
+                if(millis() - timer[3] > (side1?switchingTime1B:switchingTime1A) + 50){ //wait to see if the pressure spikes
                   Serial.print("5,");
-                  if(AI_HYD_psig_PT467_HydraulicInlet1 >= side1?deadHeadPsi1B:deadHeadPsi1A - 100){ //deadheaded
+                  timer[3] = 0;
+                  if(AI_HYD_psig_PT467_HydraulicInlet1 >= (side1?deadHeadPsi1B:deadHeadPsi1A) - 100){ //deadheaded
                     Serial.print("6a,");
-                    side1?switchingPsi1B:switchingPsi1A = side1?switchingPsi1B:switchingPsi1A - 10;
-                    side1?spiked1B:spiked1A = 1; //switch from incrementing to fine tune decrementing
+                    (side1?switchingPsi1B:switchingPsi1A) = (side1?switchingPsi1B:switchingPsi1A) - 10;
+                    (side1?spiked1B:spiked1A) = 1; //switch from incrementing to fine tune decrementing
                   }
                   else{ //didnt deadhead
                     Serial.print("6b,");
-                    if(!side1?spiked1B:spiked1A){ side1?switchingPsi1B:switchingPsi1A = side1?switchingPsi1B:switchingPsi1A + 100; } //increment if we arent finetuning 
+                    if(!(side1?spiked1B:spiked1A)){ (side1?switchingPsi1B:switchingPsi1A) = (side1?switchingPsi1B:switchingPsi1A) + 100; } //increment if we arent finetuning 
                     else{
                       Serial.print("7,");
-                      if(side1?spiked1B:spiked1A > 3){warmUp1 = false;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
-                      else{side1?spiked1B:spiked1A++;} //we didnt deadhead this time after finetuning 
+                      if((side1?spiked1B:spiked1A) > 3){warmUp1 = false;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
+                      else{(side1?spiked1B:spiked1A)++;} //we didnt deadhead this time after finetuning 
                     }
                   }
                   Serial.print("###################################");
                   side1 = !side1;
                   lowCycleCnt++;
-                  timer[3] = 0;
+                  
                 }
               }
               else{ //if not during warmup sequence
-              Serial.print("8");
+                Serial.print("8");
                 side1 = !side1;
                 lowCycleCnt++;
                 timer[3] = 0;
@@ -274,6 +275,7 @@ if(STATE != MANUAL_CONTROL){
             if(millis() - timer[7] > 5000 && timer[7]){
               deadHeadPsi2B = AI_HYD_psig_PT561_HydraulicInlet2;
               DO_HYD_XV557_DCV2_B = false;
+              warmUp2 = true;
               timer[7] = 0;
             }
           }
@@ -288,21 +290,21 @@ if(STATE != MANUAL_CONTROL){
         break;
 
         case ON:
-          if(!timer[5]){timer[5] = millis();side2?DO_HYD_XV557_DCV2_B:DO_HYD_XV554_DCV2_A = true;} //open solenoid and start timer
-          if(AI_HYD_psig_PT561_HydraulicInlet2 >= side2?switchingPsi2B:switchingPsi2A){ //check if we reached switching pressure
-            side2?DO_HYD_XV557_DCV2_B:DO_HYD_XV554_DCV2_A = false; //turn off solenoid
-            if(millis() - timer[5] > side2?switchingTime2B:switchingTime2A && timer[5]){ //before even thinking about switching sides, check if minimum time has passed
+          if(!timer[5]){timer[5] = millis();(side2?DO_HYD_XV557_DCV2_B:DO_HYD_XV554_DCV2_A) = true;} //open solenoid and start timer
+          if(AI_HYD_psig_PT561_HydraulicInlet2 >= (side2?switchingPsi2B:switchingPsi2A)){ //check if we reached switching pressure
+            (side2?DO_HYD_XV557_DCV2_B:DO_HYD_XV554_DCV2_A) = false; //turn off solenoid
+            if(millis() - timer[5] > (side2?switchingTime2B:switchingTime2A) && timer[5]){ //before even thinking about switching sides, check if minimum time has passed
               if(warmUp2){ //are we in the warmp up phase?
-                if(millis() - timer[5] > side2?switchingTime2B:switchingTime2A + 50){ //wait to see if the pressure spikes
-                  if(AI_HYD_psig_PT561_HydraulicInlet2 >= side2?deadHeadPsi2B:deadHeadPsi2A - 100){ //deadheaded
-                    side2?switchingPsi2B:switchingPsi2A = side2?switchingPsi2B:switchingPsi2A - 10;
-                    side2?spiked2B:spiked2A = 1; //switch from incrementing to fine tune decrementing
+                if(millis() - timer[5] > (side2?switchingTime2B:switchingTime2A) + 50){ //wait to see if the pressure spikes
+                  if(AI_HYD_psig_PT561_HydraulicInlet2 >= (side2?deadHeadPsi2B:deadHeadPsi2A) - 100){ //deadheaded
+                    (side2?switchingPsi2B:switchingPsi2A) = (side2?switchingPsi2B:switchingPsi2A) - 10;
+                    (side2?spiked2B:spiked2A) = 1; //switch from incrementing to fine tune decrementing
                   }
                   else{ //didnt deadhead
-                    if(!side2?spiked2B:spiked2A){ side2?switchingPsi2B:switchingPsi2A = side2?switchingPsi2B:switchingPsi2A + 100; } //increment if we arent finetuning 
+                    if(!(side2?spiked2B:spiked2A)){ (side2?switchingPsi2B:switchingPsi2A) = (side2?switchingPsi2B:switchingPsi2A) + 100; } //increment if we arent finetuning 
                     else{
-                      if(side2?spiked2B:spiked2A > 3){warmUp2 = false;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
-                      else{side2?spiked2B:spiked2A++;} //we didnt deadhead this time after finetuning 
+                      if((side2?spiked2B:spiked2A) > 3){warmUp2 = false;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
+                      else{(side2?spiked2B:spiked2A)++;} //we didnt deadhead this time after finetuning 
                     }
                   }
                   side2 = !side2;
