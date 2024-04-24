@@ -4,7 +4,7 @@ void setup() {
   RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200", "V0.2.1");
+  matrixSetup("C200_Longview", "V0.2.1");
   i2cSetup();
   Serial.println("OK");
   delay(3000);
@@ -53,8 +53,9 @@ if(STATE != MANUAL_CONTROL){
     timer[0] = 0;
     timer[1] = 0;
     timer[3] = 0;
+    timer[4] = 0;
     timer[5] = 0;
-    timer[5] = 0;
+    timer[7] = 0;
 
     DO_Encl_PilotRed = false;
     DO_Encl_PilotGreen = false;
@@ -63,7 +64,7 @@ if(STATE != MANUAL_CONTROL){
     flashGreen = 0;
     flashRed = 0;
     flashAmber = 0;
-
+    manualPause = false;
     CHANGED_STATE = STATE;
   }
 
@@ -75,8 +76,8 @@ if(STATE != MANUAL_CONTROL){
       DO_Comm_LSR_Local = true;
       DO_Encl_PilotGreen = !DI_Comm_LSR_Local;
       DO_Encl_PilotAmber = DI_Comm_LSR_Local;
-    
-      if(DI_Encl_ButtonGreen || virtualGreenButton){ STATE = IDLE_ON; }
+      
+      if((DI_Encl_ButtonGreen || virtualGreenButton) && !DI_Comm_LSR_Local){ STATE = IDLE_ON; }
     break;
 
   //#####################################################################
@@ -102,13 +103,13 @@ if(STATE != MANUAL_CONTROL){
     case PRODUCTION:
       if(!timer[0]){
         timer[0] = millis();
-        flashGreen = 2000;
+        flashGreen = 1000;
         DO_HYD_XV460_DCV1_A = false;
         DO_HYD_XV463_DCV1_B = false;
         DO_HYD_XV554_DCV2_A = false;
         DO_HYD_XV557_DCV2_B = false;
         INTENSE1 = START;
-        INTENSE2 = START;
+        //INTENSE2 = START;
       }
       
       //if the red button is held for less than 5 seconds pause it otherwise safe shutdown
@@ -125,6 +126,11 @@ if(STATE != MANUAL_CONTROL){
         }
         else{STATE = SHUTDOWN;}
         holdR = 0;
+      }
+      if(manualPause && DI_Encl_ButtonGreen){
+        manualPause = false;
+        INTENSE1 = START;
+        INTENSE2 = START;
       }
 
       if(manualPause){ smallMatrix[2].displayPause(false); }
@@ -162,19 +168,22 @@ if(STATE != MANUAL_CONTROL){
 
         case START:
           if(!deadHeadPsi1A){
-            if(!timer[2]){timer[2] = millis();DO_HYD_XV460_DCV1_A = true;DO_HYD_XV463_DCV1_B = false;}
-            if(millis() - timer[2] > 5000 && timer[2]){
+            Serial.print("01,");
+            if(!timer[3]){timer[3] = millis();DO_HYD_XV460_DCV1_A = true;DO_HYD_XV463_DCV1_B = false;}
+            if(millis() - timer[3] > 5000 && timer[3]){
               deadHeadPsi1A = AI_HYD_psig_PT467_HydraulicInlet1;
               DO_HYD_XV460_DCV1_A = false;
-              timer[2] = 0;
+              timer[3] = 0;
             }
           }
           else if(!deadHeadPsi1B){
-            if(!timer[2]){timer[2] = millis();DO_HYD_XV463_DCV1_B = true;DO_HYD_XV460_DCV1_A = false;}
-            if(millis() - timer[2] > 5000 && timer[2]){
+            Serial.print("02,");
+            if(!timer[3]){timer[3] = millis();DO_HYD_XV463_DCV1_B = true;DO_HYD_XV460_DCV1_A = false;}
+            if(millis() - timer[3] > 5000 && timer[3]){
               deadHeadPsi1B = AI_HYD_psig_PT467_HydraulicInlet1;
               DO_HYD_XV463_DCV1_B = false;
-              timer[2] = 0;
+              warmUp1 = true;
+              timer[3] = 0;
             }
           }
           else{
@@ -182,37 +191,46 @@ if(STATE != MANUAL_CONTROL){
             side1 = false;
             switchingTime1A = 1500;
             switchingTime1B = 1500;
+            Serial.println("1");
+            timer[3] = 0;
           }
-          timer[3] = 0;
+          
         break;
 
         case ON:
-          switchingPsi1 = side1?switchingPsi1B:switchingPsi1A;
-          switchingTime1 = side1?switchingTime1B:switchingTime1A;
-          spiked1 = side1?spiked1B:spiked1A;
-          if(!timer[3]){timer[3] = millis();side1?DO_HYD_XV463_DCV1_B:DO_HYD_XV460_DCV1_A = true;}
-          if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1){ //check if we reached switching pressure
+          Serial.print("2,");
+          if(!timer[3]){timer[3] = millis(); side1?DO_HYD_XV463_DCV1_B:DO_HYD_XV460_DCV1_A = true;}
+          Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);
+          if(AI_HYD_psig_PT467_HydraulicInlet1 >= side1?switchingPsi1B:switchingPsi1A){ //check if we reached switching pressure
             side1?DO_HYD_XV463_DCV1_B:DO_HYD_XV460_DCV1_A = false; //turn off solenoid
-            if(millis() - timer[3] > switchingTime1 && timer[3]){ //before even thinking about switching sides, check if minimum time has passed
-              if(warmpUp1){
-                if(millis() - timer[3] > switchingTime1 + 50){ //wait to see if the pressure spikes
+            if(millis() - timer[3] > side1?switchingTime1B:switchingTime1A && timer[3]){ //before even thinking about switching sides, check if minimum time has passed
+              Serial.print(",4,");
+              if(warmUp1){
+                Serial.print("4.5,");
+                if(millis() - timer[3] > side1?switchingTime1B:switchingTime1A + 50){ //wait to see if the pressure spikes
+                  Serial.print("5,");
                   if(AI_HYD_psig_PT467_HydraulicInlet1 >= side1?deadHeadPsi1B:deadHeadPsi1A - 100){ //deadheaded
-                    switchingPsi1 = switchingPsi1 - 10;
-                    spiked1 = 1; //switch from incrementing to fine tune decrementing
+                    Serial.print("6a,");
+                    side1?switchingPsi1B:switchingPsi1A = side1?switchingPsi1B:switchingPsi1A - 10;
+                    side1?spiked1B:spiked1A = 1; //switch from incrementing to fine tune decrementing
                   }
                   else{ //didnt deadhead
-                    if(!spiked1){ switchingPsi1 = switchingPsi1 + 100; } //increment if we arent finetuning 
+                    Serial.print("6b,");
+                    if(!side1?spiked1B:spiked1A){ side1?switchingPsi1B:switchingPsi1A = side1?switchingPsi1B:switchingPsi1A + 100; } //increment if we arent finetuning 
                     else{
-                      if(spiked1 > 3){warmpUp1 = false;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
-                      else{spiked1++;} //we didnt deadhead this time after finetuning 
+                      Serial.print("7,");
+                      if(side1?spiked1B:spiked1A > 3){warmUp1 = false;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
+                      else{side1?spiked1B:spiked1A++;} //we didnt deadhead this time after finetuning 
                     }
                   }
+                  Serial.print("###################################");
                   side1 = !side1;
                   lowCycleCnt++;
                   timer[3] = 0;
                 }
               }
               else{ //if not during warmup sequence
+              Serial.print("8");
                 side1 = !side1;
                 lowCycleCnt++;
                 timer[3] = 0;
@@ -261,32 +279,30 @@ if(STATE != MANUAL_CONTROL){
           }
           else{
             side2 = false;
-            if(AI_H2_psig_PT712_Stage1_DischargeTank >= 1350){INTENSE2 = ON;} //make sure not to even start compressing until stage 1 discharge tank (stage 2 suction) is at minimum 1350psi
-            switchingTime2A = 1500; //reset switching time delays
+            INTENSE2 = ON;
+            //if(AI_H2_psig_PT712_Stage1_DischargeTank >= 1350){INTENSE2 = ON;} //make sure not to even start compressing until stage 1 discharge tank (stage 2 suction) is at minimum 1350psi
+            switchingTime2A = 1500;
             switchingTime2B = 1500;
           }
           timer[5] = 0;
         break;
 
         case ON:
-          switchingPsi2 = side2?switchingPsi2B:switchingPsi2A; //choose side A or side B
-          switchingTime2 = side2?switchingTime2B:switchingTime2A; //choose side A or side B
-          spiked2 = side2?spiked2B:spiked2A; //choose side A or side B
           if(!timer[5]){timer[5] = millis();side2?DO_HYD_XV557_DCV2_B:DO_HYD_XV554_DCV2_A = true;} //open solenoid and start timer
-          if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2){ //check if we reached switching pressure
+          if(AI_HYD_psig_PT561_HydraulicInlet2 >= side2?switchingPsi2B:switchingPsi2A){ //check if we reached switching pressure
             side2?DO_HYD_XV557_DCV2_B:DO_HYD_XV554_DCV2_A = false; //turn off solenoid
-            if(millis() - timer[5] > switchingTime2 && timer[5]){ //before even thinking about switching sides, check if minimum time has passed
+            if(millis() - timer[5] > side2?switchingTime2B:switchingTime2A && timer[5]){ //before even thinking about switching sides, check if minimum time has passed
               if(warmUp2){ //are we in the warmp up phase?
-                if(millis() - timer[5] > switchingTime2 + 50){ //wait to see if the pressure spikes
+                if(millis() - timer[5] > side2?switchingTime2B:switchingTime2A + 50){ //wait to see if the pressure spikes
                   if(AI_HYD_psig_PT561_HydraulicInlet2 >= side2?deadHeadPsi2B:deadHeadPsi2A - 100){ //deadheaded
-                    switchingPsi2 = switchingPsi2 - 10;
-                    spiked2 = 1; //switch from incrementing to fine tune decrementing
+                    side2?switchingPsi2B:switchingPsi2A = side2?switchingPsi2B:switchingPsi2A - 10;
+                    side2?spiked2B:spiked2A = 1; //switch from incrementing to fine tune decrementing
                   }
                   else{ //didnt deadhead
-                    if(!spiked2){ switchingPsi2 = switchingPsi2 + 100; } //increment if we arent finetuning 
+                    if(!side2?spiked2B:spiked2A){ side2?switchingPsi2B:switchingPsi2A = side2?switchingPsi2B:switchingPsi2A + 100; } //increment if we arent finetuning 
                     else{
-                      if(spiked2 > 3){warmUp2 = false;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
-                      else{spiked2++;} //we didnt deadhead this time after finetuning 
+                      if(side2?spiked2B:spiked2A > 3){warmUp2 = false;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
+                      else{side2?spiked2B:spiked2A++;} //we didnt deadhead this time after finetuning 
                     }
                   }
                   side2 = !side2;
@@ -401,4 +417,5 @@ if(STATE != MANUAL_CONTROL){
 
   loopTime = millis() - loopTimer;
   loopTimer = 0;
+  Serial.println();
 }

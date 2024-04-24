@@ -95,8 +95,6 @@ int flashGreen, flashAmber, flashRed = 0;
 int delayTime = 100;
 int lowCycleCnt_,highCycleCnt_,lowCycleCnt,highCycleCnt = 0;
 int j,k,l= 0;
-int switchingPsi1, switchingTime1, spiked1 = 0;
-int switchingPsi2, switchingTime2, spiked2 = 0;
 int suctionDelta1,suctionDelta2,dischargeDelta1,dischargeDelta2 = 0;
 
 bool flashTog[3] = { false };
@@ -107,8 +105,9 @@ bool plot, prettyPrint, rawPrint, errorPrint = false;
 bool virtualRedButton, virtualGreenButton, virtualAmberButton = false;
 bool prevG,prevA,prevR = false;
 bool daughterTog, c50setup,lsrTog, manualPause, manualMode = false;
-bool warmpUp1,warmUp2,side1,side2 = true;
-unsigned long timer[5] = { 0 };
+bool warmUp1,warmUp2 = true;
+bool side1,side2 = false;
+unsigned long timer[10] = { 0 };
 unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer,lsrReset,loopTimer,dataTimer,pauseTimer,holdR,lcdTimer,dataPrintTimer,daughterPrintTimer = 0;
 
