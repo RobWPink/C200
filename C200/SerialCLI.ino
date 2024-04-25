@@ -393,9 +393,13 @@ void dataPrint(unsigned long dly){
       Serial.print("STATE: ");
       Serial.println(STATE);
 
-      Serial.print("INTENSE1/2 STATEs: ");
+      Serial.print("INTENSE:1/2: ");
       Serial.print(INTENSE1);Serial.print(", ");
       Serial.println(INTENSE2);
+
+      Serial.print("SUBSTATE:1/2: ");
+      Serial.print(SUBSTATE1);Serial.print(", ");
+      Serial.println(SUBSTATE2);
 
       Serial.print("intense timers: ");
       Serial.print(millis() - timer[2]);Serial.print(", ");
@@ -436,7 +440,7 @@ void dataPrint(unsigned long dly){
       Serial.print(warmUp1B);Serial.print(", ");
       Serial.print(warmUp2A);Serial.print(", ");
       Serial.println(warmUp2B);
-      
+
       Serial.print("Tmp_inlet:1/2: ");
       Serial.print(tmp_inlet1); Serial.print(",");
       Serial.println(tmp_inlet2);

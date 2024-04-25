@@ -54,7 +54,10 @@ void loop() {
     timer[1] = 0;
     timer[2] = 0;
     timer[3] = 0;
-
+    INTENSE1 = START;
+    INTENSE2 = START;
+    SUBSTATE1 = STROKE;
+    SUBSTATE2 = STROKE;
 
     DO_Encl_PilotRed = false;
     DO_Encl_PilotGreen = false;
@@ -107,8 +110,6 @@ void loop() {
         DO_HYD_XV463_DCV1_B = false;
         DO_HYD_XV554_DCV2_A = false;
         DO_HYD_XV557_DCV2_B = false;
-        INTENSE1 = START;
-        //INTENSE2 = START;
       }
       
       //if the red button is held for less than 5 seconds pause it otherwise safe shutdown
@@ -144,215 +145,11 @@ void loop() {
         timer[1] = 0;
       }
 
-      //#########################################################
-      //####################### LOW SIDE ########################
-      //#########################################################
+      //Main operation of compressing
+      intensifier1Operation(); //Low side
+      intensifier2Operation(); //High side
 
-      if(INTENSE1 != PREV1){
-        timer[2] = 0;
-        DO_HYD_XV460_DCV1_A = false;
-        DO_HYD_XV463_DCV1_B = false;
-        PREV1 = INTENSE1;
-      }
-      switch(INTENSE1){
-        case OFF:
-          DO_HYD_XV460_DCV1_A = false;
-          DO_HYD_XV463_DCV1_B = false;
-        break;
-
-        case START:
-        if(!deadHeadPsi1A || !deadHeadPsi1B){INTENSE1 = DEADHEAD1;}
-        else{INTENSE1 = SIDE_A;}
-        break;
-
-        case DEADHEAD1:
-          if(!timer[2]){timer[2] = millis();DO_HYD_XV460_DCV1_A = true;}
-          if(millis() - timer[2] > 5000 && timer[2]){
-            deadHeadPsi1A = AI_HYD_psig_PT467_HydraulicInlet1;
-            DO_HYD_XV460_DCV1_A = false;
-            INTENSE1 = DEADHEAD2;
-          }
-        break;
-
-        case DEADHEAD2:
-          if(!timer[2]){timer[2] = millis();DO_HYD_XV463_DCV1_B = true;}
-          if(millis() - timer[2] > 5000 && timer[2]){
-            deadHeadPsi1B = AI_HYD_psig_PT467_HydraulicInlet1;
-            DO_HYD_XV463_DCV1_B = false;
-            INTENSE1 = SIDE_A;
-          }
-        break;
-
-        case SIDE_A:
-          if(!timer[2]){ timer[2] = millis();DO_HYD_XV460_DCV1_A = true;DO_HYD_XV463_DCV1_B = false;} 
-          if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){ //check if we reached switching pressure
-            DO_HYD_XV460_DCV1_A = false; //turn off solenoid
-            tmp_inlet1 = AI_HYD_psig_PT467_HydraulicInlet1; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
-            if(millis() - timer[2] > switchingTime1A && timer[2]){ //before even thinking about switching sides, check if minimum time has passed
-              if(!warmUp1A){
-                if(tmp_inlet1 >= (deadHeadPsi1A-switchingPsi1A)/2 + switchingPsi1A){ //deadheaded
-                  switchingPsi1A = switchingPsi1A - 10; // fine tune decrement
-                  spiked1A = 1; //switch from incrementing to fine tune decrementing
-                }
-                else{
-                  if(!spiked1A){switchingPsi1A = switchingPsi1A + 100; } //increment if we arent finetuning 
-                  else{
-                    if(spiked1A > 3){warmUp1A = true;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
-                    else{spiked1A++;} //we didnt deadhead this time after finetuning 
-                  }
-                }
-              }
-              lowCycleCnt++; //reached end of cycle time, switch sides 
-              INTENSE1 = SIDE_B;
-            }
-          }
-        break;
-
-        case SIDE_B:
-          if(!timer[2]){ timer[2] = millis();DO_HYD_XV460_DCV1_A = false;DO_HYD_XV463_DCV1_B = true;} 
-          if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B){ //check if we reached switching pressure
-            tmp_inlet1 = AI_HYD_psig_PT467_HydraulicInlet1; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
-            DO_HYD_XV463_DCV1_B = false; //turn off solenoid
-            if(millis() - timer[2] > switchingTime1B && timer[2]){ //before even thinking about switching sides, check if minimum time has passed
-              if(!warmUp1B){
-                if(tmp_inlet1 >= (deadHeadPsi1B-switchingPsi1B)/3 + switchingPsi1B){ //deadheaded
-                  switchingPsi1B = switchingPsi1B - 10; // fine tune decrement
-                  spiked1B = 1; //switch from incrementing to fine tune decrementing
-                }
-                else{
-                  if(!spiked1B){switchingPsi1B = switchingPsi1B + 100; } //increment if we arent finetuning 
-                  else{
-                    if(spiked1B > 3){warmUp1B = true;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
-                    else{spiked1B++;} //we didnt deadhead this time after finetuning 
-                  }
-                }
-              }
-              lowCycleCnt++; //reached end of cycle time, switch sides 
-              INTENSE1 = SIDE_A;
-            }
-          }
-        break;
-       
-        case PAUSE:
-          DO_HYD_XV460_DCV1_A = false;
-          DO_HYD_XV463_DCV1_B = false;
-          for(int i = 0; i < PTsize;i++){
-            if(!manualPause && PTdata[i].overPressure && (PTdata[i].pause == 1 || !PTdata[i].pause)){
-              break;
-            }
-          }
-          INTENSE1 = SIDE_A;
-        break;
-
-        default:
-        break;
-      }
-
-      //#########################################################
-      //####################### HIGH SIDE #######################
-      //#########################################################
-
-      if(INTENSE2 != PREV2){
-        timer[3] = 0;
-        DO_HYD_XV554_DCV2_A = false;
-        DO_HYD_XV557_DCV2_B = false;
-        PREV2 = INTENSE2;
-      }
-      switch(INTENSE2){
-        case OFF:
-          DO_HYD_XV554_DCV2_A = false;
-          DO_HYD_XV557_DCV2_B = false;
-        break;
-
-        case START:
-        if(!deadHeadPsi2A || !deadHeadPsi2B){INTENSE2 = DEADHEAD1;}
-        else{INTENSE2 = SIDE_A;}
-        break;
-
-        case DEADHEAD1:
-          if(!timer[3]){timer[3] = millis();DO_HYD_XV554_DCV2_A = true;}
-          if(millis() - timer[3] > 5000 && timer[3]){
-            deadHeadPsi2A = AI_HYD_psig_PT561_HydraulicInlet2;
-            DO_HYD_XV554_DCV2_A = false;
-            INTENSE2 = DEADHEAD2;
-          }
-        break;
-
-        case DEADHEAD2:
-          if(!timer[3]){timer[3] = millis();DO_HYD_XV557_DCV2_B = true;}
-          if(millis() - timer[3] > 5000 && timer[3]){
-            deadHeadPsi2B = AI_HYD_psig_PT561_HydraulicInlet2;
-            DO_HYD_XV557_DCV2_B = false;
-            INTENSE2 = SIDE_A;
-          }
-        break;
-
-        case SIDE_A:
-          if(!timer[3]){ timer[3] = millis();DO_HYD_XV554_DCV2_A = true;DO_HYD_XV557_DCV2_B = false;} 
-          if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2A){ //check if we reached switching pressure
-            tmp_inlet2 = AI_HYD_psig_PT561_HydraulicInlet2; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
-            DO_HYD_XV554_DCV2_A = false; //turn off solenoid
-            if(millis() - timer[3] > switchingTime2A && timer[3]){ //before even thinking about switching sides, check if minimum time has passed
-              if(!warmUp2A){
-                if(tmp_inlet2 >= (deadHeadPsi2A-switchingPsi2A)/3 + switchingPsi2A){ //deadheaded
-                  switchingPsi2A = switchingPsi2A - 10; // fine tune decrement
-                  spiked2A = 1; //switch from incrementing to fine tune decrementing
-                }
-                else{
-                  if(!spiked2A){switchingPsi2A = switchingPsi2A + 100; } //increment if we arent finetuning 
-                  else{
-                    if(spiked2A > 3){warmUp2A = true;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
-                    else{spiked2A++;} //we didnt deadhead this time after finetuning 
-                  }
-                }
-              }
-              lowCycleCnt++; //reached end of cycle time, switch sides 
-              INTENSE2 = SIDE_B;
-            }
-          }
-        break;
-
-        case SIDE_B:
-          if(!timer[3]){ timer[3] = millis();DO_HYD_XV554_DCV2_A = false;DO_HYD_XV557_DCV2_B = true;} 
-          if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2B){ //check if we reached switching pressure
-            tmp_inlet2 = AI_HYD_psig_PT561_HydraulicInlet2; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
-            DO_HYD_XV557_DCV2_B = false; //turn off solenoid
-            if(millis() - timer[3] > switchingTime2B && timer[3]){ //before even thinking about switching sides, check if minimum time has passed
-              if(!warmUp2B){
-                if(tmp_inlet2 >= (deadHeadPsi2B-switchingPsi2B)/3 + switchingPsi2B){ //deadheaded
-                  switchingPsi2B = switchingPsi2B - 10; // fine tune decrement
-                  spiked2B = 1; //switch from incrementing to fine tune decrementing
-                }
-                else{
-                  if(!spiked2B){switchingPsi2B = switchingPsi2B + 100; } //increment if we arent finetuning 
-                  else{
-                    if(spiked2B > 3){warmUp2B = true;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
-                    else{spiked2B++;} //we didnt deadhead this time after finetuning 
-                  }
-                }
-              }
-              lowCycleCnt++; //reached end of cycle time, switch sides 
-              INTENSE2 = SIDE_A;
-            }
-          }
-        break;
-       
-        case PAUSE:
-          DO_HYD_XV554_DCV2_A = false;
-          DO_HYD_XV557_DCV2_B = false;
-          for(int i = 0; i < PTsize;i++){
-            if(!manualPause && PTdata[i].overPressure && (PTdata[i].pause == 1 || !PTdata[i].pause)){
-              break;
-            }
-          }
-          INTENSE2 = SIDE_A;
-        break;
-
-        default:
-        break;
-      }
-
-
+    break;
   //#####################################################################
     case SHUTDOWN:
       if(!timer[0]){
