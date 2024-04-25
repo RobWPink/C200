@@ -142,6 +142,8 @@ int switchingTime1A = 1500;
 int switchingTime1B = 1500;
 int switchingTime2A = 1500;
 int switchingTime2B = 1500;
+
+double tmp_inlet1,tmp_inlet2 = 0;
 double AI_HYD_C_TT454_HydraulicTank = 0;
 double AI_CLT_C_TT107_CoolantSupply1 = 0;
 double AI_CLT_C_TT207_CoolantSupply2 = 0;

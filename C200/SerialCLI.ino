@@ -436,7 +436,10 @@ void dataPrint(unsigned long dly){
       Serial.print(warmUp1B);Serial.print(", ");
       Serial.print(warmUp2A);Serial.print(", ");
       Serial.println(warmUp2B);
-
+      
+      Serial.print("Tmp_inlet:1/2: ");
+      Serial.print(tmp_inlet1); Serial.print(",");
+      Serial.println(tmp_inlet2);
 
       Serial.print("inlets: ");
       Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);Serial.print(", ");

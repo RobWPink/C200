@@ -187,9 +187,10 @@ void loop() {
           if(!timer[2]){ timer[2] = millis();DO_HYD_XV460_DCV1_A = true;DO_HYD_XV463_DCV1_B = false;} 
           if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){ //check if we reached switching pressure
             DO_HYD_XV460_DCV1_A = false; //turn off solenoid
-            if(millis() - timer[2] > 1500 && timer[2]){ //before even thinking about switching sides, check if minimum time has passed
+            tmp_inlet1 = AI_HYD_psig_PT467_HydraulicInlet1; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
+            if(millis() - timer[2] > switchingTime1A && timer[2]){ //before even thinking about switching sides, check if minimum time has passed
               if(!warmUp1A){
-                if(AI_HYD_psig_PT467_HydraulicInlet1 >= (deadHeadPsi1A-switchingPsi1A)/3 + switchingPsi1A){ //deadheaded
+                if(tmp_inlet1 >= (deadHeadPsi1A-switchingPsi1A)/2 + switchingPsi1A){ //deadheaded
                   switchingPsi1A = switchingPsi1A - 10; // fine tune decrement
                   spiked1A = 1; //switch from incrementing to fine tune decrementing
                 }
@@ -210,10 +211,11 @@ void loop() {
         case SIDE_B:
           if(!timer[2]){ timer[2] = millis();DO_HYD_XV460_DCV1_A = false;DO_HYD_XV463_DCV1_B = true;} 
           if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B){ //check if we reached switching pressure
+            tmp_inlet1 = AI_HYD_psig_PT467_HydraulicInlet1; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
             DO_HYD_XV463_DCV1_B = false; //turn off solenoid
             if(millis() - timer[2] > switchingTime1B && timer[2]){ //before even thinking about switching sides, check if minimum time has passed
               if(!warmUp1B){
-                if(AI_HYD_psig_PT467_HydraulicInlet1 >= (deadHeadPsi1B-switchingPsi1B)/3 + switchingPsi1B){ //deadheaded
+                if(tmp_inlet1 >= (deadHeadPsi1B-switchingPsi1B)/3 + switchingPsi1B){ //deadheaded
                   switchingPsi1B = switchingPsi1B - 10; // fine tune decrement
                   spiked1B = 1; //switch from incrementing to fine tune decrementing
                 }
@@ -288,10 +290,11 @@ void loop() {
         case SIDE_A:
           if(!timer[3]){ timer[3] = millis();DO_HYD_XV554_DCV2_A = true;DO_HYD_XV557_DCV2_B = false;} 
           if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2A){ //check if we reached switching pressure
+            tmp_inlet2 = AI_HYD_psig_PT561_HydraulicInlet2; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
             DO_HYD_XV554_DCV2_A = false; //turn off solenoid
             if(millis() - timer[3] > switchingTime2A && timer[3]){ //before even thinking about switching sides, check if minimum time has passed
               if(!warmUp2A){
-                if(AI_HYD_psig_PT561_HydraulicInlet2 >= (deadHeadPsi2A-switchingPsi2A)/3 + switchingPsi2A){ //deadheaded
+                if(tmp_inlet2 >= (deadHeadPsi2A-switchingPsi2A)/3 + switchingPsi2A){ //deadheaded
                   switchingPsi2A = switchingPsi2A - 10; // fine tune decrement
                   spiked2A = 1; //switch from incrementing to fine tune decrementing
                 }
@@ -312,10 +315,11 @@ void loop() {
         case SIDE_B:
           if(!timer[3]){ timer[3] = millis();DO_HYD_XV554_DCV2_A = false;DO_HYD_XV557_DCV2_B = true;} 
           if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2B){ //check if we reached switching pressure
+            tmp_inlet2 = AI_HYD_psig_PT561_HydraulicInlet2; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
             DO_HYD_XV557_DCV2_B = false; //turn off solenoid
             if(millis() - timer[3] > switchingTime2B && timer[3]){ //before even thinking about switching sides, check if minimum time has passed
               if(!warmUp2B){
-                if(AI_HYD_psig_PT561_HydraulicInlet2 >= (deadHeadPsi2B-switchingPsi2B)/3 + switchingPsi2B){ //deadheaded
+                if(tmp_inlet2 >= (deadHeadPsi2B-switchingPsi2B)/3 + switchingPsi2B){ //deadheaded
                   switchingPsi2B = switchingPsi2B - 10; // fine tune decrement
                   spiked2B = 1; //switch from incrementing to fine tune decrementing
                 }
