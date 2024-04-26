@@ -215,6 +215,7 @@ void i2cTransceive(int ptInterval){
           *PTdata[i].value = PTdata[i].avg.getAverage();
         }
       }
+      /*
       if(PTdata[i].max != -1 && PTdata[i].pause != -1){
         if(*PTdata[i].value >= PTdata[i].max && !PTdata[i].overPressure){
           PTdata[i].overPressure = true;
@@ -248,6 +249,7 @@ void i2cTransceive(int ptInterval){
           PTdata[i].overPressure = false;
         }
       }
+      */
     }
   }
   PTdata[6].mapped = map((int)PTdata[6].raw, PTdata[6].mapA, PTdata[6].mapB, PTdata[6].mapC, PTdata[6].mapD) + PTdata[6].offset; //read hydraulics quickly

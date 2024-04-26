@@ -1,3 +1,7 @@
+//try taking out all pause triggers by commenting out min/mas in functions
+ 
+
+
 void intensifier1Operation(){
   if(INTENSE1 != PREV1){
     timer[2] = 0;
@@ -76,7 +80,7 @@ void intensifier1Operation(){
     case SIDE_B:
       switch(SUBSTATE1){
         case STROKE:
-          if(!timer[2]){ timer[2] = millis(); DO_HYD_XV460_DCV1_A = false; DO_HYD_XV463_DCV1_B = true;}
+          if(!timer[2]){ timer[2] = millis(); DO_HYD_XV463_DCV1_B = true;}
           if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B){
             tmp_inlet1 = AI_HYD_psig_PT467_HydraulicInlet1;
             DO_HYD_XV463_DCV1_B = false;
@@ -131,6 +135,7 @@ void intensifier1Operation(){
 
 
 void intensifier2Operation(){
+  /*
   if(INTENSE2 != PREV2){
     timer[3] = 0;
     SUBSTATE2 = STROKE;
@@ -256,5 +261,6 @@ void intensifier2Operation(){
     default:
     break;
   }
+  */
 }
 

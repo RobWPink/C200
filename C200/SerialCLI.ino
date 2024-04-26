@@ -389,7 +389,7 @@ void dataPrint(unsigned long dly){
         }
         if(i < 1){Serial.print("|||");}
       }
-      
+      Serial.println();
       Serial.print("STATE: ");
       Serial.println(STATE);
 
