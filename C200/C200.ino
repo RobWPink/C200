@@ -2,7 +2,7 @@
 void setup() {
   Serial.begin(9600);
   RPC.begin(); //boots M4
-pinModeSetup();
+  pinModeSetup();
   Wire.begin();
   matrixSetup("C200_Longview", "V0.3.0");
   i2cSetup();
@@ -52,7 +52,7 @@ void loop() {
   if(STATE != CHANGED_STATE){ //reset state timer
     timer[0] = 0;
     timer[1] = 0;
-    timer[2] = 0;
+    //timer[2] = 0;
     timer[3] = 0;
     INTENSE1 = START;
     INTENSE2 = START;
@@ -171,7 +171,7 @@ void loop() {
         }
         timer[0] = 0;
         timer[1] = 0;
-        timer[2] = 0;
+        //timer[2] = 0;
         timer[3] = 0;
         DO_CLT_PMP104_PMP204_CoolantPumps_Enable = false;
         STATE = IDLE_OFF;

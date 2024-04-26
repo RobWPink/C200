@@ -392,8 +392,8 @@ void dataPrint(unsigned long dly){
       Serial.println();
       Serial.print("STATE: ");
       Serial.println(STATE);
-      Serial.print("SIDESTATES: ");
-      Serial.println(side1);//Serial.print(", ");
+      Serial.print("INTENSE STATES: ");
+      Serial.println(INTENSE1);//Serial.print(", ");
       //Serial.println(INTENSE2);
 
       // Serial.print("INTENSE:1/2: ");
