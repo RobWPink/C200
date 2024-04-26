@@ -98,7 +98,6 @@ void intensifier1Operation(){
 void intensifier1Operation(){
   if(INTENSE1 != PREV1){
     timer[2] = 0;
-    SUBSTATE1 = STROKE;
     DO_HYD_XV460_DCV1_A = false;
     DO_HYD_XV463_DCV1_B = false;
     PREV1 = INTENSE1;
@@ -134,11 +133,11 @@ void intensifier1Operation(){
     case SIDE_A:
       switch(SUBSTATE1){
         case STROKE:
-          if(!timer[2]){ timer[2] = millis(); DO_HYD_XV460_DCV1_A = true;}
+          if(!timer[2]){ timer[2] = millis(); DO_HYD_XV460_DCV1_A = true; DO_HYD_XV463_DCV1_B = false;}
           if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){
             tmp_inlet1 = AI_HYD_psig_PT467_HydraulicInlet1; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
             DO_HYD_XV460_DCV1_A = false;
-            SUBSTATE1 = warmUp1A?NORMAL:WARMUP; //skip wamrup phase if already done
+            SUBSTATE1 = warmUp1A?WARMUP:NORMAL;
           }
           if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = "1A Timeout";}
         break;
@@ -161,6 +160,7 @@ void intensifier1Operation(){
         case NORMAL:
           if(millis() - timer[2] > switchingTime1A && timer[2]){//check if minimum time has passed
             INTENSE1 = SIDE_B;
+            SUBSTATE1 = STROKE;
             lowCycleCnt++; //reached end of cycle time, switch sides 
           }
         break;
@@ -179,7 +179,7 @@ void intensifier1Operation(){
             DO_HYD_XV463_DCV1_B = false;
             SUBSTATE1 = warmUp1B?NORMAL:WARMUP;
           }
-          if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = "1B Timeout";}
+          if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = "1B Timeout"; timer[2] = 0;}
         break;
 
         case WARMUP:
@@ -200,6 +200,7 @@ void intensifier1Operation(){
         case NORMAL:
           if(millis() - timer[2] > switchingTime1B && timer[2]){
             INTENSE1 = SIDE_A;
+            SUBSTATE1 = STROKE;
             lowCycleCnt++;
           }
         break;
@@ -215,7 +216,8 @@ void intensifier1Operation(){
       for(int i = 0; i < PTsize;i++){
         if(!manualPause && PTdata[i].overPressure && (PTdata[i].pause == 1 || !PTdata[i].pause)){ break; }
       }
-      INTENSE1 = START;
+      INTENSE1 = SIDE_A;
+      SUBSTATE1 = STROKE;
     break;
 
     default:
@@ -231,7 +233,6 @@ void intensifier2Operation(){
 
   if(INTENSE2 != PREV2){
     timer[3] = 0;
-    SUBSTATE2 = STROKE;
     DO_HYD_XV554_DCV2_A = false;
     DO_HYD_XV557_DCV2_B = false;
     PREV2 = INTENSE2;
@@ -267,11 +268,11 @@ void intensifier2Operation(){
     case SIDE_A:
       switch(SUBSTATE2){
         case STROKE:
-          if(!timer[3]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = true;}
+          if(!timer[3]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = true; DO_HYD_XV557_DCV2_B = false;}
           if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2A){
             tmp_inlet2 = AI_HYD_psig_PT561_HydraulicInlet2; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
             DO_HYD_XV554_DCV2_A = false;
-            SUBSTATE2 = warmUp2A?NORMAL:WARMUP; //skip warmup phase if already done
+            SUBSTATE2 = warmUp2A?WARMUP:NORMAL;
           }
           if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = "2A Timeout";}
         break;
@@ -294,6 +295,7 @@ void intensifier2Operation(){
         case NORMAL:
           if(millis() - timer[3] > switchingTime2A && timer[3]){//check if minimum time has passed
             INTENSE2 = SIDE_B;
+            SUBSTATE2 = STROKE;
             highCycleCnt++; //reached end of cycle time, switch sides 
           }
         break;
@@ -306,13 +308,13 @@ void intensifier2Operation(){
     case SIDE_B:
       switch(SUBSTATE2){
         case STROKE:
-          if(!timer[3]){ timer[3] = millis(); DO_HYD_XV557_DCV2_B = true;}
+          if(!timer[3]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = false; DO_HYD_XV557_DCV2_B = true;}
           if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2B){
             tmp_inlet2 = AI_HYD_psig_PT561_HydraulicInlet2;
             DO_HYD_XV557_DCV2_B = false;
             SUBSTATE2 = warmUp2B?NORMAL:WARMUP;
           }
-          if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = "2B Timeout";}
+          if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = "2B Timeout"; timer[3] = 0;}
         break;
 
         case WARMUP:
@@ -333,6 +335,7 @@ void intensifier2Operation(){
         case NORMAL:
           if(millis() - timer[3] > switchingTime2B && timer[3]){
             INTENSE2 = SIDE_A;
+            SUBSTATE2 = STROKE;
             highCycleCnt++;
           }
         break;
@@ -348,7 +351,8 @@ void intensifier2Operation(){
       for(int i = 0; i < PTsize;i++){
         if(!manualPause && PTdata[i].overPressure && (PTdata[i].pause == 2 || !PTdata[i].pause)){ break; }
       }
-      INTENSE2 = START;
+      INTENSE2 = SIDE_A;
+      SUBSTATE2 = STROKE;
     break;
 
     default:
