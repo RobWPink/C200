@@ -1,106 +1,11 @@
-//try taking out all pause triggers by commenting out min/mas in functions
-void intensifier1Operation(){
-  switch(INTENSE1){
-    case OFF:
-      DO_HYD_XV460_DCV1_A = false;
-      DO_HYD_XV463_DCV1_B = false;
-    break;
-
-    case START:
-      PREV1 = INTENSE1;
-      INTENSE1 = (!deadHeadPsi1A || !deadHeadPsi1B) ? DEADHEAD1 : SIDE_A;
-    break;
-
-    case DEADHEAD1:
-      if(!timer[2]){timer[2] = millis();DO_HYD_XV460_DCV1_A = true;}
-      if(millis() - timer[2] > 5000 && timer[2]){
-        deadHeadPsi1A = AI_HYD_psig_PT467_HydraulicInlet1;
-        DO_HYD_XV460_DCV1_A = false;
-        PREV1 = INTENSE1;
-        INTENSE1 = DEADHEAD2;
-        timer[2] = 0;
-      }
-    break;
-
-    case DEADHEAD2:
-      if(!timer[2]){timer[2] = millis();DO_HYD_XV463_DCV1_B = true;}
-      if(millis() - timer[2] > 5000 && timer[2]){
-        deadHeadPsi1B = AI_HYD_psig_PT467_HydraulicInlet1;
-        DO_HYD_XV463_DCV1_B = false;
-        PREV1 = INTENSE1;
-        INTENSE1 = SIDE_A;
-        timer[2] = 0;
-      }
-    break;
-
-    case SIDE_A:
-      if(!tog[0]){ tog[0] = true; DO_HYD_XV460_DCV1_A = true;DO_HYD_XV463_DCV1_B = false;}
-      if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){
-        PREV1 = INTENSE1;
-        INTENSE1 = SIDE_B;
-        DO_HYD_XV460_DCV1_A = false;
-        if(!warmUp1A){
-          if(AI_HYD_psig_PT467_HydraulicInlet1 >= (deadHeadPsi1A-switchingPsi1A)/2 + switchingPsi1A){ //deadheaded
-            switchingPsi1A = switchingPsi1A - 10; // fine tune decrement
-            spiked1A = 1; //switch from incrementing to fine tune decrementing
-          }
-          else{
-            if(!spiked1A){switchingPsi1A = switchingPsi1A + 100; } //increment if we arent finetuning 
-            else{
-              if(spiked1A > 3){warmUp1A = true;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
-              else{spiked1A++;} //we didnt deadhead this time after finetuning 
-            }
-          }
-        }
-      }
-    break;
-
-    case SIDE_B:
-      if(tog[0]){ tog[0] = false; DO_HYD_XV460_DCV1_A = false;DO_HYD_XV463_DCV1_B = true;}
-      if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){
-        PREV1 = INTENSE1;
-        INTENSE1 = SIDE_A;
-        DO_HYD_XV463_DCV1_B = false;
-        if(!warmUp1A){
-          if(AI_HYD_psig_PT467_HydraulicInlet1 >= (deadHeadPsi1A-switchingPsi1A)/2 + switchingPsi1A){ //deadheaded
-            switchingPsi1A = switchingPsi1A - 10; // fine tune decrement
-            spiked1A = 1; //switch from incrementing to fine tune decrementing
-          }
-          else{
-            if(!spiked1A){switchingPsi1A = switchingPsi1A + 100; } //increment if we arent finetuning 
-            else{
-              if(spiked1A > 3){warmUp1A = true;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
-              else{spiked1A++;} //we didnt deadhead this time after finetuning 
-            }
-          }
-        }
-      }
-    break;
-
-    case PAUSE:
-    break;
-
-    default:
-    break;
-  }
-}
-
-
-
-//next try secondary timer for between turning solenoid on and checking inlet psik,
-
-
-
-
-
-
-/*
 void intensifier1Operation(){
   if(INTENSE1 != PREV1){
     timer[2] = 0;
     DO_HYD_XV460_DCV1_A = false;
     DO_HYD_XV463_DCV1_B = false;
+    stateHistory = stateHistory + String(INTENSE1);
     PREV1 = INTENSE1;
+    return;
   }
   switch(INTENSE1){
     case OFF:
@@ -137,7 +42,7 @@ void intensifier1Operation(){
           if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){
             tmp_inlet1 = AI_HYD_psig_PT467_HydraulicInlet1; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
             DO_HYD_XV460_DCV1_A = false;
-            SUBSTATE1 = warmUp1A?WARMUP:NORMAL;
+            SUBSTATE1 = warmUp1A?NORMAL:WARMUP;
           }
           if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = "1A Timeout";}
         break;
@@ -226,7 +131,7 @@ void intensifier1Operation(){
 }
 
 
-
+/*
 
 
 void intensifier2Operation(){

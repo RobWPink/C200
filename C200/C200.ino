@@ -67,6 +67,7 @@ void loop() {
     flashRed = 0;
     flashAmber = 0;
     manualPause = false;
+    stateHistory = stateHistory + "(" + String(STATE) + ")";
     CHANGED_STATE = STATE;
   }
 

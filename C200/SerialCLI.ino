@@ -203,6 +203,7 @@ void dataPrint(unsigned long dly){
     String msgD = "";
     String msgE = "";
     String msgF = "";
+    String msgG = "\"STATE\":" + String(STATE) + "," + "\"INT_STATE1\":" + String(INTENSE1) + "," + "\"INT_STATE2\":" + String(INTENSE2) + "," + "\"SUB_STATE1\":" + String(SUBSTATE1) + "," + "\"SUB_STATE1\":" + String(SUBSTATE2);
     for(int i = 0; i < TTsize;i++){
       msgA = msgA + "\"" + TTdata[i].key + "\":" + *TTdata[i].value + ",";
     }
@@ -230,14 +231,15 @@ void dataPrint(unsigned long dly){
     Serial.print(msgC);
     Serial.print(msgD);
     Serial.print(msgE);
-    Serial.println(msgF);
-
+    Serial.print(msgF);
+    Serial.println(msgG);
   }
   else if(millis() - dataPrintTimer > dly && dataPrintTimer){
     if(!printMode){return;}
     String msg = "{";
     switch(printMode){
       case PACKET:
+       // msg = msg + "\"STATE\":" + STATE + "," + "\"INT_STATE1\":" + INTENSE1 + "," + "\"INT_STATE2\":" + INTENSE2 + "," + "\"SUB_STATE1\":" + SUBSTATE1 + "," + "\"SUB_STATE1\":" + SUBSTATE2;
         for(int i = 0; i < TTsize;i++){
           if(*TTdata[i].value != TTdata[i].prev){
             if(msg != "{"){msg = msg + ",";}
@@ -392,17 +394,20 @@ void dataPrint(unsigned long dly){
       Serial.println();
       Serial.print("STATE: ");
       Serial.println(STATE);
-      Serial.print("INTENSE STATES: ");
-      Serial.println(INTENSE1);//Serial.print(", ");
-      //Serial.println(INTENSE2);
 
-      // Serial.print("INTENSE:1/2: ");
-      // Serial.print(INTENSE1);Serial.print(", ");
-      // Serial.println(INTENSE2);
+      Serial.print("INTENSE:1/2: ");
+      Serial.print(INTENSE1);Serial.print(", ");
+      Serial.println(INTENSE2);
 
-      // Serial.print("SUBSTATE:1/2: ");
-      // Serial.print(SUBSTATE1);Serial.print(", ");
-      // Serial.println(SUBSTATE2);
+      Serial.print("SUBSTATE:1/2: ");
+      Serial.print(SUBSTATE1);Serial.print(", ");
+      Serial.println(SUBSTATE2);
+
+      Serial.print("stateHistory: ");
+      if(stateHistory.length() > 30){
+        stateHistory.remove(0,5);
+      }
+      Serial.println(stateHistory);
 
       Serial.print("intense timers: ");
       Serial.print(millis() - timer[2]);Serial.print(", ");

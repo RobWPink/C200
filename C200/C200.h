@@ -116,7 +116,7 @@ Adafruit_LiquidCrystal lcd(0);
 String faultString = "";
 String errMsg[30] = { "" };
 double loopTime = 0;
-
+String stateHistory = "";
 uint8_t mcpExist = 0;
 int prevDischarge1, prevDischarge2 = 0;
 int prevSuction1, prevSuction2 = 0;
