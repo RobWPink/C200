@@ -1,7 +1,91 @@
 //try taking out all pause triggers by commenting out min/mas in functions
- 
+void intensifier1Operation(){
+  if(!side1){
+    if(!timer[2]){timer[2] = millis();DO_HYD_XV460_DCV1_A = true;}
+    if(millis() - timer[2] > 5000 && timer[2]){
+      deadHeadPsi1A = AI_HYD_psig_PT467_HydraulicInlet1;
+      DO_HYD_XV460_DCV1_A = false;
+      side1 = 1;
+      timer[2] = 0;
+    }
+  }
+  else if(side1 == 1){
+    if(!timer[2]){timer[2] = millis();DO_HYD_XV463_DCV1_B = true;}
+    if(millis() - timer[2] > 5000 && timer[2]){
+      deadHeadPsi1B = AI_HYD_psig_PT467_HydraulicInlet1;
+      DO_HYD_XV463_DCV1_B = false;
+      side1 = 2;
+      timer[2] = 0;
+    }
+  }
+
+  else if(side1 == 2){
+    if(!timer[2]){ timer[2] = millis(); DO_HYD_XV460_DCV1_A = true;}
+    if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){
+      tmp_inlet1 = AI_HYD_psig_PT467_HydraulicInlet1; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
+      DO_HYD_XV460_DCV1_A = false;
+    }
+    if(millis() - timer[2] > switchingTime1A && timer[2] && !DO_HYD_XV460_DCV1_A){
+      if(!warmUp1A){
+        if(tmp_inlet1 >= (deadHeadPsi1A-switchingPsi1A)/2 + switchingPsi1A){ //deadheaded
+          switchingPsi1A = switchingPsi1A - 10; // fine tune decrement
+          spiked1A = 1; //switch from incrementing to fine tune decrementing
+        }
+        else{
+          if(!spiked1A){switchingPsi1A = switchingPsi1A + 100; } //increment if we arent finetuning 
+          else{
+            if(spiked1A > 3){warmUp1A = true;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
+            else{spiked1A++;} //we didnt deadhead this time after finetuning 
+          }
+        }
+      }
+      side1 = 3;
+      timer[2] = 0;
+      lowCycleCnt++; //reached end of cycle time, switch sides 
+    }
+  }
+  else if(side1 == 3){
+    if(!timer[2]){ timer[2] = millis(); DO_HYD_XV463_DCV1_B = true;}
+    if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B){
+      tmp_inlet1 = AI_HYD_psig_PT467_HydraulicInlet1; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
+      DO_HYD_XV463_DCV1_B = false;
+    }
+    if(millis() - timer[2] > switchingTime1B && timer[2] && !DO_HYD_XV463_DCV1_B){
+      if(!warmUp1B){
+        if(tmp_inlet1 >= (deadHeadPsi1B-switchingPsi1B)/2 + switchingPsi1B){ //deadheaded
+          switchingPsi1B = switchingPsi1B - 10; // fine tune decrement
+          spiked1B = 1; //switch from incrementing to fine tune decrementing
+        }
+        else{
+          if(!spiked1B){switchingPsi1B = switchingPsi1B + 100; } //increment if we arent finetuning 
+          else{
+            if(spiked1B > 3){warmUp1B = true;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
+            else{spiked1B++;} //we didnt deadhead this time after finetuning 
+          }
+        }
+      }
+      side1 = 2;
+      timer[2] = 0;
+      lowCycleCnt++; //reached end of cycle time, switch sides 
+    }
+  }
+}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 void intensifier1Operation(){
   if(INTENSE1 != PREV1){
     timer[2] = 0;
@@ -135,7 +219,7 @@ void intensifier1Operation(){
 
 
 void intensifier2Operation(){
-  /*
+
   if(INTENSE2 != PREV2){
     timer[3] = 0;
     SUBSTATE2 = STROKE;
@@ -261,6 +345,6 @@ void intensifier2Operation(){
     default:
     break;
   }
-  */
+  
 }
-
+*/

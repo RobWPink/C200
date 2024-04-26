@@ -137,7 +137,7 @@ bool virtualRedButton, virtualGreenButton, virtualAmberButton = false;
 bool prevG, prevA, prevR = false;
 bool daughterTog, lsrTog, manualPause, manualMode = false;
 bool warmUp1A, warmUp1B, warmUp2A, warmUp2B = false;
-
+int side1 = 0;
 unsigned long timer[10] = { 0 };
 unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer, lsrReset, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
