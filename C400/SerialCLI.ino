@@ -36,9 +36,8 @@ void SerialCLI() {
           break;
         }
       }
-      
       if(digital){;}
-  
+
       else if(argStr.equalsIgnoreCase("sw1a")) {
         String argStrVal = argBuf[++n];
         argVal = argStrVal.toInt();
@@ -106,7 +105,6 @@ void SerialCLI() {
       else if(argStr.equalsIgnoreCase("fm")){
         printMode = (printMode == FM)?NONE:FM;
       }
-
       else if(argStr.equalsIgnoreCase("gbn")){
         virtualGreenButton = 1;
       }
@@ -115,9 +113,6 @@ void SerialCLI() {
       }
       else if(argStr.equalsIgnoreCase("rbn")){
         virtualRedButton = 1;
-      }
-      else if(argStr.equalsIgnoreCase("estop")){
-        STATE = ESTOP;
       }
 
       else if(argStr.equalsIgnoreCase("debug")){
@@ -183,7 +178,7 @@ void printHelp(){
   Serial.println("lsr                -> Virtually press lsr reset button for 500ms");
   Serial.println("pretty             -> Toggle print mode labeled lists <--> csv list");
   Serial.println("raw                -> Toggle to print only raw values");
-  Serial.println("plotall               -> Toggle Plotting of all values using Arduino Serial Plotter");
+  Serial.println("plot               -> Toggle Plotting of all values using Arduino Serial Plotter");
   Serial.println("stop/quiet         -> Silence all printouts");
   Serial.println("manual             -> Control all output manually");
   Serial.println("help/h             -> This help menu");
@@ -201,8 +196,8 @@ void printHelp(){
 
 void dataPrint(unsigned long dly){
   if(!dataPrintTimer){dataPrintTimer = millis();}
+  
   if(plotall){
-    //Serial.print("\"Inlet1\":");
     Serial.print("\"Inlet2\":");
     Serial.print(AI_HYD_psig_PT561_HydraulicInlet2);
     Serial.print(",");
@@ -211,46 +206,42 @@ void dataPrint(unsigned long dly){
     Serial.print(",");
     Serial.print("\"DCV2B\":");
     Serial.println(DO_HYD_XV557_DCV2_B*1000);
-    
-    /*
-    String msgA = "";
-    String msgB = "";
-    String msgC = "";
-    String msgD = "";
-    String msgE = "";
-    String msgF = "";
-    String msgG = "\"STATE\":" + String(STATE) + "," + "\"INT_STATE1\":" + String(INTENSE1) + "," + "\"INT_STATE2\":" + String(INTENSE2) + "," + "\"SUB_STATE1\":" + String(SUBSTATE1) + "," + "\"SUB_STATE1\":" + String(SUBSTATE2);
-    for(int i = 0; i < TTsize;i++){
-      msgA = msgA + "\"" + TTdata[i].key + "\":" + *TTdata[i].value + ",";
-    }
-    for(int i = 0; i < PTsize;i++){
-      msgB = msgB + PTdata[i].key + ":" + *PTdata[i].value + ",";
-    }
-    for(int i = 0; i < 2;i++){
-      for(int j = 0; j < 4;j++){
-        msgC = msgC + "\"" + flowMeters[i].flowData[j].key + "\"" + ":" + *flowMeters[i].flowData[j].value + ",";
-      }
-    }
-    for(int i = 0; i < varSize;i++){
-      msgD = msgD + "\"" + varData[i].key + "\"" + ":" + *varData[i].value + ",";
-    }
-    for(int i = 0; i < DOsize;i++){
-      msgE = msgE + "\"" + DOdata[i].key + "\"" + ":" + *DOdata[i].value + ",";
-    }
-    for(int i = 0; i < DIsize;i++){
-      msgF = msgF + "\"" + DIdata[i].key + "\"" + ":" + *DIdata[i].value + ",";
-    }
-    msgF.remove(msgF.length()-1,1);//get rid of extra comma
+    // String msgA = "";
+    // String msgB = "";
+    // String msgC = "";
+    // String msgD = "";
+    // String msgE = "";
+    // String msgF = "";
+    // String msgG = "\"STATE\":" + String(STATE) + "," + "\"INT_STATE1\":" + String(INTENSE1) + "," + "\"INT_STATE2\":" + String(INTENSE2) + "," + "\"SUB_STATE1\":" + String(SUBSTATE1) + "," + "\"SUB_STATE1\":" + String(SUBSTATE2);
+    // for(int i = 0; i < TTsize;i++){
+    //   msgA = msgA + "\"" + TTdata[i].key + "\":" + *TTdata[i].value + ",";
+    // }
+    // for(int i = 0; i < PTsize;i++){
+    //   msgB = msgB + PTdata[i].key + ":" + *PTdata[i].value + ",";
+    // }
+    // for(int i = 0; i < 2;i++){
+    //   for(int j = 0; j < 4;j++){
+    //     msgC = msgC + "\"" + flowMeters[i].flowData[j].key + "\"" + ":" + *flowMeters[i].flowData[j].value + ",";
+    //   }
+    // }
+    // for(int i = 0; i < varSize;i++){
+    //   msgD = msgD + "\"" + varData[i].key + "\"" + ":" + *varData[i].value + ",";
+    // }
+    // for(int i = 0; i < DOsize;i++){
+    //   msgE = msgE + "\"" + DOdata[i].key + "\"" + ":" + *DOdata[i].value + ",";
+    // }
+    // for(int i = 0; i < DIsize;i++){
+    //   msgF = msgF + "\"" + DIdata[i].key + "\"" + ":" + *DIdata[i].value + ",";
+    // }
+    // msgF.remove(msgF.length()-1,1);//get rid of extra comma
 
-    Serial.print(msgA);
-    Serial.print(msgB);
-    Serial.print(msgC);
-    Serial.print(msgD);
-    Serial.print(msgE);
-    Serial.print(msgF);
-    Serial.println(msgG);
-    */
-
+    // Serial.print(msgA);
+    // Serial.print(msgB);
+    // Serial.print(msgC);
+    // Serial.print(msgD);
+    // Serial.print(msgE);
+    // Serial.print(msgF);
+    // Serial.println(msgG);
   }
   else if(millis() - dataPrintTimer > dly && dataPrintTimer){
     if(!printMode){return;}
@@ -409,7 +400,7 @@ void dataPrint(unsigned long dly){
         }
         if(i < 1){Serial.print("|||");}
       }
-      Serial.println();
+            Serial.println();
       Serial.print("STATE: ");
       Serial.println(STATE);
 
@@ -461,6 +452,12 @@ void dataPrint(unsigned long dly){
       Serial.print(count2A);Serial.print(", ");
       Serial.println(count2B);
 
+      Serial.print("peakPsi:1A,1B,2A,2B: ");
+      Serial.print(peakPsi1A);Serial.print(", ");
+      Serial.print(peakPsi1B);Serial.print(", ");
+      Serial.print(peakPsi2A);Serial.print(", ");
+      Serial.println(peakPsi2B);
+
       Serial.print("warmUp:1A,1B,2A,2B: ");
       Serial.print(warmUp1A);Serial.print(", ");
       Serial.print(warmUp1B);Serial.print(", ");
@@ -485,6 +482,7 @@ void dataPrint(unsigned long dly){
       Serial.print(AI_H2_psig_PT407_Stage3_Discharge);Serial.print(", ");
       Serial.println(AI_H2_psig_PT410_Stage3_DischargeTank);
       
+      
     break;
 
     default:
@@ -493,4 +491,3 @@ void dataPrint(unsigned long dly){
     dataPrintTimer = millis();
   }
 }
- 

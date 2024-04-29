@@ -274,6 +274,10 @@ struct vars {
   int* value;
   int prev;
 } varData[] = {
+  { "peakPressure1A", "DHPSI1A", &peakPsi1A, 0 },
+  { "peakPressure1B", "DHPSI1B", &peakPsi1B, 0 },
+  { "peakPressure2A", "DHPSI2A", &peakPsi2A, 0 },
+  { "peakPressure2B", "DHPSI2B", &peakPsi2B, 0 },
   { "DeadHeadPressure1A", "DHPSI1A", &deadHeadPsi1A, 0 },
   { "DeadHeadPressure1B", "DHPSI1B", &deadHeadPsi1B, 0 },
   { "DeadHeadPressure2A", "DHPSI2A", &deadHeadPsi2A, 0 },

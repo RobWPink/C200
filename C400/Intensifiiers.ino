@@ -140,6 +140,8 @@ void intensifier2Operation(){
     timer[3] = 0;
     DO_HYD_XV554_DCV2_A = false;
     DO_HYD_XV557_DCV2_B = false;
+    peakPsi2A = 0;
+    peakPsi2B = 0;
     stateHistory = stateHistory + String(INTENSE2);
     PREV2 = INTENSE2;
     return;
@@ -176,9 +178,9 @@ void intensifier2Operation(){
       switch(SUBSTATE2){
         case STROKE:
           if(!timer[3]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = true; stateHistory = stateHistory + "+";}
-          if(millis() - timer[3] > 500 && timer[3]){
+          if(millis() - timer[3] > 250 && timer[3]){
+            if(AI_HYD_psig_PT561_HydraulicInlet2 > peakPsi2A){peakPsi2A = AI_HYD_psig_PT561_HydraulicInlet2;}
             if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2A){
-              tmp_inlet1 = AI_HYD_psig_PT561_HydraulicInlet2; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
               DO_HYD_XV554_DCV2_A = false;
               SUBSTATE2 = warmUp2A?NORMAL:WARMUP;
             }
@@ -187,8 +189,8 @@ void intensifier2Operation(){
         break;
 
         case WARMUP: //needed to prevent changes in switchingPsi from interfering with nested checks
-          if(tmp_inlet1 >= (deadHeadPsi2A-switchingPsi2A)/2 + switchingPsi2A){ //deadheaded
-            switchingPsi2A = switchingPsi2A - 10; // fine tune decrement
+          if(peakPsi2A >= deadHeadPsi2A - 200){ //deadheaded
+            switchingPsi2A = switchingPsi2A - 20; // fine tune decrement
             count2A = 1; //switch from incrementing to fine tune decrementing
           }
           else{
@@ -202,7 +204,7 @@ void intensifier2Operation(){
         break;
 
         case NORMAL:
-          if(millis() - timer[3] > switchingTime2A-500 && timer[3]){//check if minimum time has passed
+          if(millis() - timer[3] > switchingTime2A-250 && timer[3]){//check if minimum time has passed
             INTENSE2 = SIDE_B;
             SUBSTATE2 = STROKE;
             highCycleCnt++; //reached end of cycle time, switch sides 
@@ -218,9 +220,9 @@ void intensifier2Operation(){
       switch(SUBSTATE2){
         case STROKE:
           if(!timer[3]){ timer[3] = millis(); DO_HYD_XV557_DCV2_B = true;stateHistory = stateHistory + "-";}
-          if(millis() - timer[3] > 500 && timer[3]){
+          if(millis() - timer[3] > 250 && timer[3]){
+            if(AI_HYD_psig_PT561_HydraulicInlet2 > peakPsi2B){peakPsi2B = AI_HYD_psig_PT561_HydraulicInlet2;}
             if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2B){
-              tmp_inlet1 = AI_HYD_psig_PT561_HydraulicInlet2;
               DO_HYD_XV557_DCV2_B = false;
               SUBSTATE2 = warmUp2B?NORMAL:WARMUP;
             }
@@ -229,9 +231,9 @@ void intensifier2Operation(){
         break;
 
         case WARMUP:
-          if(tmp_inlet1 >= (deadHeadPsi2B-switchingPsi2B)/2 + switchingPsi2B){
-            switchingPsi2B = switchingPsi2B - 10;
-            count2B = 1;
+          if(peakPsi2A >= deadHeadPsi2A - 200){ //deadheaded
+            switchingPsi2A = switchingPsi2A - 20; // fine tune decrement
+            count2A = 1; //switch from incrementing to fine tune decrementing
           }
           else{
             if(!count2B){switchingPsi2B = switchingPsi2B + 100; }
@@ -244,7 +246,7 @@ void intensifier2Operation(){
         break;
 
         case NORMAL:
-          if(millis() - timer[3] > switchingTime2B-500 && timer[3]){
+          if(millis() - timer[3] > switchingTime2B-250 && timer[3]){
             INTENSE2 = SIDE_A;
             SUBSTATE2 = STROKE;
             highCycleCnt++;
@@ -270,153 +272,3 @@ void intensifier2Operation(){
     break;
   }
 }
-
-void intensifier2Operation_HIGHLOW(){
-  if(INTENSE2 != PREV2){
-    timer[3] = 0;
-    DO_HYD_XV554_DCV2_A = false;
-    DO_HYD_XV557_DCV2_B = false;
-    stateHistory = stateHistory + String(INTENSE2);
-    PREV2 = INTENSE2;
-    return;
-  }
-  switch(INTENSE2){
-    case OFF:
-      DO_HYD_XV554_DCV2_A = false;
-      DO_HYD_XV557_DCV2_B = false;
-    break;
-
-    case START:
-      INTENSE2 = DEADHEAD1;//(!deadHeadPsi2A || !deadHeadPsi2B) ? DEADHEAD1 : SIDE_A;
-    break;
-
-    case DEADHEAD1:
-      if(!timer[3]){timer[3] = millis();DO_HYD_XV554_DCV2_A = true;stateHistory = stateHistory + "+";}
-      if(millis() - timer[3] > 5000 && timer[3]){
-        deadHeadPsi2A = AI_HYD_psig_PT561_HydraulicInlet2;
-        switchingPsi2A = deadHeadPsi2A;
-        DO_HYD_XV554_DCV2_A = false;
-        INTENSE2 = DEADHEAD2;
-        count2A = 0;
-      }
-    break;
-
-    case DEADHEAD2:
-      if(!timer[3]){timer[3] = millis();DO_HYD_XV557_DCV2_B = true;stateHistory = stateHistory + "-";}
-      if(millis() - timer[3] > 5000 && timer[3]){
-        deadHeadPsi2B = AI_HYD_psig_PT561_HydraulicInlet2;
-        switchingPsi2B = deadHeadPsi2B;
-        DO_HYD_XV557_DCV2_B = false;
-        INTENSE2 = SIDE_A;
-        count2B = 0;
-      }
-    break;
-
-    case SIDE_A:
-      if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = "2A Timeout";}
-      switch(SUBSTATE2){
-        case STROKE:
-          if(!timer[3]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = true; stateHistory = stateHistory + "+";}
-          if(AI_HYD_psig_PT561_HydraulicInlet2 > peakPsi2A){peakPsi2A = AI_HYD_psig_PT561_HydraulicInlet2;}
-          if(millis() - timer[3] > 500 && timer[3]){
-            if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2A){
-              DO_HYD_XV554_DCV2_A = false;
-              SUBSTATE2 = warmUp2A?NORMAL:WARMUP;
-            }
-          }
-        break;
-
-        case WARMUP: //needed to prevent changes in switchingPsi from interfering with nested checks
-          if(peakPsi2A < deadHeadPsi2A-200){ //not deadheaded
-            if(count2A > 3){warmUp2A = true;}
-            else{count2A++;}
-          }
-          else{//deadheaded
-            switchingPsi2A = switchingPsi2A - ((count2A)?(300/count2A):300); //if we are close to the right switching pressure we dont want to overshoot too far
-            count2A = 0;
-          }
-          // if(peakPsi2A >= deadHeadPsi2A-200){
-          //   if(count2A > 13){count2A = -1;switchingPsi2A = switchingPsi2A - 50;}
-          //   else{count2A++;}
-          // }
-          // else{
-          //   switchingPsi2A = switchingPsi2A + 50;
-          //   count2A = 10;
-          // }
-          SUBSTATE2 = NORMAL;
-        break;
-
-        case NORMAL:
-          if(millis() - timer[3] > switchingTime2A-500 && timer[3]){//check if minimum time has passed
-            INTENSE2 = SIDE_B;
-            SUBSTATE2 = STROKE;
-            highCycleCnt++; //reached end of cycle time, switch sides 
-          }
-        break;
-
-        default:
-        break;
-      }
-    break;
-
-    case SIDE_B:
-      if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = "2B Timeout";}
-      switch(SUBSTATE2){
-        case STROKE:
-          if(!timer[3]){ timer[3] = millis(); DO_HYD_XV557_DCV2_B = true; stateHistory = stateHistory + "+";}
-          if(AI_HYD_psig_PT561_HydraulicInlet2 > peakPsi2B){peakPsi2B = AI_HYD_psig_PT561_HydraulicInlet2;}
-          if(millis() - timer[3] > 500 && timer[3]){
-            if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2B){
-              DO_HYD_XV557_DCV2_B = false;
-              SUBSTATE2 = warmUp2B?NORMAL:WARMUP;
-            }
-          }
-        break;
-
-        case WARMUP: //needed to prevent changes in switchingPsi from interfering with nested checks
-          if(peakPsi2B < deadHeadPsi2B-200){ //not deadheaded
-            if(count2B > 3){warmUp2B = true;}
-            else{count2B++;}
-          }
-          else{//deadheaded
-            switchingPsi2B = switchingPsi2B - ((count2B)?(300/count2B):300); //if we are close to the right switching pressure we dont want to overshoot too far
-            count2B = 0;
-          }
-          // if(peakPsi2B >= deadHeadPsi2B-200){
-          //   if(count2B > 13){count2B = -1;switchingPsi2B = switchingPsi2B - 50;}
-          //   else{count2B++;}
-          // }
-          // else{
-          //   switchingPsi2B = switchingPsi2B + 50;
-          //   count2B = 10;
-          // }
-          SUBSTATE2 = NORMAL;
-        break;
-
-        case NORMAL:
-          if(millis() - timer[3] > switchingTime2B-500 && timer[3]){//check if minimum time has passed
-            INTENSE2 = SIDE_B;
-            SUBSTATE2 = STROKE;
-            highCycleCnt++; //reached end of cycle time, switch sides 
-          }
-        break;
-
-        default:
-        break;
-      }
-    break;
-
-    case PAUSE:
-      DO_HYD_XV554_DCV2_A = false;
-      DO_HYD_XV557_DCV2_B = false;
-      for(int i = 0; i < PTsize;i++){
-        if(!manualPause && PTdata[i].overPressure && (PTdata[i].pause == 2 || !PTdata[i].pause)){ break; }
-      }
-      INTENSE2 = SIDE_A;
-    break;
-
-    default:
-    break;
-  }
-}
-
