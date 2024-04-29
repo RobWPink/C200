@@ -86,6 +86,7 @@ enum substate {
 
 enum prnt {
   NONE,
+  PLOT,
   ALL,
   PACKET,
   DIGITAL_IN,
@@ -115,12 +116,6 @@ SmallMatrix smallMatrix[3] = { SmallMatrix(0x70), SmallMatrix(0x71), SmallMatrix
 LargeMatrix bigMatrix[3] = { LargeMatrix(0x73), LargeMatrix(0x74), LargeMatrix(0x75) };
 Adafruit_LiquidCrystal lcd(0);
 
-
-double strokePsi2A[1000][2] = {0};
-double strokePsi2B[1000][2] = {0};
-int strokePsiCnt2A = 0;
-int strokePsiCnt2B = 0;
-bool manualStroke = false;
 String faultString = "";
 String errMsg[30] = { "" };
 double loopTime = 0;
@@ -140,15 +135,15 @@ bool flashTog[3] = { false };
 bool tog[5] = { false };
 bool firstLowSide, firstHighSide = false;
 bool strokeLowSide, strokeHighSide = false;
-bool plot, prettyPrint, rawPrint, errorPrint = false;
-bool virtualRedButton, virtualGreenButton, virtualAmberButton = false;
+bool plotall, prettyPrint, rawPrint, errorPrint = false;
+unsigned long virtualRedButton, virtualGreenButton, virtualAmberButton = 0;
 bool prevG, prevA, prevR = false;
 bool daughterTog, lsrTog, manualPause, manualMode = false;
 bool warmUp1A, warmUp1B, warmUp2A, warmUp2B = false;
 unsigned long timer[10] = { 0 };
 unsigned long flashTimer[3] = { 0 };
-unsigned long hydraulicSafetyTimer, twoTimer, lsrReset, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
-
+unsigned long hydraulicSafetyTimer, twoTimer, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
+int plot = 0;
 int deadHeadPsi1A = 0;
 int deadHeadPsi1B = 0;
 int deadHeadPsi2A = 0;

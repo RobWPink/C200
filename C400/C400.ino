@@ -19,14 +19,29 @@ void loop() {
   SerialCLI();
   RPCtransceive();
   
-  if(lsrReset){ //button press for LSR reset
-    if(lsrReset == 1){lsrReset = millis();DO_Comm_LSR_Reset = true;}
-    if(millis() - lsrReset > 1000){
+  //############# Buttons #############
+  if(virtualAmberButton){ //button press for LSR reset
+    if(virtualAmberButton == 1){virtualAmberButton = millis();DO_Comm_LSR_Reset = true;}
+    if(millis() - virtualAmberButton > 1000){
       DO_Comm_LSR_Reset = false;
-      lsrReset = 0;
+      virtualAmberButton = 0;
     }
   }
 
+  if(virtualGreenButton){ //button press for green button
+    if(virtualGreenButton == 1){virtualGreenButton = millis();}
+    if(millis() - virtualGreenButton > 1000){
+      virtualGreenButton = 0;
+    }
+  }
+
+  if(virtualRedButton){ //button press for green button
+    if(virtualRedButton == 1){virtualRedButton = millis();}
+    if(millis() - virtualRedButton > 1000){
+      virtualRedButton = 0;
+    }
+  }
+  //#################################
   //rs485Transceive();
   i2cTransceive(250);
     
@@ -52,6 +67,7 @@ void loop() {
   if(STATE != CHANGED_STATE){ //reset state timer
     timer[0] = 0;
     timer[1] = 0;
+    timer[2] = 0;
     INTENSE1 = START;
     INTENSE2 = START;
     SUBSTATE1 = STROKE;
@@ -150,102 +166,6 @@ void loop() {
 
     break;
   //#####################################################################
-    case SHUTDOWN:
-      if(!timer[0]){
-        timer[0] = millis();
-        for(int i = 0; i < DOsize;i++){
-          if((DOdata[i].key.indexOf("XV") >= -1 || DOdata[i].key.indexOf("PMP") >= -1 || DOdata[i].key.indexOf("PL") >= -1) && DOdata[i].key.indexOf("LSR") == -1 && DOdata[i].key.indexOf("CLT") == -1){
-            *DOdata[i].value = false;
-          }
-        }
-
-        smallMatrix[2].displayStop(false);
-      }
-      
-      if(millis() - timer[0] > 30000 && timer[0]){
-        for(int i = 0; i < DOsize;i++){
-          if((DOdata[i].key.indexOf("XV") >= -1 || DOdata[i].key.indexOf("PMP") >= -1 || DOdata[i].key.indexOf("PL") >= -1) && DOdata[i].key.indexOf("CLT") == -1){
-            *DOdata[i].value = false;
-          }
-        }
-        timer[0] = 0;
-        timer[1] = 0;
-        //timer[2] = 0;
-        timer[3] = 0;
-        DO_CLT_PMP104_PMP204_CoolantPumps_Enable = false;
-        STATE = IDLE_OFF;
-      }
-      //if pressure lowers and temps lower shut down the rest
-    break;
-
-  //#####################################################################
-
-
-    case MANUAL_STROKE:
-      if(!timer[0]){
-        timer[0] = millis();
-        smallMatrix[2].displayChar('M', true);
-        for(int i = 0; i < DOsize;i++){
-          if(DOdata[i].key.indexOf("LSR") == -1){
-            *DOdata[i].value = false;
-          }
-        }
-        DO_HYD_PMP458_HydraulicPump1_Enable = true; //turn on hydraulic pump 1
-        DO_HYD_PMP552_HydraulicPump2_Enable = true; //turn on hydraulic pump 2
-        DO_H2_XV907_SuctionPreTank = true;
-        INTENSEm = DEADHEAD1;
-      }
-      switch(INTENSEm){
-        case DEADHEAD1:
-          if(!timer[2]){timer[2] = millis();DO_HYD_XV554_DCV2_A = true;strokePsiCnt2A = 0;memset(strokePsi2A, 0, sizeof(strokePsi2A[0][0]) * 2 * 1000);}
-          strokePsi2A[strokePsiCnt2A++][0] = millis() - timer[2];
-          strokePsi2A[strokePsiCnt2A++][1] = AI_HYD_psig_PT561_HydraulicInlet2;
-
-          if(millis() - timer[2] > 4000 && timer[2]){
-            DO_HYD_XV554_DCV2_A = false;
-            Serial.print("A: ");
-            for(int k = 0; k < 1000;k++){
-              if(!strokePsi2A[k][0]){break;}
-              Serial.print("[");
-              Serial.print(strokePsi2A[k][0]);
-              Serial.print(",");
-              Serial.print(strokePsi2A[k][1]);
-              Serial.print("]");
-              Serial.print(",");
-            }
-            Serial.println();
-            INTENSEm = DEADHEAD2;
-            timer[2] = 0;
-          }
-        break;
-
-        case DEADHEAD2:
-          if(!timer[2]){timer[2] = millis();DO_HYD_XV557_DCV2_B = true;strokePsiCnt2B = 0;memset(strokePsi2B, 0, sizeof(strokePsi2B[0][0]) * 2 * 1000);}
-
-          strokePsi2B[strokePsiCnt2B++][0] = millis() - timer[2];
-          strokePsi2B[strokePsiCnt2B++][1] = AI_HYD_psig_PT561_HydraulicInlet2;
-
-          if(millis() - timer[2] > 4000 && timer[2]){
-            DO_HYD_XV557_DCV2_B = false;
-            Serial.print("B: ");
-            for(int k = 0; k < 1000;k++){
-              if(!strokePsi2B[k][0]){break;}
-              Serial.print("[");
-              Serial.print(strokePsi2B[k][0]);
-              Serial.print(",");
-              Serial.print(strokePsi2B[k][1]);
-              Serial.print("]");
-              Serial.print(",");
-            }
-            Serial.println();
-            INTENSEm = DEADHEAD1;
-            timer[2] = 0;
-          }
-        break;
-
-        default:
-        break;
-      }
 
     case MANUAL_CONTROL:
       if(!timer[0]){
