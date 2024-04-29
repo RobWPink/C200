@@ -18,7 +18,7 @@ void intensifier1Operation(){
     break;
 
     case DEADHEAD1:
-      if(!timer[2]){timer[2] = millis();DO_HYD_XV460_DCV1_A = true;}
+      if(!timer[2]){timer[2] = millis();DO_HYD_XV460_DCV1_A = true;stateHistory = stateHistory + "+";}
       if(millis() - timer[2] > 5000 && timer[2]){
         deadHeadPsi1A = AI_HYD_psig_PT467_HydraulicInlet1;
         DO_HYD_XV460_DCV1_A = false;
@@ -27,7 +27,7 @@ void intensifier1Operation(){
     break;
 
     case DEADHEAD2:
-      if(!timer[2]){timer[2] = millis();DO_HYD_XV463_DCV1_B = true;}
+      if(!timer[2]){timer[2] = millis();DO_HYD_XV463_DCV1_B = true;stateHistory = stateHistory + "-";}
       if(millis() - timer[2] > 5000 && timer[2]){
         deadHeadPsi1B = AI_HYD_psig_PT467_HydraulicInlet1;
         DO_HYD_XV463_DCV1_B = false;
@@ -38,11 +38,13 @@ void intensifier1Operation(){
     case SIDE_A:
       switch(SUBSTATE1){
         case STROKE:
-          if(!timer[2]){ timer[2] = millis(); DO_HYD_XV460_DCV1_A = true; DO_HYD_XV463_DCV1_B = false;}
-          if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){
-            tmp_inlet1 = AI_HYD_psig_PT467_HydraulicInlet1; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
-            DO_HYD_XV460_DCV1_A = false;
-            SUBSTATE1 = warmUp1A?NORMAL:WARMUP;
+          if(!timer[2]){ timer[2] = millis(); DO_HYD_XV460_DCV1_A = true; stateHistory = stateHistory + "+";}
+          if(millis() - timer[2] > 500 && timer[2]){
+            if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){
+              tmp_inlet1 = AI_HYD_psig_PT467_HydraulicInlet1; //pressure will instantly change when solenoid is closed, making the following check inaccurate, so save psi for that check
+              DO_HYD_XV460_DCV1_A = false;
+              SUBSTATE1 = warmUp1A?NORMAL:WARMUP;
+            }
           }
           if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = "1A Timeout";}
         break;
@@ -78,11 +80,13 @@ void intensifier1Operation(){
     case SIDE_B:
       switch(SUBSTATE1){
         case STROKE:
-          if(!timer[2]){ timer[2] = millis(); DO_HYD_XV463_DCV1_B = true;}
-          if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B){
-            tmp_inlet1 = AI_HYD_psig_PT467_HydraulicInlet1;
-            DO_HYD_XV463_DCV1_B = false;
-            SUBSTATE1 = warmUp1B?NORMAL:WARMUP;
+          if(!timer[2]){ timer[2] = millis(); DO_HYD_XV463_DCV1_B = true;stateHistory = stateHistory + "-";}
+          if(millis() - timer[2] > 500 && timer[2]){
+            if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B){
+              tmp_inlet1 = AI_HYD_psig_PT467_HydraulicInlet1;
+              DO_HYD_XV463_DCV1_B = false;
+              SUBSTATE1 = warmUp1B?NORMAL:WARMUP;
+            }
           }
           if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = "1B Timeout"; timer[2] = 0;}
         break;

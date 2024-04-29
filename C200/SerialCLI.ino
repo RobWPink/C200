@@ -212,17 +212,17 @@ void dataPrint(unsigned long dly){
     }
     for(int i = 0; i < 2;i++){
       for(int j = 0; j < 4;j++){
-        msgC = msgC + flowMeters[i].flowData[j].key + ":" + *flowMeters[i].flowData[j].value + ",";
+        msgC = msgC + "\"" + flowMeters[i].flowData[j].key + "\"" + ":" + *flowMeters[i].flowData[j].value + ",";
       }
     }
     for(int i = 0; i < varSize;i++){
-      msgD = msgD + varData[i].key + ":" + *varData[i].value + ",";
+      msgD = msgD + "\"" + varData[i].key + "\"" + ":" + *varData[i].value + ",";
     }
     for(int i = 0; i < DOsize;i++){
-      msgE = msgE + DOdata[i].key + ":" + *DOdata[i].value + ",";
+      msgE = msgE + "\"" + DOdata[i].key + "\"" + ":" + *DOdata[i].value + ",";
     }
     for(int i = 0; i < DIsize;i++){
-      msgF = msgF + DIdata[i].key + ":" + *DIdata[i].value + ",";
+      msgF = msgF + "\"" + DIdata[i].key + "\"" + ":" + *DIdata[i].value + ",";
     }
     msgF.remove(msgF.length()-1,1);//get rid of extra comma
 
@@ -405,7 +405,7 @@ void dataPrint(unsigned long dly){
 
       Serial.print("stateHistory: ");
       if(stateHistory.length() > 30){
-        stateHistory.remove(0,5);
+        stateHistory.remove(0,3);
       }
       Serial.println(stateHistory);
 
