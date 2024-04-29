@@ -134,7 +134,7 @@ void intensifier1Operation(){
   }
 }
 
-
+//side b is not detecting deadheads
 void intensifier2Operation(){
   if(INTENSE2 != PREV2){
     timer[3] = 0;
@@ -181,15 +181,17 @@ void intensifier2Operation(){
           if(millis() - timer[3] > 250 && timer[3]){
             if(AI_HYD_psig_PT561_HydraulicInlet2 > peakPsi2A){peakPsi2A = AI_HYD_psig_PT561_HydraulicInlet2;}
             if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2A){
-              DO_HYD_XV554_DCV2_A = false;
-              SUBSTATE2 = warmUp2A?NORMAL:WARMUP;
+              if(millis() - timer[3] > 50 && timer[3]){
+                DO_HYD_XV554_DCV2_A = false;
+                SUBSTATE2 = warmUp2A?NORMAL:WARMUP;
+              }
             }
           }
           if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = "2A Timeout";}
         break;
 
         case WARMUP: //needed to prevent changes in switchingPsi from interfering with nested checks
-          if(peakPsi2A >= deadHeadPsi2A - 200){ //deadheaded
+          if(peakPsi2A >= deadHeadPsi2A - 300){ //deadheaded
             switchingPsi2A = switchingPsi2A - 20; // fine tune decrement
             count2A = 1; //switch from incrementing to fine tune decrementing
           }
@@ -223,15 +225,17 @@ void intensifier2Operation(){
           if(millis() - timer[3] > 250 && timer[3]){
             if(AI_HYD_psig_PT561_HydraulicInlet2 > peakPsi2B){peakPsi2B = AI_HYD_psig_PT561_HydraulicInlet2;}
             if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2B){
-              DO_HYD_XV557_DCV2_B = false;
-              SUBSTATE2 = warmUp2B?NORMAL:WARMUP;
+              if(millis() - timer[3] > 50 && timer[3]){
+                DO_HYD_XV557_DCV2_B = false;
+                SUBSTATE2 = warmUp2B?NORMAL:WARMUP;
+              }
             }
           }
           if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = "2B Timeout"; timer[3] = 0;}
         break;
 
         case WARMUP:
-          if(peakPsi2A >= deadHeadPsi2A - 200){ //deadheaded
+          if(peakPsi2A >= deadHeadPsi2A - 300){ //deadheaded
             switchingPsi2A = switchingPsi2A - 20; // fine tune decrement
             count2A = 1; //switch from incrementing to fine tune decrementing
           }
