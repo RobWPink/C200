@@ -145,8 +145,8 @@ void loop() {
       }
 
       //Main operation of compressing
-      intensifier1Operation(); //Low side
-      //intensifier2Operation(); //High side
+      //intensifier1Operation(); //Low side
+      intensifier2Operation(); //High side
 
     break;
   //#####################################################################
@@ -197,19 +197,19 @@ void loop() {
       }
       switch(INTENSEm){
         case DEADHEAD1:
-          if(!timer[2]){timer[2] = millis();DO_HYD_XV460_DCV1_A = true;strokePsiCnt1A = 0;memset(strokePsi1A, 0, sizeof(strokePsi1A[0][0]) * 2 * 1000);}
-          strokePsi1A[strokePsiCnt1A++][0] = millis() - timer[2];
-          strokePsi1A[strokePsiCnt1A++][1] = AI_HYD_psig_PT467_HydraulicInlet1;
+          if(!timer[2]){timer[2] = millis();DO_HYD_XV554_DCV2_A = true;strokePsiCnt2A = 0;memset(strokePsi2A, 0, sizeof(strokePsi2A[0][0]) * 2 * 1000);}
+          strokePsi2A[strokePsiCnt2A++][0] = millis() - timer[2];
+          strokePsi2A[strokePsiCnt2A++][1] = AI_HYD_psig_PT561_HydraulicInlet2;
 
           if(millis() - timer[2] > 4000 && timer[2]){
-            DO_HYD_XV460_DCV1_A = false;
+            DO_HYD_XV554_DCV2_A = false;
             Serial.print("A: ");
             for(int k = 0; k < 1000;k++){
-              if(!strokePsi1A[k][0]){break;}
+              if(!strokePsi2A[k][0]){break;}
               Serial.print("[");
-              Serial.print(strokePsi1A[k][0]);
+              Serial.print(strokePsi2A[k][0]);
               Serial.print(",");
-              Serial.print(strokePsi1A[k][1]);
+              Serial.print(strokePsi2A[k][1]);
               Serial.print("]");
               Serial.print(",");
             }
@@ -220,20 +220,20 @@ void loop() {
         break;
 
         case DEADHEAD2:
-          if(!timer[2]){timer[2] = millis();DO_HYD_XV463_DCV1_B = true;strokePsiCnt1B = 0;memset(strokePsi1B, 0, sizeof(strokePsi1B[0][0]) * 2 * 1000);}
+          if(!timer[2]){timer[2] = millis();DO_HYD_XV557_DCV2_B = true;strokePsiCnt2B = 0;memset(strokePsi2B, 0, sizeof(strokePsi2B[0][0]) * 2 * 1000);}
 
-          strokePsi1B[strokePsiCnt1B++][0] = millis() - timer[2];
-          strokePsi1B[strokePsiCnt1B++][1] = AI_HYD_psig_PT467_HydraulicInlet1;
+          strokePsi2B[strokePsiCnt2B++][0] = millis() - timer[2];
+          strokePsi2B[strokePsiCnt2B++][1] = AI_HYD_psig_PT561_HydraulicInlet2;
 
           if(millis() - timer[2] > 4000 && timer[2]){
-            DO_HYD_XV463_DCV1_B = false;
+            DO_HYD_XV557_DCV2_B = false;
             Serial.print("B: ");
             for(int k = 0; k < 1000;k++){
-              if(!strokePsi1B[k][0]){break;}
+              if(!strokePsi2B[k][0]){break;}
               Serial.print("[");
-              Serial.print(strokePsi1B[k][0]);
+              Serial.print(strokePsi2B[k][0]);
               Serial.print(",");
-              Serial.print(strokePsi1B[k][1]);
+              Serial.print(strokePsi2B[k][1]);
               Serial.print("]");
               Serial.print(",");
             }

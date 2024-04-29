@@ -137,7 +137,10 @@ void SerialCLI() {
       }
 
       else if(argStr.equalsIgnoreCase("stroke")){
-        manualStroke = !manualStroke;
+        STATE = (STATE == MANUAL_STROKE)?ESTOP:MANUAL_STROKE;
+      }
+      else if(argStr.equalsIgnoreCase("estop")){
+        STATE = ESTOP;
       }
 
       else if(argStr.equalsIgnoreCase("manual")){
