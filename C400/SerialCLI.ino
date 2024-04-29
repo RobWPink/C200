@@ -38,25 +38,7 @@ void SerialCLI() {
       }
       
       if(digital){;}
-      else if(argStr.equalsIgnoreCase("plot")) {
-        printMode = PLOT;
-        String argStrVal = argBuf[++n];
-        double prevPlot = plot;
-        for(int i = 0; i < TTsize; i++){
-          if(argStrVal.equalsIgnoreCase(TTdata[i].key)){ 
-            plot = (plot == i+2000)?0:i+2000;
-            break;
-          }
-        }
-        for(int i = 0; i < PTsize; i++){
-          if(argStrVal.equalsIgnoreCase(PTdata[i].key)){ 
-            plot = (plot == i+3000)?0:i+3000;
-            break;
-          }
-        }
-        if(plot == prevPlot){plot = 0;}
-      }
-
+  
       else if(argStr.equalsIgnoreCase("sw1a")) {
         String argStrVal = argBuf[++n];
         argVal = argStrVal.toInt();
@@ -143,7 +125,6 @@ void SerialCLI() {
       }
 
       else if(argStr.equalsIgnoreCase("plotall")){
-        printMode = PLOT;
         plotall = !plotall;
       }
 
@@ -220,64 +201,61 @@ void printHelp(){
 
 void dataPrint(unsigned long dly){
   if(!dataPrintTimer){dataPrintTimer = millis();}
-  
+  if(plotall){
+    //Serial.print("\"Inlet1\":");
+    Serial.print("\"Inlet2\":");
+    Serial.print(AI_HYD_psig_PT561_HydraulicInlet2);
+    Serial.print(",");
+    Serial.print("\"DCV2A\":");
+    Serial.print(DO_HYD_XV554_DCV2_A*1000);
+    Serial.print(",");
+    Serial.print("\"DCV2B\":");
+    Serial.println(DO_HYD_XV557_DCV2_B*1000);
+    
+    /*
+    String msgA = "";
+    String msgB = "";
+    String msgC = "";
+    String msgD = "";
+    String msgE = "";
+    String msgF = "";
+    String msgG = "\"STATE\":" + String(STATE) + "," + "\"INT_STATE1\":" + String(INTENSE1) + "," + "\"INT_STATE2\":" + String(INTENSE2) + "," + "\"SUB_STATE1\":" + String(SUBSTATE1) + "," + "\"SUB_STATE1\":" + String(SUBSTATE2);
+    for(int i = 0; i < TTsize;i++){
+      msgA = msgA + "\"" + TTdata[i].key + "\":" + *TTdata[i].value + ",";
+    }
+    for(int i = 0; i < PTsize;i++){
+      msgB = msgB + PTdata[i].key + ":" + *PTdata[i].value + ",";
+    }
+    for(int i = 0; i < 2;i++){
+      for(int j = 0; j < 4;j++){
+        msgC = msgC + "\"" + flowMeters[i].flowData[j].key + "\"" + ":" + *flowMeters[i].flowData[j].value + ",";
+      }
+    }
+    for(int i = 0; i < varSize;i++){
+      msgD = msgD + "\"" + varData[i].key + "\"" + ":" + *varData[i].value + ",";
+    }
+    for(int i = 0; i < DOsize;i++){
+      msgE = msgE + "\"" + DOdata[i].key + "\"" + ":" + *DOdata[i].value + ",";
+    }
+    for(int i = 0; i < DIsize;i++){
+      msgF = msgF + "\"" + DIdata[i].key + "\"" + ":" + *DIdata[i].value + ",";
+    }
+    msgF.remove(msgF.length()-1,1);//get rid of extra comma
+
+    Serial.print(msgA);
+    Serial.print(msgB);
+    Serial.print(msgC);
+    Serial.print(msgD);
+    Serial.print(msgE);
+    Serial.print(msgF);
+    Serial.println(msgG);
+    */
+
+  }
   else if(millis() - dataPrintTimer > dly && dataPrintTimer){
     if(!printMode){return;}
     String msg = "{";
     switch(printMode){
-      case PLOT:
-        if(plotall){
-          String msgA = "";
-          String msgB = "";
-          String msgC = "";
-          String msgD = "";
-          String msgE = "";
-          String msgF = "";
-          String msgG = "\"STATE\":" + String(STATE) + "," + "\"INT_STATE1\":" + String(INTENSE1) + "," + "\"INT_STATE2\":" + String(INTENSE2) + "," + "\"SUB_STATE1\":" + String(SUBSTATE1) + "," + "\"SUB_STATE1\":" + String(SUBSTATE2);
-          for(int i = 0; i < TTsize;i++){
-            msgA = msgA + "\"" + TTdata[i].key + "\":" + *TTdata[i].value + ",";
-          }
-          for(int i = 0; i < PTsize;i++){
-            msgB = msgB + PTdata[i].key + ":" + *PTdata[i].value + ",";
-          }
-          for(int i = 0; i < 2;i++){
-            for(int j = 0; j < 4;j++){
-              msgC = msgC + "\"" + flowMeters[i].flowData[j].key + "\"" + ":" + *flowMeters[i].flowData[j].value + ",";
-            }
-          }
-          for(int i = 0; i < varSize;i++){
-            msgD = msgD + "\"" + varData[i].key + "\"" + ":" + *varData[i].value + ",";
-          }
-          for(int i = 0; i < DOsize;i++){
-            msgE = msgE + "\"" + DOdata[i].key + "\"" + ":" + *DOdata[i].value + ",";
-          }
-          for(int i = 0; i < DIsize;i++){
-            msgF = msgF + "\"" + DIdata[i].key + "\"" + ":" + *DIdata[i].value + ",";
-          }
-          msgF.remove(msgF.length()-1,1);//get rid of extra comma
-
-          Serial.print(msgA);
-          Serial.print(msgB);
-          Serial.print(msgC);
-          Serial.print(msgD);
-          Serial.print(msgE);
-          Serial.print(msgF);
-          Serial.println(msgG);
-        }
-        else if(plot){
-          if(2000 <= plot < 3000){
-            Serial.print(millis());
-            Serial.print(",");
-            Serial.println(*TTdata[plot-2000].value);
-          }
-          else if(3000 <= plot < 4000){
-            Serial.print(millis());
-            Serial.print(",");
-            Serial.println(*TTdata[plot-3000].value);
-          }
-        }
-      break;
-
       case PACKET:
        // msg = msg + "\"STATE\":" + STATE + "," + "\"INT_STATE1\":" + INTENSE1 + "," + "\"INT_STATE2\":" + INTENSE2 + "," + "\"SUB_STATE1\":" + SUBSTATE1 + "," + "\"SUB_STATE1\":" + SUBSTATE2;
         for(int i = 0; i < TTsize;i++){
@@ -477,11 +455,11 @@ void dataPrint(unsigned long dly){
       Serial.print(deadHeadPsi2A);Serial.print(", ");
       Serial.println(deadHeadPsi2B);
 
-      Serial.print("spiked:1A,1B,2A,2B: ");
-      Serial.print(spiked1A);Serial.print(", ");
-      Serial.print(spiked1B);Serial.print(", ");
-      Serial.print(spiked2A);Serial.print(", ");
-      Serial.println(spiked2B);
+      Serial.print("count:1A,1B,2A,2B: ");
+      Serial.print(count1A);Serial.print(", ");
+      Serial.print(count1B);Serial.print(", ");
+      Serial.print(count2A);Serial.print(", ");
+      Serial.println(count2B);
 
       Serial.print("warmUp:1A,1B,2A,2B: ");
       Serial.print(warmUp1A);Serial.print(", ");

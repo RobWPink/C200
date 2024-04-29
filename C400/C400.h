@@ -86,7 +86,6 @@ enum substate {
 
 enum prnt {
   NONE,
-  PLOT,
   ALL,
   PACKET,
   DIGITAL_IN,
@@ -123,7 +122,7 @@ String stateHistory = "";
 uint8_t mcpExist = 0;
 int prevDischarge1, prevDischarge2 = 0;
 int prevSuction1, prevSuction2 = 0;
-int spiked1A, spiked1B, spiked2A, spiked2B = 0;
+int count1A, count1B, count2A, count2B = 0;
 int scrollCnt, errorCnt = 0;
 int flashGreen, flashAmber, flashRed = 0;
 int delayTime = 100;
@@ -143,7 +142,12 @@ bool warmUp1A, warmUp1B, warmUp2A, warmUp2B = false;
 unsigned long timer[10] = { 0 };
 unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
-int plot = 0;
+
+int peakPsi1A = 0;
+int peakPsi1B = 0;
+int peakPsi2A = 0;
+int peakPsi2B = 0;
+
 int deadHeadPsi1A = 0;
 int deadHeadPsi1B = 0;
 int deadHeadPsi2A = 0;
@@ -152,10 +156,11 @@ int switchingPsi1A = 300;
 int switchingPsi1B = 300;
 int switchingPsi2A = 300;
 int switchingPsi2B = 300;
-int switchingTime1A = 1500;
-int switchingTime1B = 1500;
-int switchingTime2A = 1500;
-int switchingTime2B = 1500;
+int switchingTime1A = 3000;
+int switchingTime1B = 3000;
+int switchingTime2A = 3000;
+int switchingTime2B = 3000;
+
 
 double tmp_inlet1, tmp_inlet2 = 0;
 double AI_HYD_C_TT454_HydraulicTank = 0;
