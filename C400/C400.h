@@ -138,7 +138,7 @@ bool plotall, prettyPrint, rawPrint, errorPrint = false;
 unsigned long virtualRedButton, virtualGreenButton, virtualAmberButton = 0;
 bool prevG, prevA, prevR = false;
 bool daughterTog, lsrTog, manualPause, manualMode = false;
-bool warmUp1A, warmUp1B, warmUp2A, warmUp2B = false;
+int warmUp1A, warmUp1B, warmUp2A, warmUp2B = false;
 unsigned long timer[10] = { 0 };
 unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
@@ -286,12 +286,20 @@ struct vars {
   { "SwitchingPressure1B", "SWPSI1B", &switchingPsi1B, 0 },
   { "SwitchingPressure2A", "SWPSI2A", &switchingPsi2A, 0 },
   { "SwitchingPressure2B", "SWPSI2B", &switchingPsi2B, 0 },
+  { "warmUp1A", "WMP1A", &warmUp1A, 0 },
+  { "warmUp1B", "WMP1B", &warmUp1B, 0 },
+  { "warmUp2A", "WMP2A", &warmUp2A, 0 },
+  { "warmUp2B", "WMP2B", &warmUp2B, 0 },
+  { "count1A", "CNT1A", &count1A, 0 },
+  { "count1B", "CNT1B", &count1B, 0 },
+  { "count2A", "CNT2A", &count2A, 0 },
+  { "count2B", "CNT2B", &count2B, 0 },
   { "SwitchingTime1A", "SWTM1A", &switchingTime1A, 0 },
   { "SwitchingTime1B", "SWTM1B", &switchingTime1B, 0 },
   { "SwitchingTime2A", "SWTM2A", &switchingTime2A, 0 },
   { "SwitchingTime2B", "SWTM2B", &switchingTime2B, 0 }
 };
-int varSize = 16;
+int varSize = 24;
 
 struct fm {
   String name;

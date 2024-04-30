@@ -202,14 +202,14 @@ void intensifier2Operation(){
         break;
 
         case WARMUP: //needed to prevent changes in switchingPsi from interfering with nested checks
-          if(peakPsi2A >= deadHeadPsi2A - 300){ //deadheaded
+          if(peakPsi2A >= deadHeadPsi2A - 200){ //deadheaded
             switchingPsi2A = switchingPsi2A - 20; // fine tune decrement
             count2A = 1; //switch from incrementing to fine tune decrementing
           }
           else{
             if(!count2A){switchingPsi2A = switchingPsi2A + 100; } //increment if we arent finetuning 
             else{
-              if(count2A > 3){warmUp2A = true;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
+              if(count2A > 3){warmUp2A = true;switchingTime2A = 1500;} //make sure we dont deadhead 3 times in a row while decrement finetuning 
               else{count2A++;} //we didnt deadhead this time after finetuning 
             }
           }
@@ -246,14 +246,14 @@ void intensifier2Operation(){
         break;
 
         case WARMUP:
-          if(peakPsi2B >= deadHeadPsi2B - 300){ //deadheaded
+          if(peakPsi2B >= deadHeadPsi2B - 200){ //deadheaded
             switchingPsi2B = switchingPsi2B - 20; // fine tune decrement
             count2B = 1; //switch from incrementing to fine tune decrementing
           }
           else{
             if(!count2B){switchingPsi2B = switchingPsi2B + 100; }
             else{
-              if(count2B > 3){warmUp2B = true;}
+              if(count2B > 3){warmUp2B = true;switchingTime2B = 1500;}
               else{count2B++;}
             }
           }
