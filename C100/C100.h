@@ -89,7 +89,7 @@ Adafruit_LiquidCrystal lcd(0);
 String faultString = "";
 String errMsg[30] = {""};
 double loopTime = 0;
-int switchingPsi1 = 1950;
+int switchingPsi1 = 1600;//1950
 int switchingPsi2 = 1600;
 int cycleCnt,scrollCnt,errorCnt = 0;
 int flashGreen, flashAmber, flashRed = 0;
