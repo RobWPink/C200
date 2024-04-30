@@ -153,13 +153,21 @@ void intensifier2Operation(){
     break;
 
     case START:
-      INTENSE2 = (!deadHeadPsi2A || !deadHeadPsi2B) ? DEADHEAD1 : SIDE_A;
+      if(!timer[3]){timer[3] = millis();DO_HYD_XV557_DCV2_B = true;stateHistory = stateHistory + "-";}
+      if(millis() - timer[3] > 5000 && timer[3]){
+        DO_HYD_XV557_DCV2_B = false;
+        INTENSE2 = DEADHEAD1;//(!deadHeadPsi2A || !deadHeadPsi2B) ? DEADHEAD1 : SIDE_A;
+      }
+      
     break;
 
     case DEADHEAD1:
       if(!timer[3]){timer[3] = millis();DO_HYD_XV554_DCV2_A = true;stateHistory = stateHistory + "+";}
+      if(millis() - timer[3] > 500 && timer[3]){
+        if(AI_HYD_psig_PT561_HydraulicInlet2 > peakPsi2A){peakPsi2A = AI_HYD_psig_PT561_HydraulicInlet2;}
+      }
       if(millis() - timer[3] > 5000 && timer[3]){
-        deadHeadPsi2A = AI_HYD_psig_PT561_HydraulicInlet2;
+        deadHeadPsi2A = peakPsi2A;
         DO_HYD_XV554_DCV2_A = false;
         INTENSE2 = DEADHEAD2;
       }
@@ -167,8 +175,11 @@ void intensifier2Operation(){
 
     case DEADHEAD2:
       if(!timer[3]){timer[3] = millis();DO_HYD_XV557_DCV2_B = true;stateHistory = stateHistory + "-";}
+      if(millis() - timer[3] > 500 && timer[3]){
+        if(AI_HYD_psig_PT561_HydraulicInlet2 > peakPsi2B){peakPsi2B = AI_HYD_psig_PT561_HydraulicInlet2;}
+      }
       if(millis() - timer[3] > 5000 && timer[3]){
-        deadHeadPsi2B = AI_HYD_psig_PT561_HydraulicInlet2;
+        deadHeadPsi2B = peakPsi2B;
         DO_HYD_XV557_DCV2_B = false;
         INTENSE2 = SIDE_A;
       }
@@ -178,7 +189,7 @@ void intensifier2Operation(){
       switch(SUBSTATE2){
         case STROKE:
           if(!timer[3]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = true; stateHistory = stateHistory + "+";}
-          if(millis() - timer[3] > 250 && timer[3]){
+          if(millis() - timer[3] > 500 && timer[3]){
             if(AI_HYD_psig_PT561_HydraulicInlet2 > peakPsi2A){peakPsi2A = AI_HYD_psig_PT561_HydraulicInlet2;}
             if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2A){
               if(millis() - timer[3] > 50 && timer[3]){
@@ -187,7 +198,7 @@ void intensifier2Operation(){
               }
             }
           }
-          if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = "2A Timeout";}
+          if((millis() - timer[3] > 30000 && timer[3]) || switchingPsi2A > deadHeadPsi2A-300){STATE = FAULT; faultString = "2A Timeout";}
         break;
 
         case WARMUP: //needed to prevent changes in switchingPsi from interfering with nested checks
@@ -206,7 +217,7 @@ void intensifier2Operation(){
         break;
 
         case NORMAL:
-          if(millis() - timer[3] > switchingTime2A-250 && timer[3]){//check if minimum time has passed
+          if(millis() - timer[3] > switchingTime2A-550 && timer[3]){//check if minimum time has passed
             INTENSE2 = SIDE_B;
             SUBSTATE2 = STROKE;
             highCycleCnt++; //reached end of cycle time, switch sides 
@@ -222,7 +233,7 @@ void intensifier2Operation(){
       switch(SUBSTATE2){
         case STROKE:
           if(!timer[3]){ timer[3] = millis(); DO_HYD_XV557_DCV2_B = true;stateHistory = stateHistory + "-";}
-          if(millis() - timer[3] > 250 && timer[3]){
+          if(millis() - timer[3] > 500 && timer[3]){
             if(AI_HYD_psig_PT561_HydraulicInlet2 > peakPsi2B){peakPsi2B = AI_HYD_psig_PT561_HydraulicInlet2;}
             if(AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2B){
               if(millis() - timer[3] > 50 && timer[3]){
@@ -231,13 +242,13 @@ void intensifier2Operation(){
               }
             }
           }
-          if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = "2B Timeout"; timer[3] = 0;}
+          if((millis() - timer[3] > 30000 && timer[3]) || switchingPsi2B > deadHeadPsi2B-300){STATE = FAULT; faultString = "2B Timeout"; timer[3] = 0;}
         break;
 
         case WARMUP:
-          if(peakPsi2A >= deadHeadPsi2A - 300){ //deadheaded
-            switchingPsi2A = switchingPsi2A - 20; // fine tune decrement
-            count2A = 1; //switch from incrementing to fine tune decrementing
+          if(peakPsi2B >= deadHeadPsi2B - 300){ //deadheaded
+            switchingPsi2B = switchingPsi2B - 20; // fine tune decrement
+            count2B = 1; //switch from incrementing to fine tune decrementing
           }
           else{
             if(!count2B){switchingPsi2B = switchingPsi2B + 100; }
@@ -250,7 +261,7 @@ void intensifier2Operation(){
         break;
 
         case NORMAL:
-          if(millis() - timer[3] > switchingTime2B-250 && timer[3]){
+          if(millis() - timer[3] > switchingTime2B-550 && timer[3]){
             INTENSE2 = SIDE_A;
             SUBSTATE2 = STROKE;
             highCycleCnt++;

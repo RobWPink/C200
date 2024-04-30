@@ -291,7 +291,7 @@ struct vars {
   { "SwitchingTime2A", "SWTM2A", &switchingTime2A, 0 },
   { "SwitchingTime2B", "SWTM2B", &switchingTime2B, 0 }
 };
-int varSize = 12;
+int varSize = 16;
 
 struct fm {
   String name;
@@ -381,7 +381,7 @@ struct pt {
   { "AI_HYD_psig_PT461_HydraulicIntake1_A", "PT461", 0, 0, 0, avgPT461, &AI_HYD_psig_PT461_HydraulicIntake1_A, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, false },
   { "AI_HYD_psig_PT462_HydraulicIntake1_B", "PT462", 0, 0, 0, avgPT462, &AI_HYD_psig_PT462_HydraulicIntake1_B, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, false }
 };
-int PTsize = 13;
+int PTsize = 12;
 
 //do i pause both at max discharge3tank?
 // when do i turn off hydraulic pump?

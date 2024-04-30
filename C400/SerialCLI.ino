@@ -114,6 +114,9 @@ void SerialCLI() {
       else if(argStr.equalsIgnoreCase("rbn")){
         virtualRedButton = 1;
       }
+      else if(argStr.equalsIgnoreCase("estop")){
+        STATE = ESTOP;
+      }
 
       else if(argStr.equalsIgnoreCase("debug")){
         printMode = (printMode == DEBUG)?NONE:DEBUG;
