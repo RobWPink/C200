@@ -44,10 +44,10 @@ void loop() {
 
   if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
-    DO_CLT_PMP104_PMP204_CoolantPumps_Enable = DO_Comm_LSR_Local;
-    DO_CLT_FCU112_CoolantFan1_Enable = DO_Comm_LSR_Local;
-    DO_CLT_FCU212_CoolantFan2_Enable = DO_Comm_LSR_Local;
-    if(DI_Comm_LSR_Local && (STATE == PRODUCTION || STATE == PAUSE)){
+    DO_CLT_PMP104_PMP204_CoolantPumps_Enable = !DI_Comm_LSR_Local;
+    DO_CLT_FCU112_CoolantFan1_Enable = !DI_Comm_LSR_Local;
+    DO_CLT_FCU212_CoolantFan2_Enable = !DI_Comm_LSR_Local;
+    if(DI_Comm_LSR_Local && STATE == PRODUCTION){
       PREV_STATE = STATE;
       STATE = FAULT;
       faultString = "LSR Error";
@@ -75,22 +75,14 @@ void loop() {
   String errDev[30] = {""};
   switch(STATE){
     case IDLE_OFF:
-      if(!timer[0]){
-        timer[0] = millis();
-        smallMatrix[2].displayPlay(false);
-        DO_Encl_PilotGreen = true;
-        DO_Encl_PilotRed = false;
-        DO_Comm_LSR_Local = true;
-        tog[0] = false;
-      }
-      if(DI_Comm_LSR_Local && !tog[0]){
-        tog[0] = true;
-        smallMatrix[2].displayPlay(true);
-        DO_Encl_PilotGreen = false;
-      }
-      else if(!DI_Comm_LSR_Local && tog[0]){ timer[0] = 0; }
-    
-      if(DI_Encl_ButtonGreen){ STATE = IDLE_ON; }
+      if(!timer[0]){ timer[0] = millis(); }
+
+      smallMatrix[2].displayPlay(DI_Comm_LSR_Local);
+      DO_Comm_LSR_Local = true;
+      DO_Encl_PilotGreen = !DI_Comm_LSR_Local;
+      DO_Encl_PilotAmber = DI_Comm_LSR_Local;
+      
+      if((DI_Encl_ButtonGreen || virtualGreenButton) && !DI_Comm_LSR_Local){ STATE = IDLE_ON; }
     break;
 
   //#####################################################################
