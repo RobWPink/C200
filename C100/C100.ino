@@ -123,7 +123,10 @@ void loop() {
         lowCycleCnt = 0;
         timer[1] = 0;
       }
-
+      if(!DI_CLT_FS000_CoolantFlowSwitch){ //check filter switch
+        STATE = FAULT;
+        faultString = "Coolant Flow Switch Error";
+      }
       //if the red button is held for less than 5 seconds pause it otherwise safe shutdown
       if(DI_Encl_ButtonRed && !prevR){
         prevR = true;
