@@ -4,7 +4,7 @@ void setup() {
   RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200_Longview", "V0.3.0");
+  matrixSetup("C200_Longview", "V0.4.1");
   i2cSetup();
   Serial.println("OK");
   delay(3000);
