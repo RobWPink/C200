@@ -69,10 +69,6 @@ void SerialCLI() {
       else if(argStr.equalsIgnoreCase("help") || argStr.equalsIgnoreCase("h")){
         printHelp();
       }
-
-      else if(argStr.equalsIgnoreCase("lsr")){
-        lsrReset = 1;
-      }
       
       else if(argStr.equalsIgnoreCase("raw")){
         rawPrint = !rawPrint;
@@ -109,9 +105,17 @@ void SerialCLI() {
       else if(argStr.equalsIgnoreCase("fm")){
         printMode = (printMode == FM)?NONE:FM;
       }
-
       else if(argStr.equalsIgnoreCase("gbn")){
-        virtualGreenButton = !virtualGreenButton;
+        virtualGreenButton = 1;
+      }
+      else if(argStr.equalsIgnoreCase("abn")){
+        virtualAmberButton = 1;
+      }
+      else if(argStr.equalsIgnoreCase("rbn")){
+        virtualRedButton = 1;
+      }
+      else if(argStr.equalsIgnoreCase("estop")){
+        STATE = ESTOP;
       }
 
       else if(argStr.equalsIgnoreCase("debug")){
@@ -169,12 +173,15 @@ void printHelp(){
   Serial.println("tt                 -> Print all TT values");
   Serial.println("fm                 -> Print all Flow meter values");
   Serial.println("var                -> Print all adaptive variables");
+  Serial.println("gbn                -> Simulate Green Button Push");
+  Serial.println("abn                -> Simulate Amber Button Push");
+  Serial.println("rbn                -> Simulate Red Button Push");
+  Serial.println("estop              -> Simulate ESTOP Button Push");
   Serial.println("delay              -> Designate print delay time in ms (default: 1000)");
   Serial.println("sw1a               -> Change switching pressure 1a");
   Serial.println("sw1b               -> Change switching pressure 1b");
   Serial.println("sw2a               -> Change switching pressure 2a");
   Serial.println("sw2b               -> Change switching pressure 2b");
-  Serial.println("lsr                -> Virtually press lsr reset button for 500ms");
   Serial.println("pretty             -> Toggle print mode labeled lists <--> csv list");
   Serial.println("raw                -> Toggle to print only raw values");
   Serial.println("plot               -> Toggle Plotting of all values using Arduino Serial Plotter");
@@ -403,11 +410,17 @@ void dataPrint(unsigned long dly){
       Serial.print(SUBSTATE1);Serial.print(", ");
       Serial.println(SUBSTATE2);
 
-      Serial.print("stateHistory: ");
-      if(stateHistory.length() > 30){
-        stateHistory.remove(0,3);
+      Serial.print("stateHistory1: ");
+      if(stateHistory1.length() > 30){
+        stateHistory1.remove(0,3);
       }
-      Serial.println(stateHistory);
+      Serial.println(stateHistory1);
+
+      Serial.print("stateHistory2: ");
+      if(stateHistory2.length() > 30){
+        stateHistory2.remove(0,3);
+      }
+      Serial.println(stateHistory2);
 
       Serial.print("intense timers: ");
       Serial.print(millis() - timer[2]);Serial.print(", ");
@@ -437,21 +450,23 @@ void dataPrint(unsigned long dly){
       Serial.print(deadHeadPsi2A);Serial.print(", ");
       Serial.println(deadHeadPsi2B);
 
-      Serial.print("spiked:1A,1B,2A,2B: ");
-      Serial.print(spiked1A);Serial.print(", ");
-      Serial.print(spiked1B);Serial.print(", ");
-      Serial.print(spiked2A);Serial.print(", ");
-      Serial.println(spiked2B);
+      Serial.print("count:1A,1B,2A,2B: ");
+      Serial.print(count1A);Serial.print(", ");
+      Serial.print(count1B);Serial.print(", ");
+      Serial.print(count2A);Serial.print(", ");
+      Serial.println(count2B);
+
+      Serial.print("peakPsi:1A,1B,2A,2B: ");
+      Serial.print(peakPsi1A);Serial.print(", ");
+      Serial.print(peakPsi1B);Serial.print(", ");
+      Serial.print(peakPsi2A);Serial.print(", ");
+      Serial.println(peakPsi2B);
 
       Serial.print("warmUp:1A,1B,2A,2B: ");
       Serial.print(warmUp1A);Serial.print(", ");
       Serial.print(warmUp1B);Serial.print(", ");
       Serial.print(warmUp2A);Serial.print(", ");
       Serial.println(warmUp2B);
-
-      Serial.print("Tmp_inlet:1/2: ");
-      Serial.print(tmp_inlet1); Serial.print(",");
-      Serial.println(tmp_inlet2);
 
       Serial.print("inlets: ");
       Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);Serial.print(", ");

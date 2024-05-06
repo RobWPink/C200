@@ -10,12 +10,7 @@
 #include <ModbusRTU.h>
 #include <RunningAverage.h>
 #include <LedHelper.h>
-/*
-low side: y = 5.9216x + 69.412
-high side: y = 2.0196x + 5581.4
 
-
-*/
 #define MODBUS_ID 22
 #define RE_DE1 12
 #define MOVING_AVG_SIZE 200
@@ -33,28 +28,12 @@ high side: y = 2.0196x + 5581.4
 #define BCOEFFICIENT_c -2650.4
 #define BCOEFFICIENT_e 3988
 
-//warm up phase:
-//start
-//set all switchingPSI to 300
-//stroke side a
-//wait until 1500ms from start of stroke
-//continually check inlet for switchingPSI
-//once switchingPSI reached wait 100ms
-//check if inlet at or greater than 2000
-//if not, increment switchingPSI by 100
-//if so, wait until next a stroke and decrement switchingPSI by 10
-//once switchingPSI reached wait 100ms
-//check if inlet at or greater than 2000
-//if so, go back to decrement by switchingPSI 10
-//if not, check this stroke 3 more times, before moving to normal mode
-//stroke side b, go back to "wait until 1500ms"
-
-  
 enum state {
   IDLE_OFF,
   IDLE_ON,
   PRODUCTION,
   SHUTDOWN,
+  MANUAL_STROKE,
   MANUAL_CONTROL,
   FAULT,
   ESTOP
@@ -73,7 +52,8 @@ enum comp {
 } INTENSE1,
   INTENSE2,
   PREV1,
-  PREV2;
+  PREV2,
+  INTENSEm;
 
 enum substate {
   STROKE,
@@ -94,6 +74,7 @@ enum prnt {
   VAR,
   DEBUG
 } printMode;
+
 
 TwoWire i2c(20, 21);
 //ModbusMaster mbLocal;
@@ -116,30 +97,29 @@ Adafruit_LiquidCrystal lcd(0);
 String faultString = "";
 String errMsg[30] = { "" };
 double loopTime = 0;
-String stateHistory = "";
+String stateHistory1 = "";
+String stateHistory2 = "";
 uint8_t mcpExist = 0;
-int prevDischarge1, prevDischarge2 = 0;
-int prevSuction1, prevSuction2 = 0;
-int spiked1A, spiked1B, spiked2A, spiked2B = 0;
 int scrollCnt, errorCnt = 0;
 int flashGreen, flashAmber, flashRed = 0;
 int delayTime = 100;
 int lowCycleCnt_, highCycleCnt_, lowCycleCnt, highCycleCnt = 0;
 int j, k, l = 0;
-int suctionDelta1, suctionDelta2, dischargeDelta1, dischargeDelta2 = 0;
 
 bool flashTog[3] = { false };
 bool tog[5] = { false };
-bool firstLowSide, firstHighSide = false;
-bool strokeLowSide, strokeHighSide = false;
 bool plot, prettyPrint, rawPrint, errorPrint = false;
-bool virtualRedButton, virtualGreenButton, virtualAmberButton = false;
 bool prevG, prevA, prevR = false;
 bool daughterTog, lsrTog, manualPause, manualMode = false;
-bool warmUp1A, warmUp1B, warmUp2A, warmUp2B = false;
 unsigned long timer[10] = { 0 };
 unsigned long flashTimer[3] = { 0 };
-unsigned long hydraulicSafetyTimer, twoTimer, lsrReset, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
+unsigned long hydraulicSafetyTimer, twoTimer, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
+unsigned long virtualRedButton, virtualGreenButton, virtualAmberButton = 0;
+
+int peakPsi1A = 0;
+int peakPsi1B = 0;
+int peakPsi2A = 0;
+int peakPsi2B = 0;
 
 int deadHeadPsi1A = 0;
 int deadHeadPsi1B = 0;
@@ -149,10 +129,17 @@ int switchingPsi1A = 300;
 int switchingPsi1B = 300;
 int switchingPsi2A = 300;
 int switchingPsi2B = 300;
-int switchingTime1A = 1500;
-int switchingTime1B = 1500;
-int switchingTime2A = 1500;
-int switchingTime2B = 1500;
+int switchingTime1A = 3000;
+int switchingTime1B = 3000;
+int switchingTime2A = 3000;
+int switchingTime2B = 3000;
+int count1A, count1B, count2A, count2B = 0;
+int warmUp1A, warmUp1B, warmUp2A, warmUp2B = false;
+
+double switchingRatio1A = 0;
+double switchingRatio1B = 0;
+double switchingRatio2A = 0;
+double switchingRatio2B = 0;
 
 double tmp_inlet1, tmp_inlet2 = 0;
 double AI_HYD_C_TT454_HydraulicTank = 0;
@@ -266,20 +253,33 @@ struct vars {
   int* value;
   int prev;
 } varData[] = {
-  { "DeadHeadPressure1A", "DHPSI1A", &deadHeadPsi1A, 0 },
-  { "DeadHeadPressure1B", "DHPSI1B", &deadHeadPsi1B, 0 },
-  { "DeadHeadPressure2A", "DHPSI2A", &deadHeadPsi2A, 0 },
-  { "DeadHeadPressure2B", "DHPSI2B", &deadHeadPsi2B, 0 },
-  { "SwitchingPressure1A", "SWPSI1A", &switchingPsi1A, 0 },
-  { "SwitchingPressure1B", "SWPSI1B", &switchingPsi1B, 0 },
-  { "SwitchingPressure2A", "SWPSI2A", &switchingPsi2A, 0 },
-  { "SwitchingPressure2B", "SWPSI2B", &switchingPsi2B, 0 },
-  { "SwitchingTime1A", "SWTM1A", &switchingTime1A, 0 },
-  { "SwitchingTime1B", "SWTM1B", &switchingTime1B, 0 },
-  { "SwitchingTime2A", "SWTM2A", &switchingTime2A, 0 },
-  { "SwitchingTime2B", "SWTM2B", &switchingTime2B, 0 }
+  { "peakPressure1A", "DHPSI1A", &peakPsi1A, 0 },
+  { "peakPressure1B", "DHPSI1B", &peakPsi1B, 0 },
+  { "peakPressure2A", "DHPSI2A", &peakPsi2A, 0 },
+  { "peakPressure2B", "DHPSI2B", &peakPsi2B, 0 },
+  { "deadHeadPressure1A", "DHPSI1A", &deadHeadPsi1A, 0 },
+  { "deadHeadPressure1B", "DHPSI1B", &deadHeadPsi1B, 0 },
+  { "deadHeadPressure2A", "DHPSI2A", &deadHeadPsi2A, 0 },
+  { "deadHeadPressure2B", "DHPSI2B", &deadHeadPsi2B, 0 },
+  { "switchingPressure1A", "SWPSI1A", &switchingPsi1A, 0 },
+  { "switchingPressure1B", "SWPSI1B", &switchingPsi1B, 0 },
+  { "switchingPressure2A", "SWPSI2A", &switchingPsi2A, 0 },
+  { "switchingPressure2B", "SWPSI2B", &switchingPsi2B, 0 },
+  { "warmUp1A", "WMP1A", &warmUp1A, 0 },
+  { "warmUp1B", "WMP1B", &warmUp1B, 0 },
+  { "warmUp2A", "WMP2A", &warmUp2A, 0 },
+  { "warmUp2B", "WMP2B", &warmUp2B, 0 },
+  { "count1A", "CNT1A", &count1A, 0 },
+  { "count1B", "CNT1B", &count1B, 0 },
+  { "count2A", "CNT2A", &count2A, 0 },
+  { "count2B", "CNT2B", &count2B, 0 },
+  { "switchingTime1A", "SWTM1A", &switchingTime1A, 0 },
+  { "switchingTime1B", "SWTM1B", &switchingTime1B, 0 },
+  { "switchingTime2A", "SWTM2A", &switchingTime2A, 0 },
+  { "switchingTime2B", "SWTM2B", &switchingTime2B, 0 }
 };
-int varSize = 12;
+int varSize = 24;
+
 
 struct fm {
   String name;

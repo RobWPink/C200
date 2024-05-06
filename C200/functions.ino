@@ -144,6 +144,23 @@ void RPCtransceive(){
   }
 }
 
+double dynamicSwitching100Psi(bool highlow, double suction, double discharge){
+  if(!highlow){
+    if(70 <= suction < 80){ return 1.1524*discharge + 196.83;}
+    else if(80 <= suction < 90){ return 1.1641*discharge + 181.37;}
+    else if(90 <= suction < 100){ return 1.1735*discharge + 165.88;}
+    else if(100 <= suction < 110){ return 1.1625*discharge + 152.75;}
+    else if(110 <= suction < 120){ return 1.1705*discharge + 137.25;}
+    else if(120 <= suction < 130){ return 1.1773*discharge + 121.73;}
+    else if(130 <= suction < 140){ return 1.1831*discharge + 106.2;}
+    else if(140 <= suction < 150){ return 1.1882*discharge + 90.658;}
+    else{return -1;}
+  }
+  else{
+    return -1;
+  }
+}
+
 void i2cTransceive(int ptInterval){
 
   for(int i = 0; i < TTsize;i++){

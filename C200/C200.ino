@@ -19,14 +19,29 @@ void loop() {
   SerialCLI();
   RPCtransceive();
   
-  if(lsrReset){ //button press for LSR reset
-    if(lsrReset == 1){lsrReset = millis();DO_Comm_LSR_Reset = true;}
-    if(millis() - lsrReset > 1000){
+//############# Buttons #############
+  if(virtualAmberButton){ //button press for LSR reset
+    if(virtualAmberButton == 1){virtualAmberButton = millis();DO_Comm_LSR_Reset = true;}
+    if(millis() - virtualAmberButton > 1000){
       DO_Comm_LSR_Reset = false;
-      lsrReset = 0;
+      virtualAmberButton = 0;
     }
   }
 
+  if(virtualGreenButton){ //button press for green button
+    if(virtualGreenButton == 1){virtualGreenButton = millis();}
+    if(millis() - virtualGreenButton > 1000){
+      virtualGreenButton = 0;
+    }
+  }
+
+  if(virtualRedButton){ //button press for green button
+    if(virtualRedButton == 1){virtualRedButton = millis();}
+    if(millis() - virtualRedButton > 1000){
+      virtualRedButton = 0;
+    }
+  }
+  //#################################
   //rs485Transceive();
   i2cTransceive(250);
     
@@ -52,7 +67,7 @@ void loop() {
   if(STATE != CHANGED_STATE){ //reset state timer
     timer[0] = 0;
     timer[1] = 0;
-    //timer[2] = 0;
+    timer[2] = 0;
     timer[3] = 0;
     INTENSE1 = START;
     INTENSE2 = START;
@@ -67,7 +82,8 @@ void loop() {
     flashRed = 0;
     flashAmber = 0;
     manualPause = false;
-    stateHistory = stateHistory + "(" + String(STATE) + ")";
+    stateHistory1 = stateHistory1 + "(" + String(STATE) + ")";
+    stateHistory2 = stateHistory2 + "(" + String(STATE) + ")";
     CHANGED_STATE = STATE;
   }
 
@@ -148,7 +164,7 @@ void loop() {
 
       //Main operation of compressing
       intensifier1Operation(); //Low side
-      //intensifier2Operation(); //High side
+      intensifier2Operation(); //High side
 
     break;
   //#####################################################################
@@ -172,7 +188,7 @@ void loop() {
         }
         timer[0] = 0;
         timer[1] = 0;
-        //timer[2] = 0;
+        timer[2] = 0;
         timer[3] = 0;
         DO_CLT_PMP104_PMP204_CoolantPumps_Enable = false;
         STATE = IDLE_OFF;
@@ -221,6 +237,12 @@ void loop() {
           *DOdata[i].value = false;
         }
       }
+      for(int i = 0; i < varSize;i++){
+        if(varData[i].key.indexOf("SWTM") == -1){
+          *varData[i].value = 0;
+        }
+      }
+
       if(DI_Encl_ESTOP){STATE = IDLE_OFF;}
     break;
 
