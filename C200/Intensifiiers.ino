@@ -73,7 +73,7 @@ void intensifier1Operation(){
           else{
             if(!count1A){switchingPsi1A = switchingPsi1A + 100; } //increment if we arent finetuning 
             else{
-              if(count1A > 3){warmUp1A = true;switchingTime1A = 1500; switchingRatio1A = switchingPsi1A/dynamicSwitching100Psi(false,AI_H2_psig_PT911_Stage1_SuctionTank,AI_H2_psig_PT716_Stage1_Discharge);} //make sure we dont deadhead 3 times in a row while decrement finetuning 
+              if(count1A > 3){warmUp1A = true;switchingTime1A = 1500; switchingRatio1A = switchingPsi1A/dynamicSwitchingPsi(false,AI_H2_psig_PT911_Stage1_SuctionTank,AI_H2_psig_PT716_Stage1_Discharge);} //make sure we dont deadhead 3 times in a row while decrement finetuning 
               else{count1A++;} //we didnt deadhead this time after finetuning 
             }
           }
@@ -81,7 +81,7 @@ void intensifier1Operation(){
         break;
 
         case NORMAL:
-          switchingPsi1A = dynamicSwitching100Psi(false,AI_H2_psig_PT911_Stage1_SuctionTank,AI_H2_psig_PT716_Stage1_Discharge) * switchingRatio1A;
+          switchingPsi1A = dynamicSwitchingPsi(false,AI_H2_psig_PT911_Stage1_SuctionTank,AI_H2_psig_PT716_Stage1_Discharge) * switchingRatio1A;
           if(millis() - timer[2] > switchingTime1A-550 && timer[2]){//check if minimum time has passed
             INTENSE1 = SIDE_B;
             SUBSTATE1 = STROKE;
@@ -118,7 +118,7 @@ void intensifier1Operation(){
           else{
             if(!count1B){switchingPsi1B = switchingPsi1B + 100; }
             else{
-              if(count1B > 3){warmUp1B = true;switchingTime1B = 1500;switchingRatio1B = switchingPsi1B/dynamicSwitching100Psi(false,AI_H2_psig_PT911_Stage1_SuctionTank,AI_H2_psig_PT716_Stage1_Discharge);}
+              if(count1B > 3){warmUp1B = true;switchingTime1B = 1500;switchingRatio1B = switchingPsi1B/dynamicSwitchingPsi(false,AI_H2_psig_PT911_Stage1_SuctionTank,AI_H2_psig_PT716_Stage1_Discharge);}
               else{count1B++;}
             }
           }
@@ -126,7 +126,7 @@ void intensifier1Operation(){
         break;
 
         case NORMAL:
-          switchingPsi1B = dynamicSwitching100Psi(false,AI_H2_psig_PT911_Stage1_SuctionTank,AI_H2_psig_PT716_Stage1_Discharge)*switchingRatio1B;
+          switchingPsi1B = dynamicSwitchingPsi(false,AI_H2_psig_PT911_Stage1_SuctionTank,AI_H2_psig_PT716_Stage1_Discharge)*switchingRatio1B;
           if(millis() - timer[2] > switchingTime1B-550 && timer[2]){
             INTENSE1 = SIDE_A;
             SUBSTATE1 = STROKE;
@@ -142,8 +142,9 @@ void intensifier1Operation(){
     case PAUSE:
       DO_HYD_XV460_DCV1_A = false;
       DO_HYD_XV463_DCV1_B = false;
+      if(manualPause){break;}
       for(int i = 0; i < PTsize;i++){
-        if(!manualPause && PTdata[i].overPressure && (PTdata[i].pause == 1 || !PTdata[i].pause)){ break; }
+        if(PTdata[i].overPressure){ break; }
       }
       INTENSE1 = SIDE_A;
       SUBSTATE1 = STROKE;
@@ -295,8 +296,9 @@ void intensifier2Operation(){
     case PAUSE:
       DO_HYD_XV554_DCV2_A = false;
       DO_HYD_XV557_DCV2_B = false;
+      if(manualPause){break;}
       for(int i = 0; i < PTsize;i++){
-        if(!manualPause && PTdata[i].overPressure && (PTdata[i].pause == 2 || !PTdata[i].pause)){ break; }
+        if(PTdata[i].overPressure){ break; }
       }
       INTENSE2 = SIDE_A;
       SUBSTATE2 = STROKE;

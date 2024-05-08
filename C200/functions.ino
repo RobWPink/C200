@@ -144,20 +144,36 @@ void RPCtransceive(){
   }
 }
 
-double dynamicSwitching100Psi(bool highlow, double suction, double discharge){
-  if(!highlow){
-    if(70 <= suction < 80){ return 1.1524*discharge + 196.83;}
-    else if(80 <= suction < 90){ return 1.1641*discharge + 181.37;}
-    else if(90 <= suction < 100){ return 1.1735*discharge + 165.88;}
-    else if(100 <= suction < 110){ return 1.1625*discharge + 152.75;}
-    else if(110 <= suction < 120){ return 1.1705*discharge + 137.25;}
-    else if(120 <= suction < 130){ return 1.1773*discharge + 121.73;}
-    else if(130 <= suction < 140){ return 1.1831*discharge + 106.2;}
-    else if(140 <= suction < 150){ return 1.1882*discharge + 90.658;}
-    else{return -1;}
+double dynamicSwitchingPsi(bool highlow, double suction, double discharge){
+  if(PTdata[0].min < 100){
+    if(!highlow){
+      if(70 <= suction < 80){ return 1.1524*discharge + 196.83;}
+      else if(80 <= suction < 90){ return 1.1641*discharge + 181.37;}
+      else if(90 <= suction < 100){ return 1.1735*discharge + 165.88;}
+      else if(100 <= suction < 110){ return 1.1625*discharge + 152.75;}
+      else if(110 <= suction < 120){ return 1.1705*discharge + 137.25;}
+      else if(120 <= suction < 130){ return 1.1773*discharge + 121.73;}
+      else if(130 <= suction < 140){ return 1.1831*discharge + 106.2;}
+      else if(140 <= suction){ return 1.1882*discharge + 90.658;}
+      else{return -1;}
+    }
+    else{
+      return -1;
+      // if(460 <= suction < 518){ return 1.1524*discharge + 196.83;}
+      // else if(518 <= suction < 576){ return 1.1641*discharge + 181.37;}
+      // else if(576 <= suction < 633){ return 1.1735*discharge + 165.88;}
+      // else if(633 <= suction < 691){ return 1.1625*discharge + 152.75;}
+      // else if(691 <= suction < 749){ return 1.1705*discharge + 137.25;}
+      // else if(749 <= suction < 806){ return 1.1773*discharge + 121.73;}
+      // else if(806 <= suction < 864){ return 1.1831*discharge + 106.2;}
+      // else if(864 <= suction){ return 1.1882*discharge + 90.658;}
+      // else{return -1;}
+    }
   }
   else{
-    return -1;
+    PREV_STATE = STATE;
+    STATE = FAULT;
+    faultString = "Wrong Suction";
   }
 }
 
@@ -232,17 +248,15 @@ void i2cTransceive(int ptInterval){
           *PTdata[i].value = PTdata[i].avg.getAverage();
         }
       }
-      /*
-      if(PTdata[i].max != -1 && PTdata[i].pause != -1){
+
+      if(PTdata[i].max != -1 && PTdata[i].maxPause != -1){
         if(*PTdata[i].value >= PTdata[i].max && !PTdata[i].overPressure){
           PTdata[i].overPressure = true;
           if(STATE == PRODUCTION){
-            if(!PTdata[i].pause){ INTENSE1 = PAUSE; INTENSE2 = PAUSE; }
-            else{
-              if(PTdata[i].pause == 1){INTENSE1 = PAUSE;}
-              else if(PTdata[i].pause == 2){INTENSE2 = PAUSE;}
-              else{Serial.println("pause state error");}
-            }
+            if(!PTdata[i].maxPause){ INTENSE1 = PAUSE; INTENSE2 = PAUSE; }
+            else if(PTdata[i].maxPause == 1){INTENSE1 = PAUSE;}
+            else if(PTdata[i].maxPause == 2){INTENSE2 = PAUSE;}
+            else{Serial.println("pause state error");}
           }
         }
         else if(*PTdata[i].value <= PTdata[i].maxRecovery && PTdata[i].overPressure){
@@ -250,23 +264,21 @@ void i2cTransceive(int ptInterval){
         }
       }
 
-      if(PTdata[i].min != -1){
+      if(PTdata[i].min != -1 && PTdata[i].minPause != 1){
         if(*PTdata[i].value < PTdata[i].min && !PTdata[i].overPressure){
           PTdata[i].overPressure = true;
           if(STATE == PRODUCTION){
-            if(!PTdata[i].pause){ INTENSE1 = PAUSE; INTENSE2 = PAUSE; }
-            else{
-              if(PTdata[i].pause == 1){INTENSE1 = PAUSE;}
-              else if(PTdata[i].pause == 2){INTENSE2 = PAUSE;}
-              else{Serial.println("pause state error");}
-            }
+            if(!PTdata[i].minPause){ INTENSE1 = PAUSE; INTENSE2 = PAUSE; }
+            else if(PTdata[i].minPause == 1){INTENSE1 = PAUSE;}
+            else if(PTdata[i].minPause == 2){INTENSE2 = PAUSE;}
+            else{Serial.println("pause state error");}
           }
         }
         else if(*PTdata[i].value >= PTdata[i].minRecovery && PTdata[i].overPressure){
           PTdata[i].overPressure = false;
         }
       }
-      */
+
     }
   }
   PTdata[6].mapped = map((int)PTdata[6].raw, PTdata[6].mapA, PTdata[6].mapB, PTdata[6].mapC, PTdata[6].mapD) + PTdata[6].offset; //read hydraulics quickly

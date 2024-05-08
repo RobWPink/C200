@@ -99,6 +99,8 @@ String errMsg[30] = { "" };
 double loopTime = 0;
 String stateHistory1 = "";
 String stateHistory2 = "";
+
+double Stage1_Compression_RATIO = 6.5;
 uint8_t mcpExist = 0;
 int scrollCnt, errorCnt = 0;
 int flashGreen, flashAmber, flashRed = 0;
@@ -343,33 +345,36 @@ struct pt {
   double prev;
   int min;
   int minRecovery;
+  int minPause;
   int max;
   int maxRecovery;
+  int maxPause;
   int mapA;
   int mapB;
   int mapC;
   int mapD;
   ADS7828 adc;
   int channel;
-  int pause;
   bool overPressure;
 } PTdata[] = {
-  { "AI_H2_psig_PT911_Stage1_SuctionTank", "PT911", 0, 0, 0, avgPT911, &AI_H2_psig_PT911_Stage1_SuctionTank, 0, 70, 80, 400, 390, 820, 4096, 0, 500, adc2, 3, 1, false },
-  { "AI_H2_psig_PT716_Stage1_Discharge", "PT716", 0, 0, 0, avgPT716, &AI_H2_psig_PT716_Stage1_Discharge, 0, -1, -1, 1450, 1350, 820, 4096, 0, 2000, adc2, 4, 1, false },
-  { "AI_H2_psig_PT712_Stage1_DischargeTank", "PT712", 0, 0, 0, avgPT712, &AI_H2_psig_PT712_Stage1_DischargeTank, 0, 400, 450, -1, -1, 820, 4096, 0, 2000, adc2, 5, 2, false },
-  { "AI_H2_psig_PT519_Stage2_Discharge", "PT519", 0, 0, 0, avgPT519, &AI_H2_psig_PT519_Stage2_Discharge, 0, -1, -1, -1, -1, 820, 4096, 0, 10000, adc2, 6, 2, false },
-  { "AI_H2_psig_PT407_Stage3_Discharge", "PT407", 0, 0, 0, avgPT407, &AI_H2_psig_PT407_Stage3_Discharge, 0, -1, -1, -1, -1, 820, 4096, 0, 20000, adc2, 7, 2, false },
-  { "AI_H2_psig_PT410_Stage3_DischargeTank", "PT410", 0, 0, 0, avgPT410, &AI_H2_psig_PT410_Stage3_DischargeTank, 0, -1, -1, 8100, 7500, 820, 4096, 0, 20000, adc3, 0, 2, false },
-  { "AI_HYD_psig_PT467_HydraulicInlet1", "PT467", 0, 0, -300, avgPT467, &AI_HYD_psig_PT467_HydraulicInlet1, 0, -1, -1, -1, -1, 820, 4096, 0, 5000, adc3, 1, 0, false },
-  { "AI_HYD_psig_PT561_HydraulicInlet2", "PT561", 0, 0, -100, avgPT561, &AI_HYD_psig_PT561_HydraulicInlet2, 0, -1, -1, -1, -1, 820, 4096, 0, 5000, adc3, 2, 0, false },
-  { "AI_HYD_psig_PT556_HydraulicIntake2_B", "PT556", 0, 0, 0, avgPT556, &AI_HYD_psig_PT556_HydraulicIntake2_B, 0, -1, -1, -1, -1, 820, 4096, 0, 20000, adc3, 3, 0, false },
-  { "AI_HYD_psig_PT555_HydraulicIntake2_A", "PT555", 0, 0, 0, avgPT555, &AI_HYD_psig_PT555_HydraulicIntake2_A, 0, -1, -1, -1, -1, 820, 4096, 0, 20000, adc3, 4, 0, false },
-  { "AI_CLT_psig_PT113_CoolantSupply1", "PT113", 0, 0, 0, avgPT113, &AI_CLT_psig_PT113_CoolantSupply1, 0, -1, -1, -1, -1, 820, 4096, 0, 250, adc3, 5, 0, false },
-  { "AI_CLT_psig_PT213_CoolantSupply2", "PT213", 0, 0, 0, avgPT213, &AI_CLT_psig_PT213_CoolantSupply2, 0, -1, -1, -1, -1, 820, 4096, 0, 250, adc3, 6, 0, false },
-  { "AI_HYD_psig_PT461_HydraulicIntake1_A", "PT461", 0, 0, 0, avgPT461, &AI_HYD_psig_PT461_HydraulicIntake1_A, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, false },
-  { "AI_HYD_psig_PT462_HydraulicIntake1_B", "PT462", 0, 0, 0, avgPT462, &AI_HYD_psig_PT462_HydraulicIntake1_B, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, false }
+  { "AI_H2_psig_PT911_Stage1_SuctionTank", "PT911", 0, 0, 0, avgPT911, &AI_H2_psig_PT911_Stage1_SuctionTank, 0, 70, 80, 1, 400, 390, 0, 820, 4096, 0, 500, adc2, 3, false },
+  { "AI_H2_psig_PT716_Stage1_Discharge", "PT716", 0, 0, 0, avgPT716, &AI_H2_psig_PT716_Stage1_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 2000, adc2, 4, false },
+  { "AI_H2_psig_PT712_Stage1_DischargeTank", "PT712", 0, 0, 0, avgPT712, &AI_H2_psig_PT712_Stage1_DischargeTank, 0, 400, 450, 2, -1, -1, 1, 820, 4096, 0, 2000, adc2, 5, false },
+  { "AI_H2_psig_PT519_Stage2_Discharge", "PT519", 0, 0, 0, avgPT519, &AI_H2_psig_PT519_Stage2_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 10000, adc2, 6, false },
+  { "AI_H2_psig_PT407_Stage3_Discharge", "PT407", 0, 0, 0, avgPT407, &AI_H2_psig_PT407_Stage3_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 20000, adc2, 7, false },
+  { "AI_H2_psig_PT410_Stage3_DischargeTank", "PT410", 0, 0, 0, avgPT410, &AI_H2_psig_PT410_Stage3_DischargeTank, 0, -1, -1, -1, 8100, 7500, 0,  820, 4096, 0, 20000, adc3, 0, false },
+  { "AI_HYD_psig_PT467_HydraulicInlet1", "PT467", 0, 0, -300, avgPT467, &AI_HYD_psig_PT467_HydraulicInlet1, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc3, 1, false },
+  { "AI_HYD_psig_PT561_HydraulicInlet2", "PT561", 0, 0, -100, avgPT561, &AI_HYD_psig_PT561_HydraulicInlet2, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc3, 2, false },
+  { "AI_HYD_psig_PT556_HydraulicIntake2_B", "PT556", 0, 0, 0, avgPT556, &AI_HYD_psig_PT556_HydraulicIntake2_B, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 20000, adc3, 3, false },
+  { "AI_HYD_psig_PT555_HydraulicIntake2_A", "PT555", 0, 0, 0, avgPT555, &AI_HYD_psig_PT555_HydraulicIntake2_A, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 20000, adc3, 4, false },
+  { "AI_CLT_psig_PT113_CoolantSupply1", "PT113", 0, 0, 0, avgPT113, &AI_CLT_psig_PT113_CoolantSupply1, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 250, adc3, 5, false },
+  { "AI_CLT_psig_PT213_CoolantSupply2", "PT213", 0, 0, 0, avgPT213, &AI_CLT_psig_PT213_CoolantSupply2, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 250, adc3, 6, false },
+  { "AI_HYD_psig_PT461_HydraulicIntake1_A", "PT461", 0, 0, 0, avgPT461, &AI_HYD_psig_PT461_HydraulicIntake1_A, -1, -1, -1, -1, -1, -1, -1,  -1, -1, -1, -1, false },
+  { "AI_HYD_psig_PT462_HydraulicIntake1_B", "PT462", 0, 0, 0, avgPT462, &AI_HYD_psig_PT462_HydraulicIntake1_B, -1, -1, -1, -1, -1, -1, -1,  -1, -1, -1, -1, false }
 };
 int PTsize = 14;
+
+
 
 //do i pause both at max discharge3tank?
 // when do i turn off hydraulic pump?
