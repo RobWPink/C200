@@ -1,4 +1,3 @@
-
 void intensifier1Operation(){
   if(INTENSE1 != PREV1){
     timer[2] = 0;
@@ -81,7 +80,9 @@ void intensifier1Operation(){
         break;
 
         case NORMAL:
-          switchingPsi1A = dynamicSwitchingPsi(false,AI_H2_psig_PT911_Stage1_SuctionTank,AI_H2_psig_PT716_Stage1_Discharge) * switchingRatio1A;
+          if(warmup1A){
+            switchingPsi1A = dynamicSwitchingPsi(false,AI_H2_psig_PT911_Stage1_SuctionTank,AI_H2_psig_PT716_Stage1_Discharge) * switchingRatio1A;
+          }
           if(millis() - timer[2] > switchingTime1A-550 && timer[2]){//check if minimum time has passed
             INTENSE1 = SIDE_B;
             SUBSTATE1 = STROKE;
@@ -126,7 +127,9 @@ void intensifier1Operation(){
         break;
 
         case NORMAL:
-          switchingPsi1B = dynamicSwitchingPsi(false,AI_H2_psig_PT911_Stage1_SuctionTank,AI_H2_psig_PT716_Stage1_Discharge)*switchingRatio1B;
+          if(warmUp1B){
+            switchingPsi1B = dynamicSwitchingPsi(false,AI_H2_psig_PT911_Stage1_SuctionTank,AI_H2_psig_PT716_Stage1_Discharge)*switchingRatio1B;
+          }
           if(millis() - timer[2] > switchingTime1B-550 && timer[2]){
             INTENSE1 = SIDE_A;
             SUBSTATE1 = STROKE;

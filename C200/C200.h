@@ -100,6 +100,8 @@ double loopTime = 0;
 String stateHistory1 = "";
 String stateHistory2 = "";
 
+int comp = 0;
+
 double Stage1_Compression_RATIO = 6.5;
 uint8_t mcpExist = 0;
 int scrollCnt, errorCnt = 0;
