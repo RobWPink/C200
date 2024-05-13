@@ -4,7 +4,7 @@ void setup() {
   RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200v2_Longview", "V0.4.2");
+  matrixSetup("C200v2_Longview", "V0.4.3");
   i2cSetup();
   Serial.println("OK");
   delay(3000);
@@ -167,8 +167,7 @@ void loop() {
       }
 
       //Main operation of compressing
-      //intensifier1Operation(); //Low side
-      intensifier1OperationV2();
+      intensifier1Operation(); //Low side
       //intensifier2Operation(); //High side
 
     break;

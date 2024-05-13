@@ -38,28 +38,6 @@ void SerialCLI() {
       }
       if(digital){;}
 
-      else if(argStr.equalsIgnoreCase("sw1a")) {
-        String argStrVal = argBuf[++n];
-        argVal = argStrVal.toInt();
-        if(argVal > 0){switchingPsi1A = argVal;}
-      }
-      else if(argStr.equalsIgnoreCase("sw1b")) {
-        String argStrVal = argBuf[++n];
-        argVal = argStrVal.toInt();
-        if(argVal > 0){switchingPsi1B = argVal;}
-      }
-
-      else if(argStr.equalsIgnoreCase("sw2a")) {
-        String argStrVal = argBuf[++n];
-        argVal = argStrVal.toInt();
-        if(argVal > 0){switchingPsi2A = argVal;}
-      }
-      else if(argStr.equalsIgnoreCase("sw2b")) {
-        String argStrVal = argBuf[++n];
-        argVal = argStrVal.toInt();
-        if(argVal > 0){switchingPsi2B = argVal;}
-      }
-
       else if(argStr.equalsIgnoreCase("delay")) {
         String argStrVal = argBuf[++n];
         argVal = argStrVal.toInt();
@@ -68,7 +46,7 @@ void SerialCLI() {
 
       else if(argStr.equalsIgnoreCase("sdm")) {
         String argStrVal = argBuf[++n];
-        sdm = argStrVal.toInt();
+        sdmLow = argStrVal.toInt();
       }
    
       else if(argStr.equalsIgnoreCase("help") || argStr.equalsIgnoreCase("h")){
@@ -176,11 +154,8 @@ void printHelp(){
   Serial.println("abn                -> Simulate Amber Button Push");
   Serial.println("rbn                -> Simulate Red Button Push");
   Serial.println("estop              -> Simulate ESTOP Button Push");
+  Serial.println("sdm                -> Change Std.Dev multiplier");
   Serial.println("delay              -> Designate print delay time in ms (default: 1000)");
-  Serial.println("sw1a               -> Change switching pressure 1a");
-  Serial.println("sw1b               -> Change switching pressure 1b");
-  Serial.println("sw2a               -> Change switching pressure 2a");
-  Serial.println("sw2b               -> Change switching pressure 2b");
   Serial.println("pretty             -> Toggle print mode labeled lists <--> csv list");
   Serial.println("raw                -> Toggle to print only raw values");
   Serial.println("plot               -> Toggle Plotting of all values using Arduino Serial Plotter");
@@ -389,14 +364,14 @@ void dataPrint(unsigned long dly){
     case DEBUG:
       Serial.print("LoopTime: ");
       Serial.println(loopTime);
-      Serial.print("FlowMeter:");
-      for(int i = 0; i < 2; i++){
-        for(int j = 0; j < 4; j++){
-          Serial.print(*flowMeters[i].flowData[j].value);
-          Serial.print(",");
-        }
-        if(i < 1){Serial.print("|||");}
-      }
+      // Serial.print("FlowMeter:");
+      // for(int i = 0; i < 2; i++){
+      //   for(int j = 0; j < 4; j++){
+      //     Serial.print(*flowMeters[i].flowData[j].value);
+      //     Serial.print(",");
+      //   }
+      //   if(i < 1){Serial.print("|||");}
+      // }
       Serial.println();
       Serial.print("STATE: ");
       Serial.println(STATE);
@@ -404,10 +379,6 @@ void dataPrint(unsigned long dly){
       Serial.print("INTENSE:1/2: ");
       Serial.print(INTENSE1);Serial.print(", ");
       Serial.println(INTENSE2);
-
-      Serial.print("SUBSTATE:1/2: ");
-      Serial.print(SUBSTATE1);Serial.print(", ");
-      Serial.println(SUBSTATE2);
 
       Serial.print("stateHistory1: ");
       if(stateHistory1.length() > 30){
@@ -431,11 +402,11 @@ void dataPrint(unsigned long dly){
       Serial.print(DO_HYD_XV554_DCV2_A);
       Serial.println(DO_HYD_XV557_DCV2_B);
 
-      Serial.print("switchingPsi:1A,1B,2A,2B: ");
-      Serial.print(switchingPsi1A);Serial.print(", ");
-      Serial.print(switchingPsi1B);Serial.print(", ");
-      Serial.print(switchingPsi2A);Serial.print(", ");
-      Serial.println(switchingPsi2B);
+      // Serial.print("switchingPsi:1A,1B,2A,2B: ");
+      // Serial.print(switchingPsi1A);Serial.print(", ");
+      // Serial.print(switchingPsi1B);Serial.print(", ");
+      // Serial.print(switchingPsi2A);Serial.print(", ");
+      // Serial.println(switchingPsi2B);
 
       Serial.print("switchingTime:1A,1B,2A,2B: ");
       Serial.print(switchingTime1A);Serial.print(", ");
@@ -449,23 +420,23 @@ void dataPrint(unsigned long dly){
       Serial.print(deadHeadPsi2A);Serial.print(", ");
       Serial.println(deadHeadPsi2B);
 
-      Serial.print("count:1A,1B,2A,2B: ");
-      Serial.print(count1A);Serial.print(", ");
-      Serial.print(count1B);Serial.print(", ");
-      Serial.print(count2A);Serial.print(", ");
-      Serial.println(count2B);
+      Serial.print("Std.Dev Mult: ");
+      Serial.print(sdmLow);Serial.print(", ");
+      Serial.println(sdmHigh);
 
+      Serial.print("Std.Dev: ");
+      Serial.print(avgLow.getStandardDeviation());Serial.print(", ");
+      Serial.println();
+
+      Serial.print("Mean");
+      Serial.print(avgLow.getFastAverage());Serial.print(", ");
+      Serial.println();
+      
       Serial.print("peakPsi:1A,1B,2A,2B: ");
       Serial.print(peakPsi1A);Serial.print(", ");
       Serial.print(peakPsi1B);Serial.print(", ");
       Serial.print(peakPsi2A);Serial.print(", ");
       Serial.println(peakPsi2B);
-
-      Serial.print("warmUp:1A,1B,2A,2B: ");
-      Serial.print(warmUp1A);Serial.print(", ");
-      Serial.print(warmUp1B);Serial.print(", ");
-      Serial.print(warmUp2A);Serial.print(", ");
-      Serial.println(warmUp2B);
 
       Serial.print("inlets: ");
       Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);Serial.print(", ");

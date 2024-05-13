@@ -120,7 +120,8 @@ unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
 unsigned long virtualRedButton, virtualGreenButton, virtualAmberButton = 0;
 
-double sdm = 1.8;
+double sdmLow = 1.75;
+double sdmHigh = 1.75;
 int peakPsi1A = 0;
 int peakPsi1B = 0;
 int peakPsi2A = 0;
@@ -130,23 +131,11 @@ int deadHeadPsi1A = 0;
 int deadHeadPsi1B = 0;
 int deadHeadPsi2A = 0;
 int deadHeadPsi2B = 0;
-int switchingPsi1A = 0;
-int switchingPsi1B = 0;
-int switchingPsi2A = 0;
-int switchingPsi2B = 0;
 int switchingTime1A = 3000;
 int switchingTime1B = 3000;
 int switchingTime2A = 3000;
 int switchingTime2B = 3000;
-int count1A, count1B, count2A, count2B = 0;
-int warmUp1A, warmUp1B, warmUp2A, warmUp2B = false;
 
-double switchingRatio1A = 0;
-double switchingRatio1B = 0;
-double switchingRatio2A = 0;
-double switchingRatio2B = 0;
-
-double tmp_inlet1, tmp_inlet2 = 0;
 double AI_HYD_C_TT454_HydraulicTank = 0;
 double AI_CLT_C_TT107_CoolantSupply1 = 0;
 double AI_CLT_C_TT207_CoolantSupply2 = 0;
@@ -270,24 +259,12 @@ struct vars {
   { "deadHeadPressure1B", "DHPSI1B", &deadHeadPsi1B, 0 },
   { "deadHeadPressure2A", "DHPSI2A", &deadHeadPsi2A, 0 },
   { "deadHeadPressure2B", "DHPSI2B", &deadHeadPsi2B, 0 },
-  { "switchingPressure1A", "SWPSI1A", &switchingPsi1A, 0 },
-  { "switchingPressure1B", "SWPSI1B", &switchingPsi1B, 0 },
-  { "switchingPressure2A", "SWPSI2A", &switchingPsi2A, 0 },
-  { "switchingPressure2B", "SWPSI2B", &switchingPsi2B, 0 },
-  { "warmUp1A", "WMP1A", &warmUp1A, 0 },
-  { "warmUp1B", "WMP1B", &warmUp1B, 0 },
-  { "warmUp2A", "WMP2A", &warmUp2A, 0 },
-  { "warmUp2B", "WMP2B", &warmUp2B, 0 },
-  { "count1A", "CNT1A", &count1A, 0 },
-  { "count1B", "CNT1B", &count1B, 0 },
-  { "count2A", "CNT2A", &count2A, 0 },
-  { "count2B", "CNT2B", &count2B, 0 },
   { "switchingTime1A", "SWTM1A", &switchingTime1A, 0 },
   { "switchingTime1B", "SWTM1B", &switchingTime1B, 0 },
   { "switchingTime2A", "SWTM2A", &switchingTime2A, 0 },
   { "switchingTime2B", "SWTM2B", &switchingTime2B, 0 }
 };
-int varSize = 24;
+int varSize = 12;
 
 
 struct fm {
