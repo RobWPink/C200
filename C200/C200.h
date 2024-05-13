@@ -10,10 +10,10 @@
 #include <ModbusRTU.h>
 #include <RunningAverage.h>
 #include <LedHelper.h>
+#include <Ewma.h>
 
 #define MODBUS_ID 22
 #define RE_DE1 12
-#define MOVING_AVG_SIZE 200
 #define ESTOP_BREAK 40
 #define LED_PWR 22
 #define TRACO_24VDC 23
@@ -120,6 +120,7 @@ unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
 unsigned long virtualRedButton, virtualGreenButton, virtualAmberButton = 0;
 
+double sdm = 1.8;
 int peakPsi1A = 0;
 int peakPsi1B = 0;
 int peakPsi2A = 0;
@@ -129,10 +130,10 @@ int deadHeadPsi1A = 0;
 int deadHeadPsi1B = 0;
 int deadHeadPsi2A = 0;
 int deadHeadPsi2B = 0;
-int switchingPsi1A = 300;
-int switchingPsi1B = 300;
-int switchingPsi2A = 300;
-int switchingPsi2B = 300;
+int switchingPsi1A = 0;
+int switchingPsi1B = 0;
+int switchingPsi2A = 0;
+int switchingPsi2B = 0;
 int switchingTime1A = 3000;
 int switchingTime1B = 3000;
 int switchingTime2A = 3000;
@@ -221,39 +222,39 @@ float AI_H2_C_RED_Temp = 0;
 float AI_H2_psig_RED_Pressure = 0;
 float AI_H2_KGPD_RED_Total = 0;
 
-RunningAverage avgTT454(MOVING_AVG_SIZE);
-RunningAverage avgTT107(MOVING_AVG_SIZE);
-RunningAverage avgTT207(MOVING_AVG_SIZE);
-RunningAverage avgTT917(MOVING_AVG_SIZE);
-RunningAverage avgTT809(MOVING_AVG_SIZE);
-RunningAverage avgTT810(MOVING_AVG_SIZE);
-RunningAverage avgTT715(MOVING_AVG_SIZE);
-RunningAverage avgTT520(MOVING_AVG_SIZE);
-RunningAverage avgTT521(MOVING_AVG_SIZE);
-RunningAverage avgTT522(MOVING_AVG_SIZE);
-RunningAverage avgTT701(MOVING_AVG_SIZE);
-RunningAverage avgPT911(MOVING_AVG_SIZE);
-RunningAverage avgPT716(MOVING_AVG_SIZE);
-RunningAverage avgPT712(MOVING_AVG_SIZE);
-RunningAverage avgPT519(MOVING_AVG_SIZE);
-RunningAverage avgPT407(MOVING_AVG_SIZE);
-RunningAverage avgPT410(MOVING_AVG_SIZE);
-RunningAverage avgPT467(3);
-RunningAverage avgPT561(3);
-RunningAverage avgPT556(MOVING_AVG_SIZE);
-RunningAverage avgPT555(MOVING_AVG_SIZE);
-RunningAverage avgPT113(MOVING_AVG_SIZE);
-RunningAverage avgPT213(MOVING_AVG_SIZE);
-RunningAverage avgFM904(MOVING_AVG_SIZE);
-RunningAverage avgFM110(MOVING_AVG_SIZE);
-RunningAverage avgPT461(MOVING_AVG_SIZE);
-RunningAverage avgPT462(MOVING_AVG_SIZE);
-RunningAverage avgPMP458(MOVING_AVG_SIZE);
-RunningAverage avgFCU112(MOVING_AVG_SIZE);
+double MOVING_AVG_SIZE = 0.02; //equivilent to 200 samples
+Ewma avgTT454(MOVING_AVG_SIZE);
+Ewma avgTT107(MOVING_AVG_SIZE);
+Ewma avgTT207(MOVING_AVG_SIZE);
+Ewma avgTT917(MOVING_AVG_SIZE);
+Ewma avgTT809(MOVING_AVG_SIZE);
+Ewma avgTT810(MOVING_AVG_SIZE);
+Ewma avgTT715(MOVING_AVG_SIZE);
+Ewma avgTT520(MOVING_AVG_SIZE);
+Ewma avgTT521(MOVING_AVG_SIZE);
+Ewma avgTT522(MOVING_AVG_SIZE);
+Ewma avgTT701(MOVING_AVG_SIZE);
+Ewma avgPT911(MOVING_AVG_SIZE);
+Ewma avgPT716(MOVING_AVG_SIZE);
+Ewma avgPT712(MOVING_AVG_SIZE);
+Ewma avgPT519(MOVING_AVG_SIZE);
+Ewma avgPT407(MOVING_AVG_SIZE);
+Ewma avgPT410(MOVING_AVG_SIZE);
+Ewma avgPT467(0.7);
+Ewma avgPT561(0.7);
+Ewma avgPT556(MOVING_AVG_SIZE);
+Ewma avgPT555(MOVING_AVG_SIZE);
+Ewma avgPT113(MOVING_AVG_SIZE);
+Ewma avgPT213(MOVING_AVG_SIZE);
+Ewma avgFM904(MOVING_AVG_SIZE);
+Ewma avgFM110(MOVING_AVG_SIZE);
+Ewma avgPT461(MOVING_AVG_SIZE);
+Ewma avgPT462(MOVING_AVG_SIZE);
+Ewma avgPMP458(MOVING_AVG_SIZE);
+Ewma avgFCU112(MOVING_AVG_SIZE);
 
 RunningAverage avgLow(50);
 RunningAverage avgHigh(50);
-
 
 struct vars {
   String name;
@@ -312,7 +313,7 @@ struct tt {
   String key;
   double raw;
   double rawTemp;
-  RunningAverage avg;
+  Ewma avg;
   double* value;
   double prev;
   int min;
@@ -346,7 +347,7 @@ struct pt {
   double raw;
   double mapped;
   double offset;
-  RunningAverage avg;
+  Ewma avg;
   double* value;
   double prev;
   int min;

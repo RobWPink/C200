@@ -202,15 +202,13 @@ void i2cTransceive(int ptInterval){
       }
       else{;}
       if(0 < TTdata[i].mcp <= 6 && !bitRead(mcpExist,TTdata[i].mcp)){
-        TTdata[i].avg.addValue(TTdata[i].rawTemp);
-        *TTdata[i].value = TTdata[i].avg.getAverage();
+        *TTdata[i].value = TTdata[i].avg.filter(TTdata[i].rawTemp);
       }
     }
     else if(TTdata[i].channel != -1){
       TTdata[i].raw = TTdata[i].adc.read(TTdata[i].channel,SD);
       TTdata[i].rawTemp = potToTemp(TTdata[i].raw,TTdata[i].coef);
-      TTdata[i].avg.addValue(TTdata[i].rawTemp);
-      *TTdata[i].value = TTdata[i].avg.getAverage();    
+      *TTdata[i].value = TTdata[i].avg.filter(TTdata[i].rawTemp);    
     }
 /*
     if(TTdata[i].max != -1){
@@ -244,8 +242,7 @@ void i2cTransceive(int ptInterval){
         PTdata[i].raw = PTdata[i].adc.read(PTdata[i].channel,SD);
         if(PTdata[i].mapA != -1 && PTdata[i].mapB != -1 && PTdata[i].mapC != -1 && PTdata[i].mapD != -1){
           PTdata[i].mapped = map((int)PTdata[i].raw, PTdata[i].mapA, PTdata[i].mapB, PTdata[i].mapC, PTdata[i].mapD) + PTdata[i].offset; //read slowly
-          PTdata[i].avg.addValue(PTdata[i].mapped);
-          *PTdata[i].value = PTdata[i].avg.getAverage();
+          *PTdata[i].value = PTdata[i].avg.filter(PTdata[i].mapped);
         }
       }
 
@@ -282,12 +279,10 @@ void i2cTransceive(int ptInterval){
     }
   }
   PTdata[6].mapped = map((int)PTdata[6].raw, PTdata[6].mapA, PTdata[6].mapB, PTdata[6].mapC, PTdata[6].mapD) + PTdata[6].offset; //read hydraulics quickly
-  PTdata[6].avg.addValue(PTdata[6].mapped);
-  *PTdata[6].value = PTdata[6].avg.getAverage();
+  *PTdata[6].value = PTdata[6].avg.filter(PTdata[6].mapped);
 
   PTdata[7].mapped = map((int)PTdata[7].raw, PTdata[7].mapA, PTdata[7].mapB, PTdata[7].mapC, PTdata[7].mapD) + PTdata[7].offset; //read hydraulics quickly
-  PTdata[7].avg.addValue(PTdata[7].mapped);
-  *PTdata[7].value = PTdata[7].avg.getAverage();
+  *PTdata[7].value = PTdata[7].avg.filter(PTdata[7].mapped);
 
   for(int i = 0; i < DIsize;i++){
     if(DIdata[i].addr != -1){

@@ -65,6 +65,11 @@ void SerialCLI() {
         argVal = argStrVal.toInt();
         if(argVal > 0){delayTime = argVal;}
       }
+
+      else if(argStr.equalsIgnoreCase("sdm")) {
+        String argStrVal = argBuf[++n];
+        sdm = argStrVal.toInt();
+      }
    
       else if(argStr.equalsIgnoreCase("help") || argStr.equalsIgnoreCase("h")){
         printHelp();
@@ -127,13 +132,7 @@ void SerialCLI() {
       }
 
       else if(argStr.equalsIgnoreCase("err")){
-        if(errMsg[0] == ""){Serial.println("No PAUSE Errors");}
-        else{
-          for(int h = 0; h < 30; h++){
-            if(errMsg[h] != ""){Serial.print(errMsg[h]);}
-            else{break;}
-          }
-        }
+        Serial.println(faultString);
       }
         
       else if(argStr.equalsIgnoreCase("pretty")){
