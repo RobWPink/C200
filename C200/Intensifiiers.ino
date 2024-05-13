@@ -80,7 +80,7 @@ void intensifier1Operation(){
         break;
 
         case NORMAL:
-          if(warmup1A){
+          if(warmUp1A){
             switchingPsi1A = dynamicSwitchingPsi(false,AI_H2_psig_PT911_Stage1_SuctionTank,AI_H2_psig_PT716_Stage1_Discharge) * switchingRatio1A;
           }
           if(millis() - timer[2] > switchingTime1A-550 && timer[2]){//check if minimum time has passed

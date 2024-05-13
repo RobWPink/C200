@@ -251,6 +251,10 @@ RunningAverage avgPT462(MOVING_AVG_SIZE);
 RunningAverage avgPMP458(MOVING_AVG_SIZE);
 RunningAverage avgFCU112(MOVING_AVG_SIZE);
 
+RunningAverage avgLow(50);
+RunningAverage avgHigh(50);
+
+
 struct vars {
   String name;
   String key;

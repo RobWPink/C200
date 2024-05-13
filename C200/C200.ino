@@ -167,7 +167,8 @@ void loop() {
       }
 
       //Main operation of compressing
-      intensifier1Operation(); //Low side
+      //intensifier1Operation(); //Low side
+      intensifier1OperationV2();
       //intensifier2Operation(); //High side
 
     break;

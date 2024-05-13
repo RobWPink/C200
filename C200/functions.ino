@@ -23,13 +23,13 @@ void daughterPrint(unsigned long dly){
       if(errMsg[0] != ""){ sprintf(ln0[2],"PAUSE: %s",errMsg[0]); }
       else{ sprintf(ln0[2],"PAUSE: No Errors"); }
     }
-    lcd.setCursor(0, 0);
-    if(ln0[scrollCnt][0] == ' '){ scrollCnt = 0; }//reset scrollCnt
-    lcd.print(ln0[scrollCnt]);
+    // lcd.setCursor(0, 0);
+    // if(ln0[scrollCnt][0] == ' '){ scrollCnt = 0; }//reset scrollCnt
+    // lcd.print(ln0[scrollCnt]);
 
-    lcd.setCursor(0, 1);
-    sprintf(ln1,"C%02dCT%02dHT%02dMX%03d", highCycleCnt, (int)AI_CLT_C_TT207_CoolantSupply2, (int)AI_HYD_C_TT454_HydraulicTank, (int)PTdata[1].max/100);
-    lcd.print(ln1);
+    // lcd.setCursor(0, 1);
+    // sprintf(ln1,"C%02dCT%02dHT%02dMX%03d", highCycleCnt, (int)AI_CLT_C_TT207_CoolantSupply2, (int)AI_HYD_C_TT454_HydraulicTank, (int)PTdata[1].max/100);
+    // lcd.print(ln1);
   }
   
   if(!daughterPrintTimer){daughterPrintTimer = millis();}
