@@ -50,18 +50,10 @@ enum comp {
   SIDE_A,
   SIDE_B,
   PAUSE
-} INTENSE1,
-  INTENSE2,
+} SUB_STATE1,
+  SUB_STATE2,
   PREV1,
-  PREV2,
-  INTENSEm;
-
-enum substate {
-  STROKE,
-  WARMUP,
-  NORMAL
-} SUBSTATE1,
-  SUBSTATE2;
+  PREV2;
 
 enum prnt {
   NONE,
@@ -119,27 +111,32 @@ unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
 unsigned long virtualRedButton, virtualGreenButton, virtualAmberButton = 0;
 
-double difLow = 400;
-double difHigh1 = 400;
-double difHigh2 = 400;
+double prev1A,prev1B,prev2A,prev2B = 0;
 
-double sdmLow = 175;
-double sdmHigh = 175;
+double deadHeadDelta1A = 400;
+double deadHeadDelta1B = 400;
+double deadHeadDelta2A = 400;
+double deadHeadDelta2B = 400;
 
-int peakPsi1A = 0;
-int peakPsi1B = 0;
-int peakPsi2A = 0;
-int peakPsi2B = 0;
+double stdDevMult1A = 2;
+double stdDevMult1B = 2;
+double stdDevMult2A = 2;
+double stdDevMult2B = 2;
 
-int deadHeadPsi1A = 0;
-int deadHeadPsi1B = 0;
-int deadHeadPsi2A = 0;
-int deadHeadPsi2B = 0;
+double peakPsi1A = 0;
+double peakPsi1B = 0;
+double peakPsi2A = 0;
+double peakPsi2B = 0;
 
-int switchingTime1A = 1500;
-int switchingTime1B = 1500;
-int switchingTime2A = 1500;
-int switchingTime2B = 1500;
+double deadHeadPsi1A = 0;
+double deadHeadPsi1B = 0;
+double deadHeadPsi2A = 0;
+double deadHeadPsi2B = 0;
+
+double switchingTime1A = 1500;
+double switchingTime1B = 1500;
+double switchingTime2A = 1500;
+double switchingTime2B = 1500;
 
 double AI_HYD_C_TT454_HydraulicTank = 0;
 double AI_CLT_C_TT107_CoolantSupply1 = 0;
@@ -247,30 +244,29 @@ Ewma avgPT462(MOVING_AVG_SIZE);
 Ewma avgPMP458(MOVING_AVG_SIZE);
 Ewma avgFCU112(MOVING_AVG_SIZE);
 
-RunningAverage avgLow(50);
-RunningAverage avgHigh(50);
+RunningAverage deltasLow(50);
+RunningAverage deltasHigh(50);
 
 struct vars {
   String name;
   String key;
-  int* value;
-  int prev;
+  double* value;
+  double prev;
 } varData[] = {
-  { "peakPressure1A", "DHPSI1A", &peakPsi1A, 0 },
-  { "peakPressure1B", "DHPSI1B", &peakPsi1B, 0 },
-  { "peakPressure2A", "DHPSI2A", &peakPsi2A, 0 },
-  { "peakPressure2B", "DHPSI2B", &peakPsi2B, 0 },
-  { "deadHeadPressure1A", "DHPSI1A", &deadHeadPsi1A, 0 },
-  { "deadHeadPressure1B", "DHPSI1B", &deadHeadPsi1B, 0 },
-  { "deadHeadPressure2A", "DHPSI2A", &deadHeadPsi2A, 0 },
-  { "deadHeadPressure2B", "DHPSI2B", &deadHeadPsi2B, 0 },
+  { "stdDevMult1A", "SDM1A", &stdDevMult1A, 0 },
+  { "stdDevMult1B", "SDM1B", &stdDevMult1B, 0 },
+  { "stdDevMult2A", "SDM2A", &stdDevMult2A, 0 },
+  { "stdDevMult2B", "SDM2B", &stdDevMult2B, 0 },
+  { "deadHeadDelta1A", "DHD1A", &deadHeadDelta1A, 0 },
+  { "deadHeadDelta1B", "DHD1B", &deadHeadDelta1B, 0 },
+  { "deadHeadDelta2A", "DHD2A", &deadHeadDelta2A, 0 },
+  { "deadHeadDelta2B", "DHD2B", &deadHeadDelta2B, 0 },
   { "switchingTime1A", "SWTM1A", &switchingTime1A, 0 },
   { "switchingTime1B", "SWTM1B", &switchingTime1B, 0 },
   { "switchingTime2A", "SWTM2A", &switchingTime2A, 0 },
   { "switchingTime2B", "SWTM2B", &switchingTime2B, 0 }
 };
 int varSize = 12;
-
 
 struct fm {
   String name;
@@ -300,8 +296,10 @@ struct tt {
   double prev;
   int min;
   int minRecovery;
+  int minPause;
   int max;
   int maxRecovery;
+  int maxPause;
   double coef;
   ADS7828 adc;
   int mcp;
@@ -309,18 +307,19 @@ struct tt {
   int pause;
   bool overheat;
 } TTdata[] = {
-  { "AI_HYD_C_TT454_HydraulicTank", "TT454", 0, 0, avgTT454, &AI_HYD_C_TT454_HydraulicTank, 0, 20, 23, 55, 30, BCOEFFICIENT, adc1, -1, 0, 0, false },
-  { "AI_CLT_C_TT107_CoolantSupply1", "TT107", 0, 0, avgTT107, &AI_CLT_C_TT107_CoolantSupply1, 0, -1, -1, 140, 130, BCOEFFICIENT, adc1, -1, 1, 0, false },
-  { "AI_CLT_C_TT207_CoolantSupply2", "TT207", 0, 0, avgTT207, &AI_CLT_C_TT207_CoolantSupply2, 0, -1, -1, 140, 130, BCOEFFICIENT, adc1, -1, 2, 0, false },
-  { "AI_H2_C_TT917_Stage1_SuctionTank", "TT917", 0, 0, avgTT917, &AI_H2_C_TT917_Stage1_SuctionTank, 0, -1, -1, 140, 130, BCOEFFICIENT, adc1, -1, 3, 0, false },
-  { "AI_H2_C_TT809_Stage1_Discharge1", "TT809", 0, 0, avgTT809, &AI_H2_C_TT809_Stage1_Discharge1, 0, -1, -1, 140, 130, 1, -1, 1, -1, 0, false },
-  { "AI_H2_C_TT810_Stage1_Discharge2", "TT810", 0, 0, avgTT810, &AI_H2_C_TT810_Stage1_Discharge2, 0, -1, -1, 140, 130, 1, -1, 2, -1, 0, false },
-  //{ "AI_H2_C_TT701_Stage1_DischargePreTank", "TT701", 0, 0, avgTT701, &AI_H2_C_TT701_Stage1_DischargePreTank, 0, -1, -1, -1, -1, -1,-1, -1, -1, 0, false }
-  { "AI_H2_C_TT715_Stage2_SuctionTank", "TT715", 0, 0, avgTT715, &AI_H2_C_TT715_Stage2_SuctionTank, 0, -1, -1, 140, 130, 1, -1, 3, -1, 0, false },
-  { "AI_H2_C_TT520_Stage2_Discharge", "TT520", 0, 0, avgTT520, &AI_H2_C_TT520_Stage2_Discharge, 0, -1, -1, 140, 130, 1, -1, 4, -1, 0, false },
-  { "AI_H2_C_TT521_Stage3_Suction", "TT521", 0, 0, avgTT521, &AI_H2_C_TT521_Stage3_Suction, 0, -1, -1, 140, 130, 1, -1, 5, -1, 0, false },
-  { "AI_H2_C_TT522_Stage3_Discharge", "TT522", 0, 0, avgTT522, &AI_H2_C_TT522_Stage3_Discharge, 0, -1, -1, 140, 130, 1, -1, 6, -1, 0, false },
+  { "AI_HYD_C_TT454_HydraulicTank", "TT454", 0, 0, avgTT454, &AI_HYD_C_TT454_HydraulicTank, 0, 20, 23, 0, 55, 30, 0,  BCOEFFICIENT, adc1, -1, 0, 0, false },
+  { "AI_CLT_C_TT107_CoolantSupply1", "TT107", 0, 0, avgTT107, &AI_CLT_C_TT107_CoolantSupply1, 0, -1, -1, 0, 140, 130, 0,  BCOEFFICIENT, adc1, -1, 1, 0, false },
+  { "AI_CLT_C_TT207_CoolantSupply2", "TT207", 0, 0, avgTT207, &AI_CLT_C_TT207_CoolantSupply2, 0, -1, -1, 0, 140, 130, 0,  BCOEFFICIENT, adc1, -1, 2, 0, false },
+  { "AI_H2_C_TT917_Stage1_SuctionTank", "TT917", 0, 0, avgTT917, &AI_H2_C_TT917_Stage1_SuctionTank, 0, -1, -1, 0, 140, 130, 0,  BCOEFFICIENT, adc1, -1, 3, 0, false },
+  { "AI_H2_C_TT809_Stage1_Discharge1", "TT809", 0, 0, avgTT809, &AI_H2_C_TT809_Stage1_Discharge1, 0, -1, -1, 0, 140, 130, 0,  1, -1, 1, -1, 0, false },
+  { "AI_H2_C_TT810_Stage1_Discharge2", "TT810", 0, 0, avgTT810, &AI_H2_C_TT810_Stage1_Discharge2, 0, -1, -1, 0, 140, 130, 0,  1, -1, 2, -1, 0, false },
+  //{ "AI_H2_C_TT701_Stage1_DischargePreTank", "TT701", 0, 0, avgTT701, &AI_H2_C_TT701_Stage1_DischargePreTank, 0, -1, -1, 0, -1, -1,0,  -1,-1, -1, -1, 0, false }
+  { "AI_H2_C_TT715_Stage2_SuctionTank", "TT715", 0, 0, avgTT715, &AI_H2_C_TT715_Stage2_SuctionTank, 0, -1, -1, 0, 140, 130, 0,  1, -1, 3, -1, 0, false },
+  { "AI_H2_C_TT520_Stage2_Discharge", "TT520", 0, 0, avgTT520, &AI_H2_C_TT520_Stage2_Discharge, 0, -1, -1, 0, 140, 130, 0,  1, -1, 4, -1, 0, false },
+  { "AI_H2_C_TT521_Stage3_Suction", "TT521", 0, 0, avgTT521, &AI_H2_C_TT521_Stage3_Suction, 0, -1, -1, 0, 140, 130, 0,  1, -1, 5, -1, 0, false },
+  { "AI_H2_C_TT522_Stage3_Discharge", "TT522", 0, 0, avgTT522, &AI_H2_C_TT522_Stage3_Discharge, 0, -1, -1, 0, 140, 130, 0,  1, -1, 6, -1, 0, false },
 };
+
 int TTsize = 10;
 
 struct pt {

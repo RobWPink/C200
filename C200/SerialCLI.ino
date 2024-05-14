@@ -36,6 +36,15 @@ void SerialCLI() {
           break;
         }
       }
+      for(int i = 0; i < varSize; i++){
+        if(argStr.equalsIgnoreCase(varData[i].key)){
+          String argStrVal = argBuf[++n];
+          argVal = argStrVal.toDouble();
+          *DOdata[i].value = argVal;
+          digital = true;
+          break;
+        }
+      }
       if(digital){;}
 
       else if(argStr.equalsIgnoreCase("delay")) {
@@ -44,25 +53,6 @@ void SerialCLI() {
         if(argVal > 0){delayTime = argVal;}
       }
 
-      else if(argStr.equalsIgnoreCase("sdmlow")) {
-        String argStrVal = argBuf[++n];
-        sdmLow = argStrVal.toDouble();
-      }
-
-      else if(argStr.equalsIgnoreCase("sdmhigh")) {
-        String argStrVal = argBuf[++n];
-        sdmHigh = argStrVal.toDouble();
-      }
-
-      else if(argStr.equalsIgnoreCase("diflow")) {
-        String argStrVal = argBuf[++n];
-        difLow = argStrVal.toDouble();
-      }
-
-      else if(argStr.equalsIgnoreCase("difhigh")) {
-        String argStrVal = argBuf[++n];
-        difHigh = argStrVal.toDouble();
-      }
 
       else if(argStr.equalsIgnoreCase("ratio")) {
         String argStrVal = argBuf[++n];
@@ -80,10 +70,6 @@ void SerialCLI() {
       else if(argStr.equalsIgnoreCase("packet")){
         printMode = (printMode == PACKET)?NONE:PACKET;
       }
-
-      // else if(argStr.equalsIgnoreCase("alldata")){
-      //   printMode = (printMode == ALL)?NONE:ALL;
-      // }
 
       else if(argStr.equalsIgnoreCase("di")){
         printMode = (printMode == DIGITAL_IN)?NONE:DIGITAL_IN;
@@ -174,10 +160,6 @@ void printHelp(){
   Serial.println("abn                -> Simulate Amber Button Push");
   Serial.println("rbn                -> Simulate Red Button Push");
   Serial.println("estop              -> Simulate ESTOP Button Push");
-  Serial.println("sdmlow             -> Change max Std.Dev delta on low side");
-  Serial.println("sdmhigh            -> Change max Std.Dev delta on high side");
-  Serial.println("diflow             -> Change failsafe deadhead buffer difference on low side");
-  Serial.println("difhigh            -> Change failsafe deadhead buffer difference on high side");
   Serial.println("ratio              -> Change Stage1 max compression ratio");
   Serial.println("delay              -> Designate print delay time in ms (default: 1000)");
   Serial.println("pretty             -> Toggle print mode labeled lists <--> csv list");
@@ -194,6 +176,14 @@ void printHelp(){
     cc = cc + "-> Toggle " + DOdata[i].name;
     Serial.println(cc);
   }
+  for(int i = 0; i < varSize; i++){
+    String cc = varData[i].key;
+    for(int b = 1;b < (19 - cc.length());b++){
+      cc = cc + " ";
+    }
+    cc = cc + "-> Change " + varData[i].name;
+    Serial.println(cc);
+  }
   Serial.println("###############################################");
 
 }
@@ -208,7 +198,7 @@ void dataPrint(unsigned long dly){
   //   String msgD = "";
   //   String msgE = "";
   //   String msgF = "";
-  //   String msgG = "\"STATE\":" + String(STATE) + "," + "\"INT_STATE1\":" + String(INTENSE1) + "," + "\"INT_STATE2\":" + String(INTENSE2) + "," + "\"SUB_STATE1\":" + String(SUBSTATE1) + "," + "\"SUB_STATE1\":" + String(SUBSTATE2);
+  //   String msgG = "\"STATE\":" + String(STATE) + "," + "\"INT_STATE1\":" + String(SUB_STATE1) + "," + "\"INT_STATE2\":" + String(SUB_STATE2) + "," + "\"SUB_STATE1\":" + String(SUBSTATE1) + "," + "\"SUB_STATE1\":" + String(SUBSTATE2);
   //   for(int i = 0; i < TTsize;i++){
   //     msgA = msgA + "\"" + TTdata[i].key + "\":" + *TTdata[i].value + ",";
   //   }
@@ -238,6 +228,12 @@ void dataPrint(unsigned long dly){
   //   Serial.print(msgE);
   //   Serial.print(msgF);
   //   Serial.println(msgG);
+  Serial.print("StdDevLOW:");
+  Serial.print(deltasLow.getValue(deltasLow.getCount()-1));
+  Serial.print(",");
+  Serial.print("StdDevHIGH:");
+  Serial.print(deltasHigh.getValue(deltasHigh.getCount()-1)); 
+  Serial.print(",");
   Serial.print("low:");
   Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);
   Serial.print(",");
@@ -249,7 +245,7 @@ void dataPrint(unsigned long dly){
     String msg = "{";
     switch(printMode){
       case PACKET:
-       // msg = msg + "\"STATE\":" + STATE + "," + "\"INT_STATE1\":" + INTENSE1 + "," + "\"INT_STATE2\":" + INTENSE2 + "," + "\"SUB_STATE1\":" + SUBSTATE1 + "," + "\"SUB_STATE1\":" + SUBSTATE2;
+       // msg = msg + "\"STATE\":" + STATE + "," + "\"INT_STATE1\":" + SUB_STATE1 + "," + "\"INT_STATE2\":" + SUB_STATE2 + "," + "\"SUB_STATE1\":" + SUBSTATE1 + "," + "\"SUB_STATE1\":" + SUBSTATE2;
         for(int i = 0; i < TTsize;i++){
           if(*TTdata[i].value != TTdata[i].prev){
             if(msg != "{"){msg = msg + ",";}
@@ -406,8 +402,8 @@ void dataPrint(unsigned long dly){
       Serial.println(STATE);
 
       Serial.print("SUBSTATE:1/2: ");
-      Serial.print(INTENSE1);Serial.print(", ");
-      Serial.println(INTENSE2);
+      Serial.print(SUB_STATE1);Serial.print(", ");
+      Serial.println(SUB_STATE2);
 
       Serial.print("stateHistory1: ");
       if(stateHistory1.length() > 30){
@@ -421,7 +417,7 @@ void dataPrint(unsigned long dly){
       }
       Serial.println(stateHistory2);
 
-      Serial.print("intense timers: ");
+      Serial.print("SUB_STATE timers: ");
       Serial.print(millis() - timer[2]);Serial.print(", ");
       Serial.println(millis() - timer[3]);
 
@@ -443,26 +439,30 @@ void dataPrint(unsigned long dly){
       Serial.print(deadHeadPsi2A);Serial.print(", ");
       Serial.println(deadHeadPsi2B);
 
-      Serial.print("S1_ratio: ");
-      Serial.println(Stage1_Compression_RATIO);
-
-      Serial.print("Std.Dev delta: ");
-      Serial.print(sdmLow);Serial.print(", ");
-      Serial.println(sdmHigh);
-
-      Serial.print("Std.Dev: ");
-      Serial.print(avgLow.getStandardDeviation());Serial.print(", ");
-      Serial.println(avgHigh.getStandardDeviation());
-
-      Serial.print("failsafe dif ");
-      Serial.print(difLow);Serial.print(", ");
-      Serial.println(difHigh);
-      
       Serial.print("peakPsi:1A,1B,2A,2B: ");
       Serial.print(peakPsi1A);Serial.print(", ");
       Serial.print(peakPsi1B);Serial.print(", ");
       Serial.print(peakPsi2A);Serial.print(", ");
       Serial.println(peakPsi2B);
+
+      Serial.print("stdDevMult:1A,1B,2A,2B: ");
+      Serial.print(stdDevMult1A);Serial.print(", ");
+      Serial.print(stdDevMult1B);Serial.print(", ");
+      Serial.print(stdDevMult2A);Serial.print(", ");
+      Serial.println(stdDevMult2B);
+
+      Serial.print("deadHeadDelta:1A,1B,2A,2B: ");
+      Serial.print(deadHeadDelta1A);Serial.print(", ");
+      Serial.print(deadHeadDelta1B);Serial.print(", ");
+      Serial.print(deadHeadDelta2A);Serial.print(", ");
+      Serial.println(deadHeadDelta2B);
+
+      Serial.print("S1_ratio: ");
+      Serial.println(Stage1_Compression_RATIO);
+
+      Serial.print("Std.Dev: ");
+      Serial.print(deltasLow.getStandardDeviation());Serial.print(", ");
+      Serial.println(deltasHigh.getStandardDeviation());
 
       Serial.print("inlets: ");
       Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);Serial.print(", ");

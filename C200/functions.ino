@@ -250,9 +250,9 @@ void i2cTransceive(int ptInterval){
         if(*PTdata[i].value >= PTdata[i].max && !PTdata[i].overPressure){
           PTdata[i].overPressure = true;
           if(STATE == PRODUCTION){
-            if(!PTdata[i].maxPause){ INTENSE1 = PAUSE; INTENSE2 = PAUSE; }
-            else if(PTdata[i].maxPause == 1){INTENSE1 = PAUSE;}
-            else if(PTdata[i].maxPause == 2){INTENSE2 = PAUSE;}
+            if(!PTdata[i].maxPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; }
+            else if(PTdata[i].maxPause == 1){SUB_STATE1 = PAUSE;}
+            else if(PTdata[i].maxPause == 2){SUB_STATE2 = PAUSE;}
             else{Serial.println("pause state error");}
           }
         }
@@ -265,9 +265,9 @@ void i2cTransceive(int ptInterval){
         if(*PTdata[i].value < PTdata[i].min && !PTdata[i].overPressure){
           PTdata[i].overPressure = true;
           if(STATE == PRODUCTION){
-            if(!PTdata[i].minPause){ INTENSE1 = PAUSE; INTENSE2 = PAUSE; }
-            else if(PTdata[i].minPause == 1){INTENSE1 = PAUSE;}
-            else if(PTdata[i].minPause == 2){INTENSE2 = PAUSE;}
+            if(!PTdata[i].minPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; }
+            else if(PTdata[i].minPause == 1){SUB_STATE1 = PAUSE;}
+            else if(PTdata[i].minPause == 2){SUB_STATE2 = PAUSE;}
             else{Serial.println("pause state error");}
           }
         }

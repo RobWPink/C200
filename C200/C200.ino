@@ -4,7 +4,7 @@ void setup() {
   RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200v2_Longview", "V0.4.5");
+  matrixSetup("C200v2_Longview", "V0.4.6");
   i2cSetup();
   Serial.println("OK");
   delay(3000);
@@ -74,10 +74,8 @@ void loop() {
     timer[1] = 0;
     timer[2] = 0;
     timer[3] = 0;
-    INTENSE1 = START;
-    INTENSE2 = START;
-    SUBSTATE1 = STROKE;
-    SUBSTATE2 = STROKE;
+    SUB_STATE1 = START;
+    SUB_STATE2 = START;
 
     DO_Encl_PilotRed = false;
     DO_Encl_PilotGreen = false;
@@ -142,8 +140,8 @@ void loop() {
       if(!DI_Encl_ButtonRed && prevR){
         prevR = false;
         if(millis() - holdR < 5000 && holdR){
-          INTENSE1 = PAUSE;
-          INTENSE2 = PAUSE;
+          SUB_STATE1 = PAUSE;
+          SUB_STATE2 = PAUSE;
           manualPause = true;
         }
         else{STATE = SHUTDOWN;}
@@ -151,12 +149,12 @@ void loop() {
       }
       if(manualPause && DI_Encl_ButtonGreen){
         manualPause = false;
-        INTENSE1 = START;
-        INTENSE2 = START;
+        SUB_STATE1 = START;
+        SUB_STATE2 = START;
       }
 
       if(manualPause){ smallMatrix[2].displayPause(false); }
-      else{ smallMatrix[2].displayQuadrants(DO_HYD_XV460_DCV1_A,DO_HYD_XV463_DCV1_B,DO_HYD_XV554_DCV2_A,DO_HYD_XV557_DCV2_B,(INTENSE1==PAUSE),(INTENSE2==PAUSE)); }
+      else{ smallMatrix[2].displayQuadrants(DO_HYD_XV460_DCV1_A,DO_HYD_XV463_DCV1_B,DO_HYD_XV554_DCV2_A,DO_HYD_XV557_DCV2_B,(SUB_STATE1==PAUSE),(SUB_STATE2==PAUSE)); }
       
       if(!timer[1]){timer[1] = millis();}
       if(millis() - timer[1] > 60000 && timer[1]){
