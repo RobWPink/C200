@@ -170,7 +170,8 @@ void loop() {
       //Main operation of compressing
       intensifier1Operation();
       if(millis() - timer[0] > 20000 && timer[0]){
-        intensifier2Operation();
+        if(aaa){intensifier2Operation();}
+        else{intensifier2Operation_OLD();}
       }
       
 

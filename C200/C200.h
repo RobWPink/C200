@@ -27,6 +27,7 @@
 #define BCOEFFICIENT_d -2350
 #define BCOEFFICIENT_c -2650.4
 #define BCOEFFICIENT_e 3988
+bool aaa = false;
 
 enum state {
   IDLE_OFF,
@@ -119,7 +120,8 @@ unsigned long hydraulicSafetyTimer, twoTimer, loopTimer, dataTimer, pauseTimer, 
 unsigned long virtualRedButton, virtualGreenButton, virtualAmberButton = 0;
 
 double difLow = 400;
-double difHigh = 400;
+double difHigh1 = 400;
+double difHigh2 = 400;
 
 double sdmLow = 175;
 double sdmHigh = 175;
