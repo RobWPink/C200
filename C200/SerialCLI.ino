@@ -54,6 +54,16 @@ void SerialCLI() {
         sdmHigh = argStrVal.toDouble();
       }
 
+      else if(argStr.equalsIgnoreCase("diflow")) {
+        String argStrVal = argBuf[++n];
+        difLow = argStrVal.toDouble();
+      }
+
+      else if(argStr.equalsIgnoreCase("difhigh")) {
+        String argStrVal = argBuf[++n];
+        difHigh = argStrVal.toDouble();
+      }
+
       else if(argStr.equalsIgnoreCase("ratio")) {
         String argStrVal = argBuf[++n];
         Stage1_Compression_RATIO = argStrVal.toDouble();
@@ -127,10 +137,6 @@ void SerialCLI() {
         prettyPrint = !prettyPrint;
       }
 
-      else if(argStr.equalsIgnoreCase("highSide")){
-        highSide = !highSide;
-      }
-
       else if(argStr.equalsIgnoreCase("manual")){
         manualMode = !manualMode;
         if(manualMode){
@@ -168,8 +174,10 @@ void printHelp(){
   Serial.println("abn                -> Simulate Amber Button Push");
   Serial.println("rbn                -> Simulate Red Button Push");
   Serial.println("estop              -> Simulate ESTOP Button Push");
-  Serial.println("sdmlow             -> Change Std.Dev multiplier on low side");
-  Serial.println("sdmhigh            -> Change Std.Dev multiplier on high side");
+  Serial.println("sdmlow             -> Change max Std.Dev delta on low side");
+  Serial.println("sdmhigh            -> Change max Std.Dev delta on high side");
+  Serial.println("diflow             -> Change failsafe deadhead buffer difference on low side");
+  Serial.println("difhigh            -> Change failsafe deadhead buffer difference on high side");
   Serial.println("ratio              -> Change Stage1 max compression ratio");
   Serial.println("delay              -> Designate print delay time in ms (default: 1000)");
   Serial.println("pretty             -> Toggle print mode labeled lists <--> csv list");
@@ -397,7 +405,7 @@ void dataPrint(unsigned long dly){
       Serial.print("STATE: ");
       Serial.println(STATE);
 
-      Serial.print("INTENSE:1/2: ");
+      Serial.print("SUBSTATE:1/2: ");
       Serial.print(INTENSE1);Serial.print(", ");
       Serial.println(INTENSE2);
 
@@ -423,12 +431,6 @@ void dataPrint(unsigned long dly){
       Serial.print(DO_HYD_XV554_DCV2_A);
       Serial.println(DO_HYD_XV557_DCV2_B);
 
-      // Serial.print("switchingPsi:1A,1B,2A,2B: ");
-      // Serial.print(switchingPsi1A);Serial.print(", ");
-      // Serial.print(switchingPsi1B);Serial.print(", ");
-      // Serial.print(switchingPsi2A);Serial.print(", ");
-      // Serial.println(switchingPsi2B);
-
       Serial.print("switchingTime:1A,1B,2A,2B: ");
       Serial.print(switchingTime1A);Serial.print(", ");
       Serial.print(switchingTime1B);Serial.print(", ");
@@ -444,7 +446,7 @@ void dataPrint(unsigned long dly){
       Serial.print("S1_ratio: ");
       Serial.println(Stage1_Compression_RATIO);
 
-      Serial.print("Std.Dev Mult: ");
+      Serial.print("Std.Dev delta: ");
       Serial.print(sdmLow);Serial.print(", ");
       Serial.println(sdmHigh);
 
@@ -452,9 +454,9 @@ void dataPrint(unsigned long dly){
       Serial.print(avgLow.getStandardDeviation());Serial.print(", ");
       Serial.println(avgHigh.getStandardDeviation());
 
-      Serial.print("Mean: ");
-      Serial.print(avgLow.getFastAverage());Serial.print(", ");
-      Serial.println(avgHigh.getFastAverage());
+      Serial.print("failsafe dif ");
+      Serial.print(difLow);Serial.print(", ");
+      Serial.println(difHigh);
       
       Serial.print("peakPsi:1A,1B,2A,2B: ");
       Serial.print(peakPsi1A);Serial.print(", ");

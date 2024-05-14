@@ -100,8 +100,6 @@ double loopTime = 0;
 String stateHistory1 = "";
 String stateHistory2 = "";
 
-int comp = 0;
-
 double Stage1_Compression_RATIO = 6.5;
 uint8_t mcpExist = 0;
 int scrollCnt, errorCnt = 0;
@@ -114,14 +112,18 @@ bool flashTog[3] = { false };
 bool tog[5] = { false };
 bool plot, prettyPrint, rawPrint, errorPrint = false;
 bool prevG, prevA, prevR = false;
-bool daughterTog, lsrTog, manualPause, manualMode,highSide = false;
+bool daughterTog, lsrTog, manualPause, manualMode;
 unsigned long timer[10] = { 0 };
 unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
 unsigned long virtualRedButton, virtualGreenButton, virtualAmberButton = 0;
 
-double sdmLow = 1.75;
-double sdmHigh = 1.75;
+double difLow = 400;
+double difHigh = 400;
+
+double sdmLow = 175;
+double sdmHigh = 175;
+
 int peakPsi1A = 0;
 int peakPsi1B = 0;
 int peakPsi2A = 0;
@@ -131,10 +133,11 @@ int deadHeadPsi1A = 0;
 int deadHeadPsi1B = 0;
 int deadHeadPsi2A = 0;
 int deadHeadPsi2B = 0;
-int switchingTime1A = 3000;
-int switchingTime1B = 3000;
-int switchingTime2A = 3000;
-int switchingTime2B = 3000;
+
+int switchingTime1A = 1500;
+int switchingTime1B = 1500;
+int switchingTime2A = 1500;
+int switchingTime2B = 1500;
 
 double AI_HYD_C_TT454_HydraulicTank = 0;
 double AI_CLT_C_TT107_CoolantSupply1 = 0;
