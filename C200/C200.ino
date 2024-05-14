@@ -4,7 +4,7 @@ void setup() {
   RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200v2_Longview", "V0.4.6");
+  matrixSetup("C200v2_Longview", "V0.5.2");
   i2cSetup();
   Serial.println("OK");
   delay(3000);
@@ -55,7 +55,7 @@ void loop() {
   //never go above 6.5/1 s1s/s2s
   PTdata[2].max = AI_H2_psig_PT911_Stage1_SuctionTank*Stage1_Compression_RATIO;
   PTdata[2].max = (PTdata[2].max > 1400)?1400:PTdata[2].max;
-  PTdata[2].maxRecovery =  PTdata[2].max - 250;
+  PTdata[2].maxRecovery =  PTdata[2].max - 200;
 
   if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
@@ -168,8 +168,8 @@ void loop() {
       //Main operation of compressing
       intensifier1Operation();
       if(millis() - timer[0] > 20000 && timer[0]){
-        if(aaa){intensifier2Operation();}
-        else{intensifier2Operation_OLD();}
+        intensifier2Operation();
+       // else{intensifier2Operation_OLD();}
       }
       
 
@@ -244,11 +244,11 @@ void loop() {
           *DOdata[i].value = false;
         }
       }
-      for(int i = 0; i < varSize;i++){
-        if(varData[i].key.indexOf("SWTM") == -1){
-          *varData[i].value = 0;
-        }
-      }
+      // for(int i = 0; i < varSize;i++){
+      //   if(varData[i].key.indexOf("SWTM") == -1){
+      //     *varData[i].value = 0;
+      //   }
+      // }
 
       if(DI_Encl_ESTOP){STATE = IDLE_OFF;}
     break;

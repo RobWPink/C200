@@ -115,8 +115,8 @@ double prev1A,prev1B,prev2A,prev2B = 0;
 
 double deadHeadDelta1A = 400;
 double deadHeadDelta1B = 400;
-double deadHeadDelta2A = 400;
-double deadHeadDelta2B = 400;
+double deadHeadDelta2A = 100;
+double deadHeadDelta2B = 800;
 
 double stdDevMult1A = 2;
 double stdDevMult1B = 2;
@@ -247,26 +247,26 @@ Ewma avgFCU112(MOVING_AVG_SIZE);
 RunningAverage deltasLow(50);
 RunningAverage deltasHigh(50);
 
-struct vars {
-  String name;
-  String key;
-  double* value;
-  double prev;
-} varData[] = {
-  { "stdDevMult1A", "SDM1A", &stdDevMult1A, 0 },
-  { "stdDevMult1B", "SDM1B", &stdDevMult1B, 0 },
-  { "stdDevMult2A", "SDM2A", &stdDevMult2A, 0 },
-  { "stdDevMult2B", "SDM2B", &stdDevMult2B, 0 },
-  { "deadHeadDelta1A", "DHD1A", &deadHeadDelta1A, 0 },
-  { "deadHeadDelta1B", "DHD1B", &deadHeadDelta1B, 0 },
-  { "deadHeadDelta2A", "DHD2A", &deadHeadDelta2A, 0 },
-  { "deadHeadDelta2B", "DHD2B", &deadHeadDelta2B, 0 },
-  { "switchingTime1A", "SWTM1A", &switchingTime1A, 0 },
-  { "switchingTime1B", "SWTM1B", &switchingTime1B, 0 },
-  { "switchingTime2A", "SWTM2A", &switchingTime2A, 0 },
-  { "switchingTime2B", "SWTM2B", &switchingTime2B, 0 }
-};
-int varSize = 12;
+// struct vars {
+//   String name;
+//   String key;
+//   double* value;
+//   double prev;
+// } varData[] = {
+//   // { "stdDevMult1A", "SDM1A", &stdDevMult1A, 0 },
+//   // { "stdDevMult1B", "SDM1B", &stdDevMult1B, 0 },
+//   // { "stdDevMult2A", "SDM2A", &stdDevMult2A, 0 },
+//   // { "stdDevMult2B", "SDM2B", &stdDevMult2B, 0 },
+//   { "deadHeadDelta1A", "DHD1A", &deadHeadDelta1A, 0 },
+//   { "deadHeadDelta1B", "DHD1B", &deadHeadDelta1B, 0 },
+//   { "deadHeadDelta2A", "DHD2A", &deadHeadDelta2A, 0 },
+//   { "deadHeadDelta2B", "DHD2B", &deadHeadDelta2B, 0 },
+//   { "switchingTime1A", "SWTM1A", &switchingTime1A, 0 },
+//   { "switchingTime1B", "SWTM1B", &switchingTime1B, 0 },
+//   { "switchingTime2A", "SWTM2A", &switchingTime2A, 0 },
+//   { "switchingTime2B", "SWTM2B", &switchingTime2B, 0 }
+// };
+// int varSize = 8;
 
 struct fm {
   String name;
