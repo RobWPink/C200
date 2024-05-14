@@ -44,9 +44,19 @@ void SerialCLI() {
         if(argVal > 0){delayTime = argVal;}
       }
 
-      else if(argStr.equalsIgnoreCase("sdm")) {
+      else if(argStr.equalsIgnoreCase("sdmlow")) {
         String argStrVal = argBuf[++n];
-        sdmLow = argStrVal.toInt();
+        sdmLow = argStrVal.toDouble();
+      }
+
+      else if(argStr.equalsIgnoreCase("sdmhigh")) {
+        String argStrVal = argBuf[++n];
+        sdmHigh = argStrVal.toDouble();
+      }
+
+      else if(argStr.equalsIgnoreCase("ratio")) {
+        String argStrVal = argBuf[++n];
+        Stage1_Compression_RATIO = argStrVal.toDouble();
       }
    
       else if(argStr.equalsIgnoreCase("help") || argStr.equalsIgnoreCase("h")){
@@ -117,6 +127,10 @@ void SerialCLI() {
         prettyPrint = !prettyPrint;
       }
 
+      else if(argStr.equalsIgnoreCase("highSide")){
+        highSide = !highSide;
+      }
+
       else if(argStr.equalsIgnoreCase("manual")){
         manualMode = !manualMode;
         if(manualMode){
@@ -154,7 +168,9 @@ void printHelp(){
   Serial.println("abn                -> Simulate Amber Button Push");
   Serial.println("rbn                -> Simulate Red Button Push");
   Serial.println("estop              -> Simulate ESTOP Button Push");
-  Serial.println("sdm                -> Change Std.Dev multiplier");
+  Serial.println("sdmlow             -> Change Std.Dev multiplier on low side");
+  Serial.println("sdmhigh            -> Change Std.Dev multiplier on high side");
+  Serial.println("ratio              -> Change Stage1 max compression ratio");
   Serial.println("delay              -> Designate print delay time in ms (default: 1000)");
   Serial.println("pretty             -> Toggle print mode labeled lists <--> csv list");
   Serial.println("raw                -> Toggle to print only raw values");
@@ -178,42 +194,47 @@ void dataPrint(unsigned long dly){
   if(!dataPrintTimer){dataPrintTimer = millis();}
   
   if(plot){
-    String msgA = "";
-    String msgB = "";
-    String msgC = "";
-    String msgD = "";
-    String msgE = "";
-    String msgF = "";
-    String msgG = "\"STATE\":" + String(STATE) + "," + "\"INT_STATE1\":" + String(INTENSE1) + "," + "\"INT_STATE2\":" + String(INTENSE2) + "," + "\"SUB_STATE1\":" + String(SUBSTATE1) + "," + "\"SUB_STATE1\":" + String(SUBSTATE2);
-    for(int i = 0; i < TTsize;i++){
-      msgA = msgA + "\"" + TTdata[i].key + "\":" + *TTdata[i].value + ",";
-    }
-    for(int i = 0; i < PTsize;i++){
-      msgB = msgB + PTdata[i].key + ":" + *PTdata[i].value + ",";
-    }
-    for(int i = 0; i < 2;i++){
-      for(int j = 0; j < 4;j++){
-        msgC = msgC + "\"" + flowMeters[i].flowData[j].key + "\"" + ":" + *flowMeters[i].flowData[j].value + ",";
-      }
-    }
-    for(int i = 0; i < varSize;i++){
-      msgD = msgD + "\"" + varData[i].key + "\"" + ":" + *varData[i].value + ",";
-    }
-    for(int i = 0; i < DOsize;i++){
-      msgE = msgE + "\"" + DOdata[i].key + "\"" + ":" + *DOdata[i].value + ",";
-    }
-    for(int i = 0; i < DIsize;i++){
-      msgF = msgF + "\"" + DIdata[i].key + "\"" + ":" + *DIdata[i].value + ",";
-    }
-    msgF.remove(msgF.length()-1,1);//get rid of extra comma
+  //   String msgA = "";
+  //   String msgB = "";
+  //   String msgC = "";
+  //   String msgD = "";
+  //   String msgE = "";
+  //   String msgF = "";
+  //   String msgG = "\"STATE\":" + String(STATE) + "," + "\"INT_STATE1\":" + String(INTENSE1) + "," + "\"INT_STATE2\":" + String(INTENSE2) + "," + "\"SUB_STATE1\":" + String(SUBSTATE1) + "," + "\"SUB_STATE1\":" + String(SUBSTATE2);
+  //   for(int i = 0; i < TTsize;i++){
+  //     msgA = msgA + "\"" + TTdata[i].key + "\":" + *TTdata[i].value + ",";
+  //   }
+  //   for(int i = 0; i < PTsize;i++){
+  //     msgB = msgB + PTdata[i].key + ":" + *PTdata[i].value + ",";
+  //   }
+  //   for(int i = 0; i < 2;i++){
+  //     for(int j = 0; j < 4;j++){
+  //       msgC = msgC + "\"" + flowMeters[i].flowData[j].key + "\"" + ":" + *flowMeters[i].flowData[j].value + ",";
+  //     }
+  //   }
+  //   for(int i = 0; i < varSize;i++){
+  //     msgD = msgD + "\"" + varData[i].key + "\"" + ":" + *varData[i].value + ",";
+  //   }
+  //   for(int i = 0; i < DOsize;i++){
+  //     msgE = msgE + "\"" + DOdata[i].key + "\"" + ":" + *DOdata[i].value + ",";
+  //   }
+  //   for(int i = 0; i < DIsize;i++){
+  //     msgF = msgF + "\"" + DIdata[i].key + "\"" + ":" + *DIdata[i].value + ",";
+  //   }
+  //   msgF.remove(msgF.length()-1,1);//get rid of extra comma
 
-    Serial.print(msgA);
-    Serial.print(msgB);
-    Serial.print(msgC);
-    Serial.print(msgD);
-    Serial.print(msgE);
-    Serial.print(msgF);
-    Serial.println(msgG);
+  //   Serial.print(msgA);
+  //   Serial.print(msgB);
+  //   Serial.print(msgC);
+  //   Serial.print(msgD);
+  //   Serial.print(msgE);
+  //   Serial.print(msgF);
+  //   Serial.println(msgG);
+  Serial.print("low:");
+  Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);
+  Serial.print(",");
+  Serial.print("high:");
+  Serial.println(AI_HYD_psig_PT561_HydraulicInlet2);
   }
   else if(millis() - dataPrintTimer > dly && dataPrintTimer){
     if(!printMode){return;}
@@ -420,17 +441,20 @@ void dataPrint(unsigned long dly){
       Serial.print(deadHeadPsi2A);Serial.print(", ");
       Serial.println(deadHeadPsi2B);
 
+      Serial.print("S1_ratio: ");
+      Serial.println(Stage1_Compression_RATIO);
+
       Serial.print("Std.Dev Mult: ");
       Serial.print(sdmLow);Serial.print(", ");
       Serial.println(sdmHigh);
 
       Serial.print("Std.Dev: ");
       Serial.print(avgLow.getStandardDeviation());Serial.print(", ");
-      Serial.println();
+      Serial.println(avgHigh.getStandardDeviation());
 
-      Serial.print("Mean");
+      Serial.print("Mean: ");
       Serial.print(avgLow.getFastAverage());Serial.print(", ");
-      Serial.println();
+      Serial.println(avgHigh.getFastAverage());
       
       Serial.print("peakPsi:1A,1B,2A,2B: ");
       Serial.print(peakPsi1A);Serial.print(", ");

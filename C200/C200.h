@@ -114,7 +114,7 @@ bool flashTog[3] = { false };
 bool tog[5] = { false };
 bool plot, prettyPrint, rawPrint, errorPrint = false;
 bool prevG, prevA, prevR = false;
-bool daughterTog, lsrTog, manualPause, manualMode = false;
+bool daughterTog, lsrTog, manualPause, manualMode,highSide = false;
 unsigned long timer[10] = { 0 };
 unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
@@ -341,7 +341,7 @@ struct pt {
   int channel;
   bool overPressure;
 } PTdata[] = {
-  { "AI_H2_psig_PT911_Stage1_SuctionTank", "PT911", 0, 0, 0, avgPT911, &AI_H2_psig_PT911_Stage1_SuctionTank, 0, 70, 80, 1, 400, 390, 0, 820, 4096, 0, 500, adc2, 3, false },
+  { "AI_H2_psig_PT911_Stage1_SuctionTank", "PT911", 0, 0, 0, avgPT911, &AI_H2_psig_PT911_Stage1_SuctionTank, 0, 75, 85, 1, 400, 390, 0, 820, 4096, 0, 500, adc2, 3, false },
   { "AI_H2_psig_PT716_Stage1_Discharge", "PT716", 0, 0, 0, avgPT716, &AI_H2_psig_PT716_Stage1_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 2000, adc2, 4, false },
   { "AI_H2_psig_PT712_Stage1_DischargeTank", "PT712", 0, 0, 0, avgPT712, &AI_H2_psig_PT712_Stage1_DischargeTank, 0, 400, 450, 2, -1, -1, 1, 820, 4096, 0, 2000, adc2, 5, false },
   { "AI_H2_psig_PT519_Stage2_Discharge", "PT519", 0, 0, 0, avgPT519, &AI_H2_psig_PT519_Stage2_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 10000, adc2, 6, false },

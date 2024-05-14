@@ -4,7 +4,7 @@ void setup() {
   RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200v2_Longview", "V0.4.3");
+  matrixSetup("C200v2_Longview", "V0.4.4");
   i2cSetup();
   Serial.println("OK");
   delay(3000);
@@ -54,7 +54,8 @@ void loop() {
 
   //never go above 6.5/1 s1s/s2s
   PTdata[2].max = AI_H2_psig_PT911_Stage1_SuctionTank*Stage1_Compression_RATIO;
-  PTdata[2].maxRecovery =  PTdata[2].max - 50;
+  PTdata[2].max = (PTdata[2].max > 1400)?1400:PTdata[2].max;
+  PTdata[2].maxRecovery =  PTdata[2].max - 250;
 
   if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
@@ -168,7 +169,7 @@ void loop() {
 
       //Main operation of compressing
       intensifier1Operation(); //Low side
-      //intensifier2Operation(); //High side
+      if(highSide){intensifier2Operation();}
 
     break;
   //#####################################################################
