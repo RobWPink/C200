@@ -40,7 +40,7 @@ void SerialCLI() {
         if(argStr.equalsIgnoreCase(varData[i].key)){
           String argStrVal = argBuf[++n];
           argVal = argStrVal.toDouble();
-          *DOdata[i].value = argVal;
+          *varData[i].value = argVal;
           digital = true;
           break;
         }

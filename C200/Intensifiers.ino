@@ -60,17 +60,17 @@ void intensifier1Operation(){
         }
 
         if(deltasLow.getCount() > 4 && deltasLow.getValue(deltasLow.getCount()-1) > stdDevMult1A*deltasLow.getStandardDeviation() + deltasLow.getFastAverage()){
-          stdDevMult1A = stdDevMult1A + 0.01;
+          //stdDevMult1A = stdDevMult1A + 0.01;
           DO_HYD_XV460_DCV1_A = false;
         }
         else if(peakPsi1A > deadHeadPsi1A - deadHeadDelta1A){
           DO_HYD_XV460_DCV1_A = false;
-          stdDevMult1A = (stdDevMult1A <= 0.5)?0.5:(stdDevMult1A - 0.05);
+          //stdDevMult1A = (stdDevMult1A <= 0.5)?0.5:(stdDevMult1A - 0.05);
         }
       }
       if((millis() - timer[2] > 30000 && timer[2])){STATE = FAULT; faultString = faultString + "|1A Timeout|";}
       
-      if(millis() - timer[2] > switchingTime1A-550 && timer[2] && !DO_HYD_XV460_DCV1_A){//check if minimum time has passed
+      if(millis() - timer[2] > switchingTime1A-500 && timer[2] && !DO_HYD_XV460_DCV1_A){//check if minimum time has passed
         SUB_STATE1 = SIDE_B;
         lowCycleCnt++; //reached end of cycle time, switch sides 
       }
@@ -87,17 +87,17 @@ void intensifier1Operation(){
         }
 
         if(deltasLow.getCount() > 4 && deltasLow.getValue(deltasLow.getCount()-1) > stdDevMult1B*deltasLow.getStandardDeviation() + deltasLow.getFastAverage()){
-          stdDevMult1B = stdDevMult1B + 0.01;
+          //stdDevMult1B = stdDevMult1B + 0.01;
           DO_HYD_XV463_DCV1_B = false;
         }
         else if(peakPsi1B > deadHeadPsi1B - deadHeadDelta1B){
           DO_HYD_XV463_DCV1_B = false;
-          stdDevMult1B = (stdDevMult1B <= 0.5)?0.5:(stdDevMult1B - 0.05);
+          //stdDevMult1B = (stdDevMult1B <= 0.5)?0.5:(stdDevMult1B - 0.05);
         }
       }
       if((millis() - timer[2] > 30000 && timer[2])){STATE = FAULT; faultString = faultString + "|1B Timeout|";}
 
-      if(millis() - timer[2] > switchingTime1B-550 && timer[2] && !DO_HYD_XV463_DCV1_B){//check if minimum time has passed
+      if(millis() - timer[2] > switchingTime1B-500 && timer[2] && !DO_HYD_XV463_DCV1_B){//check if minimum time has passed
         SUB_STATE1 = SIDE_A;
         lowCycleCnt++; //reached end of cycle time, switch sides 
       }
@@ -184,18 +184,18 @@ void intensifier2Operation(){
           else if(prev2A < AI_HYD_psig_PT561_HydraulicInlet2){ deltasHigh.addValue(AI_HYD_psig_PT561_HydraulicInlet2 - prev2A); }
         }
         if(deltasHigh.getCount() > 4 && deltasHigh.getValue(deltasHigh.getCount()-1) > stdDevMult2A*deltasHigh.getStandardDeviation() + deltasHigh.getFastAverage()){
-          stdDevMult2A = stdDevMult2A + 0.01;
+          //stdDevMult2A = stdDevMult2A + 0.01;
           DO_HYD_XV554_DCV2_A = false;
         }
         else if(peakPsi2A > deadHeadPsi2A - deadHeadDelta2A){
           DO_HYD_XV554_DCV2_A = false;
-          stdDevMult2A = (stdDevMult2A <= 0.5)?0.5:(stdDevMult2A - 0.05);
+          //stdDevMult2A = (stdDevMult2A <= 0.5)?0.5:(stdDevMult2A - 0.05);
         }
         
       }
       if((millis() - timer[3] > 30000 && timer[3])){STATE = FAULT; faultString = faultString + "|2A Timeout|";}
       
-      if(millis() - timer[3] > switchingTime2A-550 && timer[3] && !DO_HYD_XV554_DCV2_A){//check if minimum time has passed
+      if(millis() - timer[3] > switchingTime2A-500 && timer[3] && !DO_HYD_XV554_DCV2_A){//check if minimum time has passed
         SUB_STATE2 = SIDE_B;
         highCycleCnt++; //reached end of cycle time, switch sides 
       }
@@ -212,18 +212,18 @@ void intensifier2Operation(){
         }
 
         if(deltasHigh.getCount() > 4 && deltasHigh.getValue(deltasHigh.getCount()-1) > stdDevMult2B*deltasHigh.getStandardDeviation() + deltasHigh.getFastAverage()){
-          stdDevMult2B = stdDevMult2B + 0.01;
+          //stdDevMult2B = stdDevMult2B + 0.01;
           DO_HYD_XV557_DCV2_B = false;
         }
         else if(peakPsi2B > deadHeadPsi2B - deadHeadDelta2B){
           DO_HYD_XV557_DCV2_B = false;
-          stdDevMult2B = (stdDevMult2B <= 0.5)?0.5:(stdDevMult2B - 0.05);
+          //stdDevMult2B = (stdDevMult2B <= 0.5)?0.5:(stdDevMult2B - 0.05);
         }
       }
 
       if((millis() - timer[3] > 30000 && timer[3])){STATE = FAULT; faultString = faultString + "|2B Timeout|";}
       
-      if(millis() - timer[3] > switchingTime2B-550 && timer[3] && !DO_HYD_XV557_DCV2_B){//check if minimum time has passed
+      if(millis() - timer[3] > switchingTime2B-500 && timer[3] && !DO_HYD_XV557_DCV2_B){//check if minimum time has passed
         SUB_STATE2 = SIDE_A;
         highCycleCnt++; //reached end of cycle time, switch sides 
       }
@@ -315,7 +315,7 @@ void intensifier2Operation_OLD(){
       if(millis() - timer[3] > 500 && timer[3]){
         if(AI_HYD_psig_PT561_HydraulicInlet2 > deadHeadPsi2A-400){ DO_HYD_XV554_DCV2_A = false; }
       }
-      if(millis() - timer[2] > switchingTime2A-550 && timer[2] && !DO_HYD_XV554_DCV2_A){//check if minimum time has passed
+      if(millis() - timer[2] > switchingTime2A-500 && timer[2] && !DO_HYD_XV554_DCV2_A){//check if minimum time has passed
         SUB_STATE2 = SIDE_B;
         ///highCycleCnt++; //reached end of cycle time, switch sides 
       }
@@ -326,7 +326,7 @@ void intensifier2Operation_OLD(){
       if(millis() - timer[3] > 500 && timer[3]){
         if(AI_HYD_psig_PT561_HydraulicInlet2 > deadHeadPsi2B-400){ DO_HYD_XV557_DCV2_B = false; }
       }
-      if(millis() - timer[2] > switchingTime2B-550 && timer[2] && !DO_HYD_XV557_DCV2_B){//check if minimum time has passed
+      if(millis() - timer[2] > switchingTime2B-500 && timer[2] && !DO_HYD_XV557_DCV2_B){//check if minimum time has passed
         SUB_STATE2 = SIDE_A;
         //highCycleCnt++; //reached end of cycle time, switch sides 
       }

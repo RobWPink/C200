@@ -244,11 +244,6 @@ void loop() {
           *DOdata[i].value = false;
         }
       }
-      for(int i = 0; i < varSize;i++){
-        if(varData[i].key.indexOf("SWTM") == -1){
-          *varData[i].value = 0;
-        }
-      }
 
       if(DI_Encl_ESTOP){STATE = IDLE_OFF;}
     break;

@@ -115,13 +115,13 @@ double prev1A,prev1B,prev2A,prev2B = 0;
 
 double deadHeadDelta1A = 400;
 double deadHeadDelta1B = 400;
-double deadHeadDelta2A = 100;
-double deadHeadDelta2B = 800;
+double deadHeadDelta2A = 500;
+double deadHeadDelta2B = 500;
 
-double stdDevMult1A = 2;
-double stdDevMult1B = 2;
-double stdDevMult2A = 2;
-double stdDevMult2B = 2;
+double stdDevMult1A = 3;
+double stdDevMult1B = 3;
+double stdDevMult2A = 3;
+double stdDevMult2B = 3;
 
 double peakPsi1A = 0;
 double peakPsi1B = 0;
@@ -351,8 +351,8 @@ struct pt {
   { "AI_H2_psig_PT519_Stage2_Discharge", "PT519", 0, 0, 0, avgPT519, &AI_H2_psig_PT519_Stage2_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 10000, adc2, 6, false },
   { "AI_H2_psig_PT407_Stage3_Discharge", "PT407", 0, 0, 0, avgPT407, &AI_H2_psig_PT407_Stage3_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 20000, adc2, 7, false },
   { "AI_H2_psig_PT410_Stage3_DischargeTank", "PT410", 0, 0, 0, avgPT410, &AI_H2_psig_PT410_Stage3_DischargeTank, 0, -1, -1, -1, 8100, 7500, 0,  820, 4096, 0, 20000, adc3, 0, false },
-  { "AI_HYD_psig_PT467_HydraulicInlet1", "PT467", 0, 0, -300, avgPT467, &AI_HYD_psig_PT467_HydraulicInlet1, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc3, 1, false },
-  { "AI_HYD_psig_PT561_HydraulicInlet2", "PT561", 0, 0, -100, avgPT561, &AI_HYD_psig_PT561_HydraulicInlet2, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc3, 2, false },
+  { "AI_HYD_psig_PT467_HydraulicInlet1", "PT467", 0, 0, 0, avgPT467, &AI_HYD_psig_PT467_HydraulicInlet1, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc3, 1, false },
+  { "AI_HYD_psig_PT561_HydraulicInlet2", "PT561", 0, 0, 0, avgPT561, &AI_HYD_psig_PT561_HydraulicInlet2, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc3, 2, false },
   { "AI_HYD_psig_PT556_HydraulicIntake2_B", "PT556", 0, 0, 0, avgPT556, &AI_HYD_psig_PT556_HydraulicIntake2_B, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 20000, adc3, 3, false },
   { "AI_HYD_psig_PT555_HydraulicIntake2_A", "PT555", 0, 0, 0, avgPT555, &AI_HYD_psig_PT555_HydraulicIntake2_A, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 20000, adc3, 4, false },
   { "AI_CLT_psig_PT113_CoolantSupply1", "PT113", 0, 0, 0, avgPT113, &AI_CLT_psig_PT113_CoolantSupply1, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 250, adc3, 5, false },
