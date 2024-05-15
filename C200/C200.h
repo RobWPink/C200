@@ -111,17 +111,16 @@ unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
 unsigned long virtualRedButton, virtualGreenButton, virtualAmberButton = 0;
 
-double prev1A,prev1B,prev2A,prev2B = 0;
+double switchingPsi1A = 0;
+double switchingPsi1B = 0;
+double switchingPsi2A = 0;
+double switchingPsi2B = 0;
 
-double deadHeadDelta1A = 400;
-double deadHeadDelta1B = 400;
-double deadHeadDelta2A = 500;
-double deadHeadDelta2B = 500;
+double switchingTime1A = 1500;
+double switchingTime1B = 1500;
+double switchingTime2A = 1500;
+double switchingTime2B = 1500;
 
-double stdDevMult1A = 3;
-double stdDevMult1B = 3;
-double stdDevMult2A = 3;
-double stdDevMult2B = 3;
 
 double peakPsi1A = 0;
 double peakPsi1B = 0;
@@ -132,11 +131,6 @@ double deadHeadPsi1A = 0;
 double deadHeadPsi1B = 0;
 double deadHeadPsi2A = 0;
 double deadHeadPsi2B = 0;
-
-double switchingTime1A = 1500;
-double switchingTime1B = 1500;
-double switchingTime2A = 1500;
-double switchingTime2B = 1500;
 
 double AI_HYD_C_TT454_HydraulicTank = 0;
 double AI_CLT_C_TT107_CoolantSupply1 = 0;
@@ -231,8 +225,8 @@ Ewma avgPT712(MOVING_AVG_SIZE);
 Ewma avgPT519(MOVING_AVG_SIZE);
 Ewma avgPT407(MOVING_AVG_SIZE);
 Ewma avgPT410(MOVING_AVG_SIZE);
-Ewma avgPT467(0.7);
-Ewma avgPT561(0.7);
+Ewma avgPT467(0.95);
+Ewma avgPT561(0.95);
 Ewma avgPT556(MOVING_AVG_SIZE);
 Ewma avgPT555(MOVING_AVG_SIZE);
 Ewma avgPT113(MOVING_AVG_SIZE);
@@ -244,29 +238,26 @@ Ewma avgPT462(MOVING_AVG_SIZE);
 Ewma avgPMP458(MOVING_AVG_SIZE);
 Ewma avgFCU112(MOVING_AVG_SIZE);
 
-RunningAverage deltasLow(50);
-RunningAverage deltasHigh(50);
-
-struct vars {
-  String name;
-  String key;
-  double* value;
-  double prev;
-} varData[] = {
-  { "stdDevMult1A", "SDM1A", &stdDevMult1A, 0 },
-  { "stdDevMult1B", "SDM1B", &stdDevMult1B, 0 },
-  { "stdDevMult2A", "SDM2A", &stdDevMult2A, 0 },
-  { "stdDevMult2B", "SDM2B", &stdDevMult2B, 0 },
-  { "deadHeadDelta1A", "DHD1A", &deadHeadDelta1A, 0 },
-  { "deadHeadDelta1B", "DHD1B", &deadHeadDelta1B, 0 },
-  { "deadHeadDelta2A", "DHD2A", &deadHeadDelta2A, 0 },
-  { "deadHeadDelta2B", "DHD2B", &deadHeadDelta2B, 0 },
-  { "switchingTime1A", "SWTM1A", &switchingTime1A, 0 },
-  { "switchingTime1B", "SWTM1B", &switchingTime1B, 0 },
-  { "switchingTime2A", "SWTM2A", &switchingTime2A, 0 },
-  { "switchingTime2B", "SWTM2B", &switchingTime2B, 0 }
-};
-int varSize = 12;
+// struct vars {
+//   String name;
+//   String key;
+//   double* value;
+//   double prev;
+// } varData[] = {
+//   { "stdDevMult1A", "SDM1A", &stdDevMult1A, 0 },
+//   { "stdDevMult1B", "SDM1B", &stdDevMult1B, 0 },
+//   { "stdDevMult2A", "SDM2A", &stdDevMult2A, 0 },
+//   { "stdDevMult2B", "SDM2B", &stdDevMult2B, 0 },
+//   { "deadHeadDelta1A", "DHD1A", &deadHeadDelta1A, 0 },
+//   { "deadHeadDelta1B", "DHD1B", &deadHeadDelta1B, 0 },
+//   { "deadHeadDelta2A", "DHD2A", &deadHeadDelta2A, 0 },
+//   { "deadHeadDelta2B", "DHD2B", &deadHeadDelta2B, 0 },
+//   { "switchingTime1A", "SWTM1A", &switchingTime1A, 0 },
+//   { "switchingTime1B", "SWTM1B", &switchingTime1B, 0 },
+//   { "switchingTime2A", "SWTM2A", &switchingTime2A, 0 },
+//   { "switchingTime2B", "SWTM2B", &switchingTime2B, 0 }
+// };
+// int varSize = 12;
 
 struct fm {
   String name;

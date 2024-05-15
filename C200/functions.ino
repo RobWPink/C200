@@ -144,36 +144,31 @@ void RPCtransceive(){
   }
 }
 
-double dynamicSwitchingPsi(bool highlow, double suction, double discharge){
-  if(PTdata[0].min < 100){
-    if(!highlow){
-      if(70 <= suction < 80){ return 1.1524*discharge + 196.83;}
-      else if(80 <= suction < 90){ return 1.1641*discharge + 181.37;}
-      else if(90 <= suction < 100){ return 1.1735*discharge + 165.88;}
-      else if(100 <= suction < 110){ return 1.1625*discharge + 152.75;}
-      else if(110 <= suction < 120){ return 1.1705*discharge + 137.25;}
-      else if(120 <= suction < 130){ return 1.1773*discharge + 121.73;}
-      else if(130 <= suction < 140){ return 1.1831*discharge + 106.2;}
-      else if(140 <= suction){ return 1.1882*discharge + 90.658;}
-      else{return -1;}
-    }
-    else{
-      return -1;
-      // if(460 <= suction < 518){ return 1.1524*discharge + 196.83;}
-      // else if(518 <= suction < 576){ return 1.1641*discharge + 181.37;}
-      // else if(576 <= suction < 633){ return 1.1735*discharge + 165.88;}
-      // else if(633 <= suction < 691){ return 1.1625*discharge + 152.75;}
-      // else if(691 <= suction < 749){ return 1.1705*discharge + 137.25;}
-      // else if(749 <= suction < 806){ return 1.1773*discharge + 121.73;}
-      // else if(806 <= suction < 864){ return 1.1831*discharge + 106.2;}
-      // else if(864 <= suction){ return 1.1882*discharge + 90.658;}
-      // else{return -1;}
-    }
+double getLowSwitchingPsi100(){
+  if(0 < PTdata[0].min < 100){
+    if(70 <= AI_H2_psig_PT911_Stage1_SuctionTank < 80){ return 1.1524*AI_H2_psig_PT716_Stage1_Discharge + 196.83;}
+    else if(80 <= AI_H2_psig_PT911_Stage1_SuctionTank < 90){ return 1.1641*AI_H2_psig_PT716_Stage1_Discharge + 181.37;}
+    else if(90 <= AI_H2_psig_PT911_Stage1_SuctionTank < 100){ return 1.1735*AI_H2_psig_PT716_Stage1_Discharge + 165.88;}
+    else if(100 <= AI_H2_psig_PT911_Stage1_SuctionTank < 110){ return 1.1625*AI_H2_psig_PT716_Stage1_Discharge + 152.75;}
+    else if(110 <= AI_H2_psig_PT911_Stage1_SuctionTank < 120){ return 1.1705*AI_H2_psig_PT716_Stage1_Discharge + 137.25;}
+    else if(120 <= AI_H2_psig_PT911_Stage1_SuctionTank < 130){ return 1.1773*AI_H2_psig_PT716_Stage1_Discharge + 121.73;}
+    else if(130 <= AI_H2_psig_PT911_Stage1_SuctionTank < 140){ return 1.1831*AI_H2_psig_PT716_Stage1_Discharge + 106.2;}
+    else if(140 <= AI_H2_psig_PT911_Stage1_SuctionTank){ return 1.1882*AI_H2_psig_PT716_Stage1_Discharge + 90.658;}
+    else{return -1;}
   }
-  else{
-    PREV_STATE = STATE;
-    STATE = FAULT;
-    faultString = "Wrong Suction";
+}
+
+double getLowSwitchingPsi200(){
+  if(PTdata[0].min > 100){
+    if(460 <= AI_H2_psig_PT911_Stage1_SuctionTank < 518){ return 1.1524*AI_H2_psig_PT716_Stage1_Discharge + 196.83;}
+    else if(518 <= AI_H2_psig_PT911_Stage1_SuctionTank < 576){ return 1.1641*AI_H2_psig_PT716_Stage1_Discharge + 181.37;}
+    else if(576 <= AI_H2_psig_PT911_Stage1_SuctionTank < 633){ return 1.1735*AI_H2_psig_PT716_Stage1_Discharge + 165.88;}
+    else if(633 <= AI_H2_psig_PT911_Stage1_SuctionTank < 691){ return 1.1625*AI_H2_psig_PT716_Stage1_Discharge + 152.75;}
+    else if(691 <= AI_H2_psig_PT911_Stage1_SuctionTank < 749){ return 1.1705*AI_H2_psig_PT716_Stage1_Discharge + 137.25;}
+    else if(749 <= AI_H2_psig_PT911_Stage1_SuctionTank < 806){ return 1.1773*AI_H2_psig_PT716_Stage1_Discharge + 121.73;}
+    else if(806 <= AI_H2_psig_PT911_Stage1_SuctionTank < 864){ return 1.1831*AI_H2_psig_PT716_Stage1_Discharge + 106.2;}
+    else if(864 <= AI_H2_psig_PT911_Stage1_SuctionTank){ return 1.1882*AI_H2_psig_PT716_Stage1_Discharge + 90.658;}
+    else{return -1;}
   }
 }
 
