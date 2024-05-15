@@ -46,7 +46,7 @@ void loop() {
   i2cTransceive(250);
     
   if(!DI_Encl_ESTOP){STATE = ESTOP;}
-
+  if((STATE == PRODUCTION || STATE == IDLE_ON) && !DI_CLT_FS000_CoolantFlowSwitch){STATE = FAULT; faultString = "Coolant Flow Error";}
   flashDriver();
   
   dataPrint(delayTime);
@@ -131,27 +131,27 @@ void loop() {
         DO_HYD_XV554_DCV2_A = false;
         DO_HYD_XV557_DCV2_B = false;
       }
-      
-      //if the red button is held for less than 5 seconds pause it otherwise safe shutdown
-      if(DI_Encl_ButtonRed && !prevR){
-        prevR = true;
-        if(!holdR){holdR = millis();}
-      }
-      if(!DI_Encl_ButtonRed && prevR){
-        prevR = false;
-        if(millis() - holdR < 5000 && holdR){
-          SUB_STATE1 = PAUSE;
-          SUB_STATE2 = PAUSE;
-          manualPause = true;
-        }
-        else{STATE = SHUTDOWN;}
-        holdR = 0;
-      }
-      if(manualPause && DI_Encl_ButtonGreen){
-        manualPause = false;
-        SUB_STATE1 = START;
-        SUB_STATE2 = START;
-      }
+
+      // //if the red button is held for less than 5 seconds pause it otherwise safe shutdown
+      // if(DI_Encl_ButtonRed && !prevR){
+      //   prevR = true;
+      //   if(!holdR){holdR = millis();}
+      // }
+      // if(!DI_Encl_ButtonRed && prevR){
+      //   prevR = false;
+      //   if(millis() - holdR < 5000 && holdR){
+      //     SUB_STATE1 = PAUSE;
+      //     SUB_STATE2 = PAUSE;
+      //     manualPause = true;
+      //   }
+      //   else{STATE = SHUTDOWN;}
+      //   holdR = 0;
+      // }
+      // if(manualPause && DI_Encl_ButtonGreen){
+      //   manualPause = false;
+      //   SUB_STATE1 = START;
+      //   SUB_STATE2 = START;
+      // }
 
       if(manualPause){ smallMatrix[2].displayPause(false); }
       else{ smallMatrix[2].displayQuadrants(DO_HYD_XV460_DCV1_A,DO_HYD_XV463_DCV1_B,DO_HYD_XV554_DCV2_A,DO_HYD_XV557_DCV2_B,(SUB_STATE1==PAUSE),(SUB_STATE2==PAUSE)); }
@@ -166,11 +166,10 @@ void loop() {
       }
 
       //Main operation of compressing
-      intensifier1Operation();
-      if(millis() - timer[0] > 20000 && timer[0]){
-        //intensifier2Operation();
-        intensifier2Operation_OLD();
-      }
+      if(!tog[0]){intensifier1Operation();}
+      if(millis() - timer[0] > 20000 && timer[0]){tog[1] = true;}
+      if(tog[1]){intensifier2Operation();}
+
       
 
     break;
@@ -251,8 +250,8 @@ void loop() {
   //#####################################################################
 
     default:
-      if(errorPrint){Serial.println("STATE ERROR!!!!!");}
-      break;
+      Serial.println("STATE ERROR!!!!!");
+    break;
   }
 
   loopTime = millis() - loopTimer;

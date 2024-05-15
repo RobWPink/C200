@@ -27,7 +27,6 @@
 #define BCOEFFICIENT_d -2350
 #define BCOEFFICIENT_c -2650.4
 #define BCOEFFICIENT_e 3988
-bool aaa = false;
 
 enum state {
   IDLE_OFF,
@@ -70,9 +69,10 @@ enum prnt {
 
 
 TwoWire i2c(20, 21);
-//ModbusMaster mbLocal;
+
 PI4IOE5V6534Q gpio1(0x22, i2c);
 PI4IOE5V6534Q gpio2(0x23, i2c);
+
 Adafruit_MCP9600 mcp1;
 Adafruit_MCP9600 mcp2;
 Adafruit_MCP9600 mcp3;
@@ -83,33 +83,38 @@ Adafruit_MCP9600 mcp6;
 ADS7828 adc1(0x48);
 ADS7828 adc2(0x49);
 ADS7828 adc3(0x4A);
+
 SmallMatrix smallMatrix[3] = { SmallMatrix(0x70), SmallMatrix(0x71), SmallMatrix(0x72) };
 LargeMatrix bigMatrix[3] = { LargeMatrix(0x73), LargeMatrix(0x74), LargeMatrix(0x75) };
 Adafruit_LiquidCrystal lcd(0);
 
 String faultString = "";
 String errMsg[30] = { "" };
-double loopTime = 0;
 String stateHistory1 = "";
 String stateHistory2 = "";
 
-double Stage1_Compression_RATIO = 6.5;
+
 uint8_t mcpExist = 0;
 int scrollCnt, errCnt = 0;
 int flashGreen, flashAmber, flashRed = 0;
 int delayTime = 100;
 int lowCycleCnt_, highCycleCnt_, lowCycleCnt, highCycleCnt = 0;
-int j, k, l = 0;
 
 bool flashTog[3] = { false };
 bool tog[5] = { false };
-bool plot, prettyPrint, rawPrint, errorPrint = false;
+bool plot, prettyPrint, rawPrint = false;
 bool prevG, prevA, prevR = false;
-bool daughterTog, lsrTog, manualPause, manualMode;
+bool daughterTog, manualPause, manualMode;
 unsigned long timer[10] = { 0 };
 unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
 unsigned long virtualRedButton, virtualGreenButton, virtualAmberButton = 0;
+
+double loopTime = 0;
+
+double Stage1_Compression_RATIO = 6.5;
+
+double MOVING_AVG_SIZE = 0.02; //equivilent to 200 samples
 
 double switchingPsi1A = 0;
 double switchingPsi1B = 0;
@@ -120,17 +125,6 @@ double switchingTime1A = 1500;
 double switchingTime1B = 1500;
 double switchingTime2A = 1500;
 double switchingTime2B = 1500;
-
-
-double peakPsi1A = 0;
-double peakPsi1B = 0;
-double peakPsi2A = 0;
-double peakPsi2B = 0;
-
-double deadHeadPsi1A = 0;
-double deadHeadPsi1B = 0;
-double deadHeadPsi2A = 0;
-double deadHeadPsi2B = 0;
 
 double AI_HYD_C_TT454_HydraulicTank = 0;
 double AI_CLT_C_TT107_CoolantSupply1 = 0;
@@ -207,7 +201,7 @@ float AI_H2_C_RED_Temp = 0;
 float AI_H2_psig_RED_Pressure = 0;
 float AI_H2_KGPD_RED_Total = 0;
 
-double MOVING_AVG_SIZE = 0.02; //equivilent to 200 samples
+
 Ewma avgTT454(MOVING_AVG_SIZE);
 Ewma avgTT107(MOVING_AVG_SIZE);
 Ewma avgTT207(MOVING_AVG_SIZE);
@@ -237,27 +231,6 @@ Ewma avgPT461(MOVING_AVG_SIZE);
 Ewma avgPT462(MOVING_AVG_SIZE);
 Ewma avgPMP458(MOVING_AVG_SIZE);
 Ewma avgFCU112(MOVING_AVG_SIZE);
-
-// struct vars {
-//   String name;
-//   String key;
-//   double* value;
-//   double prev;
-// } varData[] = {
-//   { "stdDevMult1A", "SDM1A", &stdDevMult1A, 0 },
-//   { "stdDevMult1B", "SDM1B", &stdDevMult1B, 0 },
-//   { "stdDevMult2A", "SDM2A", &stdDevMult2A, 0 },
-//   { "stdDevMult2B", "SDM2B", &stdDevMult2B, 0 },
-//   { "deadHeadDelta1A", "DHD1A", &deadHeadDelta1A, 0 },
-//   { "deadHeadDelta1B", "DHD1B", &deadHeadDelta1B, 0 },
-//   { "deadHeadDelta2A", "DHD2A", &deadHeadDelta2A, 0 },
-//   { "deadHeadDelta2B", "DHD2B", &deadHeadDelta2B, 0 },
-//   { "switchingTime1A", "SWTM1A", &switchingTime1A, 0 },
-//   { "switchingTime1B", "SWTM1B", &switchingTime1B, 0 },
-//   { "switchingTime2A", "SWTM2A", &switchingTime2A, 0 },
-//   { "switchingTime2B", "SWTM2B", &switchingTime2B, 0 }
-// };
-// int varSize = 12;
 
 struct fm {
   String name;
@@ -309,9 +282,7 @@ struct tt {
   { "AI_H2_C_TT520_Stage2_Discharge", "TT520", 0, 0, avgTT520, &AI_H2_C_TT520_Stage2_Discharge, 0, -1, -1, 0, 140, 130, 0,  1, -1, 4, -1, 0, false },
   { "AI_H2_C_TT521_Stage3_Suction", "TT521", 0, 0, avgTT521, &AI_H2_C_TT521_Stage3_Suction, 0, -1, -1, 0, 140, 130, 0,  1, -1, 5, -1, 0, false },
   { "AI_H2_C_TT522_Stage3_Discharge", "TT522", 0, 0, avgTT522, &AI_H2_C_TT522_Stage3_Discharge, 0, -1, -1, 0, 140, 130, 0,  1, -1, 6, -1, 0, false },
-};
-
-int TTsize = 10;
+}; int TTsize = 10;
 
 struct pt {
   String name;
@@ -350,13 +321,7 @@ struct pt {
   { "AI_CLT_psig_PT213_CoolantSupply2", "PT213", 0, 0, 0, avgPT213, &AI_CLT_psig_PT213_CoolantSupply2, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 250, adc3, 6, false },
   { "AI_HYD_psig_PT461_HydraulicIntake1_A", "PT461", 0, 0, 0, avgPT461, &AI_HYD_psig_PT461_HydraulicIntake1_A, -1, -1, -1, -1, -1, -1, -1,  -1, -1, -1, -1, false },
   { "AI_HYD_psig_PT462_HydraulicIntake1_B", "PT462", 0, 0, 0, avgPT462, &AI_HYD_psig_PT462_HydraulicIntake1_B, -1, -1, -1, -1, -1, -1, -1,  -1, -1, -1, -1, false }
-};
-int PTsize = 14;
-
-
-
-//do i pause both at max discharge3tank?
-// when do i turn off hydraulic pump?
+}; int PTsize = 14;
 
 struct digital {
   String name;
@@ -408,6 +373,4 @@ struct digital {
     { "DO_HYD_PMP458_HydraulicPump1_Enable", "PMP458", &DO_HYD_PMP458_HydraulicPump1_Enable, 0, gpio2, P0_5 },  //12
     { "DO_HYD_PMP552_HydraulicPump2_Enable", "PMP552", &DO_HYD_PMP552_HydraulicPump2_Enable, 0, gpio2, P0_6 },  //13
     { "DO_CLT_PMP104_PMP204_CoolantPumps_Enable", "CLTPMP", &DO_CLT_PMP104_PMP204_CoolantPumps_Enable, 0, gpio2, P0_7 },
-  };
-int DIsize = 25;
-int DOsize = 15;
+  }; int DIsize = 25; int DOsize = 15;
