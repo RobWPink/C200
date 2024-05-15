@@ -36,15 +36,15 @@ void SerialCLI() {
           break;
         }
       }
-      // for(int i = 0; i < varSize; i++){
-      //   if(argStr.equalsIgnoreCase(varData[i].key)){
-      //     String argStrVal = argBuf[++n];
-      //     argVal = argStrVal.toDouble();
-      //     *DOdata[i].value = argVal;
-      //     digital = true;
-      //     break;
-      //   }
-      // }
+      for(int i = 0; i < varSize; i++){
+        if(argStr.equalsIgnoreCase(varData[i].key)){
+          String argStrVal = argBuf[++n];
+          argVal = argStrVal.toDouble();
+          *DOdata[i].value = argVal;
+          digital = true;
+          break;
+        }
+      }
       if(digital){;}
 
       else if(argStr.equalsIgnoreCase("delay")) {
@@ -117,6 +117,11 @@ void SerialCLI() {
 
       else if(argStr.equalsIgnoreCase("err")){
         Serial.println(faultString);
+        for(int h = 0; h < 29; h++){
+          Serial.print(errMsg[h]);
+          if(errMsg[h+1] != ""){Serial.print(",");}
+        }
+        Serial.println();
       }
         
       else if(argStr.equalsIgnoreCase("pretty")){
@@ -176,14 +181,14 @@ void printHelp(){
     cc = cc + "-> Toggle " + DOdata[i].name;
     Serial.println(cc);
   }
-  // for(int i = 0; i < varSize; i++){
-  //   String cc = varData[i].key;
-  //   for(int b = 1;b < (19 - cc.length());b++){
-  //     cc = cc + " ";
-  //   }
-  //   cc = cc + "-> Change " + varData[i].name;
-  //   Serial.println(cc);
-  // }
+  for(int i = 0; i < varSize; i++){
+    String cc = varData[i].key;
+    for(int b = 1;b < (19 - cc.length());b++){
+      cc = cc + " ";
+    }
+    cc = cc + "-> Change " + varData[i].name;
+    Serial.println(cc);
+  }
   Serial.println("###############################################");
 
 }
@@ -288,13 +293,13 @@ void dataPrint(unsigned long dly){
           }
         }
 
-        // for(int i = 0; i < varSize;i++){
-        //   if(*varData[i].value != varData[i].prev){
-        //     if(msg != "{"){msg = msg + ",";}
-        //     msg = msg + "\"" + varData[i].key + "\":" + *varData[i].value;
-        //     varData[i].prev = *varData[i].value;
-        //   }
-        // }
+        for(int i = 0; i < varSize;i++){
+          if(*varData[i].value != varData[i].prev){
+            if(msg != "{"){msg = msg + ",";}
+            msg = msg + "\"" + varData[i].key + "\":" + *varData[i].value;
+            varData[i].prev = *varData[i].value;
+          }
+        }
         if(msg != "{"){
           msg = msg + "}";
           Serial.println(msg);
@@ -329,19 +334,19 @@ void dataPrint(unsigned long dly){
         Serial.println();
       break;
 
-      // case VAR:
-      //   for(int i = 0; i < varSize; i++){
-      //     if(prettyPrint){
-      //       Serial.print("\"");
-      //       Serial.print(varData[i].name);
-      //       Serial.print("\": ");
-      //     }
-      //     Serial.print(*varData[i].value);
-      //     if(prettyPrint){ Serial.println(); }
-      //     else{ Serial.print(", "); }
-      //   }
-      //   Serial.println();
-      // break;
+      case VAR:
+        for(int i = 0; i < varSize; i++){
+          if(prettyPrint){
+            Serial.print("\"");
+            Serial.print(varData[i].name);
+            Serial.print("\": ");
+          }
+          Serial.print(*varData[i].value);
+          if(prettyPrint){ Serial.println(); }
+          else{ Serial.print(", "); }
+        }
+        Serial.println();
+      break;
 
       case FM:
         for(int i = 0; i < 2; i++){

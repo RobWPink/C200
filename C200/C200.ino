@@ -4,7 +4,7 @@ void setup() {
   RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200v2_Longview", "V0.5.2");
+  matrixSetup("C200v2_Longview", "V0.5.3");
   i2cSetup();
   Serial.println("OK");
   delay(3000);
@@ -244,11 +244,11 @@ void loop() {
           *DOdata[i].value = false;
         }
       }
-      // for(int i = 0; i < varSize;i++){
-      //   if(varData[i].key.indexOf("SWTM") == -1){
-      //     *varData[i].value = 0;
-      //   }
-      // }
+      for(int i = 0; i < varSize;i++){
+        if(varData[i].key.indexOf("SWTM") == -1){
+          *varData[i].value = 0;
+        }
+      }
 
       if(DI_Encl_ESTOP){STATE = IDLE_OFF;}
     break;

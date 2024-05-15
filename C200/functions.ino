@@ -178,7 +178,10 @@ double dynamicSwitchingPsi(bool highlow, double suction, double discharge){
 }
 
 void i2cTransceive(int ptInterval){
-
+  errCnt = 0;
+  for(int i = 0; i < 30; i++){
+    errMsg[i] = "";
+  }
   for(int i = 0; i < TTsize;i++){
     if(TTdata[i].channel == -1){;
      // TTdata[i].mcp.setFilterCoefficient(TTdata[i].coef);
@@ -210,26 +213,39 @@ void i2cTransceive(int ptInterval){
       TTdata[i].rawTemp = potToTemp(TTdata[i].raw,TTdata[i].coef);
       *TTdata[i].value = TTdata[i].avg.filter(TTdata[i].rawTemp);    
     }
-/*
-    if(TTdata[i].max != -1){
+
+    /*
+    if(TTdata[i].max != -1 && TTdata[i].maxPause != -1){
       if(*TTdata[i].value >= TTdata[i].max && !TTdata[i].overheat){
         TTdata[i].overheat = true;
-        if(STATE == PRODUCTION){STATE = PAUSE;}
+        if(STATE == PRODUCTION){
+          if(!TTdata[i].maxPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; errMsg[errCnt] = "MAX[BOTH]:\"";}
+          else if(TTdata[i].maxPause == 1){SUB_STATE1 = PAUSE;errMsg[errCnt] = "MAX[LOW]:\"";}
+          else if(TTdata[i].maxPause == 2){SUB_STATE2 = PAUSE;errMsg[errCnt] = "MAX[HIGH]:\"";}
+          else{Serial.println("pause state error");}
+          errMsg[errCnt] = errMsg[errCnt] + TTdata[i].key + "\"";
+          errCnt++;
+        }
       }
       else if(*TTdata[i].value <= TTdata[i].maxRecovery && TTdata[i].overheat){
         TTdata[i].overheat = false;
-          
       }
     }
 
-    if(TTdata[i].min != -1){
-      if(*TTdata[i].value <= TTdata[i].min && !TTdata[i].overheat){
+    if(TTdata[i].min != -1 && TTdata[i].minPause != 1){
+      if(*TTdata[i].value < TTdata[i].min && !TTdata[i].overheat){
         TTdata[i].overheat = true;
-        if(STATE == PRODUCTION){STATE = PAUSE;}
+        if(STATE == PRODUCTION){
+          if(!TTdata[i].minPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; errMsg[errCnt] = "MIN[BOTH]:\"";}
+          else if(TTdata[i].minPause == 1){SUB_STATE1 = PAUSE;errMsg[errCnt] = "MIN[LOW]:\"";}
+          else if(TTdata[i].minPause == 2){SUB_STATE2 = PAUSE;errMsg[errCnt] = "MIN[HIGH]:\"";}
+          else{Serial.println("pause state error");}
+          errMsg[errCnt] = errMsg[errCnt] + TTdata[i].key + "\"";
+          errCnt++;
+        }
       }
       else if(*TTdata[i].value >= TTdata[i].minRecovery && TTdata[i].overheat){
         TTdata[i].overheat = false;
-        
       }
     }
     */
@@ -250,10 +266,12 @@ void i2cTransceive(int ptInterval){
         if(*PTdata[i].value >= PTdata[i].max && !PTdata[i].overPressure){
           PTdata[i].overPressure = true;
           if(STATE == PRODUCTION){
-            if(!PTdata[i].maxPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; }
-            else if(PTdata[i].maxPause == 1){SUB_STATE1 = PAUSE;}
-            else if(PTdata[i].maxPause == 2){SUB_STATE2 = PAUSE;}
+            if(!PTdata[i].maxPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; errMsg[errCnt] = "MAX[BOTH]:\"";}
+            else if(PTdata[i].maxPause == 1){SUB_STATE1 = PAUSE;errMsg[errCnt] = "MAX[LOW]:\"";}
+            else if(PTdata[i].maxPause == 2){SUB_STATE2 = PAUSE;errMsg[errCnt] = "MAX[HIGH]:\"";}
             else{Serial.println("pause state error");}
+            errMsg[errCnt] = errMsg[errCnt] + PTdata[i].key + "\"";
+            errCnt++;
           }
         }
         else if(*PTdata[i].value <= PTdata[i].maxRecovery && PTdata[i].overPressure){
@@ -265,17 +283,18 @@ void i2cTransceive(int ptInterval){
         if(*PTdata[i].value < PTdata[i].min && !PTdata[i].overPressure){
           PTdata[i].overPressure = true;
           if(STATE == PRODUCTION){
-            if(!PTdata[i].minPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; }
-            else if(PTdata[i].minPause == 1){SUB_STATE1 = PAUSE;}
-            else if(PTdata[i].minPause == 2){SUB_STATE2 = PAUSE;}
+            if(!PTdata[i].minPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; errMsg[errCnt] = "MIN[BOTH]:\"";}
+            else if(PTdata[i].minPause == 1){SUB_STATE1 = PAUSE;errMsg[errCnt] = "MIN[LOW]:\"";}
+            else if(PTdata[i].minPause == 2){SUB_STATE2 = PAUSE;errMsg[errCnt] = "MIN[HIGH]:\"";}
             else{Serial.println("pause state error");}
+            errMsg[errCnt] = errMsg[errCnt] + PTdata[i].key + "\"";
+            errCnt++;
           }
         }
         else if(*PTdata[i].value >= PTdata[i].minRecovery && PTdata[i].overPressure){
           PTdata[i].overPressure = false;
         }
       }
-
     }
   }
   PTdata[6].mapped = map((int)PTdata[6].raw, PTdata[6].mapA, PTdata[6].mapB, PTdata[6].mapC, PTdata[6].mapD) + PTdata[6].offset; //read hydraulics quickly
