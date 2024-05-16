@@ -4,7 +4,7 @@ void setup() {
   RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200v2_Longview", "V0.5.3");
+  matrixSetup("C200v2_Longview", "V0.6.3");
   i2cSetup();
   Serial.println("OK");
   delay(3000);
@@ -56,6 +56,12 @@ void loop() {
   PTdata[2].max = AI_H2_psig_PT911_Stage1_SuctionTank*Stage1_Compression_RATIO;
   PTdata[2].max = (PTdata[2].max > 1400)?1400:PTdata[2].max;
   PTdata[2].maxRecovery =  PTdata[2].max - 200;
+
+  lowMax = mcpExist?max(AI_H2_C_TT917_Stage1_SuctionTank, max(AI_H2_C_TT701_Stage1_DischargePreTank, max(AI_H2_C_TT809_Stage1_Discharge1, AI_H2_C_TT810_Stage1_Discharge2))):0;
+  lowMax = (lowMax > 800)?0:lowMax;
+
+  highMax = mcpExist?max(AI_H2_C_TT715_Stage2_SuctionTank,max(AI_H2_C_TT520_Stage2_Discharge,max(AI_H2_C_TT521_Stage3_Suction,AI_H2_C_TT522_Stage3_Discharge))):0;
+  highMax = (highMax > 800)?0:highMax;
 
   if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
@@ -155,7 +161,6 @@ void loop() {
 
       if(manualPause){ smallMatrix[2].displayPause(false); }
       else{ smallMatrix[2].displayQuadrants(DO_HYD_XV460_DCV1_A,DO_HYD_XV463_DCV1_B,DO_HYD_XV554_DCV2_A,DO_HYD_XV557_DCV2_B,(SUB_STATE1==PAUSE),(SUB_STATE2==PAUSE)); }
-      
       
 
       //Main operation of compressing

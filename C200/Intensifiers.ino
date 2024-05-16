@@ -49,8 +49,8 @@ void intensifier1Operation(){
         lowCPMCnt = lowCPMCnt + millis() - timer[2];
         lowCPMCnt_ = 60 / lowCPMCnt;
 
-        if(lowCPMCnt_ > lowCPM+0.99){switchingTimeLow = switchingTimeLow + (lowCPMCnt_ - lowCPM+1)*100;}
-        else if(lowCPMCnt_ < lowCPM){switchingTimeLow = switchingTimeLow - (lowCPM - lowCPMCnt_)*100;}
+        if(lowCPMCnt_ > lowCPM+0.99){switchingTimeLow = switchingTimeLow + ((lowCPMCnt_ - lowCPM+1) + (lowMax>110)?((lowMax-110)/2):0)*time2CPMmult;}
+        else if(lowCPMCnt_ < lowCPM){switchingTimeLow = switchingTimeLow - ((lowCPM - lowCPMCnt_) + (lowMax>110)?((lowMax-110)/2):0)*time2CPMmult;}
 
         SUB_STATE1 = SIDE_A;
       }
@@ -123,8 +123,8 @@ void intensifier2Operation(){
         highCPMCnt = highCPMCnt + millis() - timer[3];
         highCPMCnt_ = 60 / highCPMCnt;
 
-        if(highCPMCnt_ > highCPM+0.99){switchingTimeHigh = switchingTimeHigh + (highCPMCnt_ - highCPM+1)*100;}
-        else if(highCPMCnt_ < highCPM){switchingTimeHigh = switchingTimeHigh - (highCPM - highCPMCnt_)*100;}
+        if(highCPMCnt_ > highCPM+0.99){switchingTimeHigh = switchingTimeHigh + ((highCPMCnt_ - highCPM+1) + (highMax>110)?((highMax-110)/2):0)*time2CPMmult;}
+        else if(highCPMCnt_ < highCPM){switchingTimeHigh = switchingTimeHigh - ((highCPM - highCPMCnt_)+ (highMax>110)?((highMax-110)/2):0)*time2CPMmult;}
 
         SUB_STATE2 = SIDE_A;
       }
@@ -145,9 +145,6 @@ void intensifier2Operation(){
     break;
   }
 }
-
-
-
 
 void intensifier2Operation_OLD(){
   if(SUB_STATE2 != PREV2){

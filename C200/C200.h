@@ -108,6 +108,7 @@ unsigned long flashTimer[3] = { 0 };
 unsigned long hydraulicSafetyTimer, twoTimer, loopTimer, dataTimer, pauseTimer, holdR, lcdTimer, dataPrintTimer, daughterPrintTimer = 0;
 unsigned long virtualRedButton, virtualGreenButton, virtualAmberButton = 0;
 
+double lowMax,highMax = 0;
 double loopTime = 0;
 
 double delayTime = 100;
@@ -129,6 +130,8 @@ double switchingTimeHigh = 1500;
 
 double highCPM = 15;
 double lowCPM = 15;
+
+double time2CPMmult = 100;
 
 struct var{
   String name;
@@ -234,17 +237,17 @@ float AI_H2_psig_RED_Pressure = 0;
 float AI_H2_KGPD_RED_Total = 0;
 
 
-Ewma avgTT454(MOVING_AVG_SIZE);
-Ewma avgTT107(MOVING_AVG_SIZE);
-Ewma avgTT207(MOVING_AVG_SIZE);
-Ewma avgTT917(MOVING_AVG_SIZE);
-Ewma avgTT809(MOVING_AVG_SIZE);
-Ewma avgTT810(MOVING_AVG_SIZE);
-Ewma avgTT715(MOVING_AVG_SIZE);
-Ewma avgTT520(MOVING_AVG_SIZE);
-Ewma avgTT521(MOVING_AVG_SIZE);
-Ewma avgTT522(MOVING_AVG_SIZE);
-Ewma avgTT701(MOVING_AVG_SIZE);
+Ewma avgTT454(1);
+Ewma avgTT107(1);
+Ewma avgTT207(1);
+Ewma avgTT917(1);
+Ewma avgTT809(1);
+Ewma avgTT810(1);
+Ewma avgTT715(1);
+Ewma avgTT520(1);
+Ewma avgTT521(1);
+Ewma avgTT522(1);
+Ewma avgTT701(1);
 Ewma avgPT911(MOVING_AVG_SIZE);
 Ewma avgPT716(MOVING_AVG_SIZE);
 Ewma avgPT712(MOVING_AVG_SIZE);
