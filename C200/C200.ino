@@ -166,7 +166,7 @@ void loop() {
       //Main operation of compressing
       if(!tog[0]){intensifier1Operation();}
       if(millis() - timer[0] > 20000 && timer[0]){tog[1] = true;}
-      if(!tog[1]){if(!tog[2]){intensifier2Operation_OLD();}else{intensifier2Operation();}}
+      if(tog[1]){if(!tog[2]){intensifier2Operation_OLD();}else{intensifier2Operation();}}
 
       
 
