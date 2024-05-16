@@ -156,19 +156,12 @@ void loop() {
       if(manualPause){ smallMatrix[2].displayPause(false); }
       else{ smallMatrix[2].displayQuadrants(DO_HYD_XV460_DCV1_A,DO_HYD_XV463_DCV1_B,DO_HYD_XV554_DCV2_A,DO_HYD_XV557_DCV2_B,(SUB_STATE1==PAUSE),(SUB_STATE2==PAUSE)); }
       
-      if(!timer[1]){timer[1] = millis();}
-      if(millis() - timer[1] > 60000 && timer[1]){
-        highCycleCnt_ = highCycleCnt/2;
-        lowCycleCnt_ = lowCycleCnt/2;
-        highCycleCnt = 0;
-        lowCycleCnt = 0;
-        timer[1] = 0;
-      }
+      
 
       //Main operation of compressing
       if(!tog[0]){intensifier1Operation();}
       if(millis() - timer[0] > 20000 && timer[0]){tog[1] = true;}
-      if(tog[1]){intensifier2Operation();}
+      if(!tog[1]){if(!tog[2]){intensifier2Operation_OLD();}else{intensifier2Operation();}}
 
       
 

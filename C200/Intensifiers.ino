@@ -29,9 +29,10 @@ void intensifier1Operation(){
 
       if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = faultString + "|1A Timeout|";}
       
-      if(millis() - timer[2] > switchingTime1A-500 && timer[2] && !DO_HYD_XV460_DCV1_A){//check if minimum time has passed
+      if(millis() - timer[2] > switchingTimeLow && timer[2] && !DO_HYD_XV460_DCV1_A){//check if minimum time has passed
+        lowCPMCnt = millis() - timer[2];
+
         SUB_STATE1 = SIDE_B;
-        lowCycleCnt++; //reached end of cycle time, switch sides 
       }
     break;
 
@@ -44,9 +45,14 @@ void intensifier1Operation(){
         
       if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = faultString + "|1B Timeout|";}
 
-      if(millis() - timer[2] > switchingTime1B-500 && timer[2] && !DO_HYD_XV463_DCV1_B){//check if minimum time has passed
+      if(millis() - timer[2] > switchingTimeLow && timer[2] && !DO_HYD_XV463_DCV1_B){//check if minimum time has passed
+        lowCPMCnt = lowCPMCnt + millis() - timer[2];
+        lowCPMCnt_ = 60 / lowCPMCnt;
+
+        if(lowCPMCnt_ > lowCPM+0.99){switchingTimeLow = switchingTimeLow + (lowCPMCnt_ - lowCPM+1)*100;}
+        else if(lowCPMCnt_ < lowCPM){switchingTimeLow = switchingTimeLow - (lowCPM - lowCPMCnt_)*100;}
+
         SUB_STATE1 = SIDE_A;
-        lowCycleCnt++; //reached end of cycle time, switch sides 
       }
     break;
 
@@ -97,9 +103,10 @@ void intensifier2Operation(){
 
       if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = faultString + "|2A Timeout|";}
       
-      if(millis() - timer[3] > switchingTime2A-500 && timer[3] && !DO_HYD_XV554_DCV2_A){//check if minimum time has passed
+      if(millis() - timer[3] > switchingTimeHigh && timer[3] && !DO_HYD_XV554_DCV2_A){//check if minimum time has passed
+        highCPMCnt = millis() - timer[3];
+
         SUB_STATE2 = SIDE_B;
-        highCycleCnt++; //reached end of cycle time, switch sides 
       }
     break;
 
@@ -112,14 +119,110 @@ void intensifier2Operation(){
         
       if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = faultString + "|2B Timeout|";}
 
-      if(millis() - timer[3] > switchingTime2B-500 && timer[3] && !DO_HYD_XV557_DCV2_B){//check if minimum time has passed
+      if(millis() - timer[3] > switchingTimeHigh && timer[3] && !DO_HYD_XV557_DCV2_B){//check if minimum time has passed
+        highCPMCnt = highCPMCnt + millis() - timer[3];
+        highCPMCnt_ = 60 / highCPMCnt;
+
+        if(highCPMCnt_ > highCPM+0.99){switchingTimeHigh = switchingTimeHigh + (highCPMCnt_ - highCPM+1)*100;}
+        else if(highCPMCnt_ < highCPM){switchingTimeHigh = switchingTimeHigh - (highCPM - highCPMCnt_)*100;}
+
         SUB_STATE2 = SIDE_A;
-        highCycleCnt++; //reached end of cycle time, switch sides 
       }
     break;
 
     case PAUSE:
       if(!timer[2]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = false; DO_HYD_XV557_DCV2_B = false;}
+      
+      if(manualPause){break;}
+      for(int i = 0; i < PTsize;i++){
+        if(PTdata[i].overPressure){ break; }
+      }
+      if(millis() - timer[3] > 5000 && timer[3]){ SUB_STATE2 = SIDE_A; }
+      
+    break;
+
+    default:
+    break;
+  }
+}
+
+
+
+
+void intensifier2Operation_OLD(){
+  if(SUB_STATE2 != PREV2){
+    timer[3] = 0;
+    DO_HYD_XV554_DCV2_A = false;
+    DO_HYD_XV557_DCV2_B = false;
+    peakPsi2A = 0;
+    peakPsi2B = 0;
+    stateHistory2 = stateHistory2 + String(SUB_STATE2);
+    PREV2 = SUB_STATE2;
+    return;
+  }
+  switch(SUB_STATE2){
+    case OFF:
+      DO_HYD_XV554_DCV2_A = false;
+      DO_HYD_XV557_DCV2_B = false;
+    break;
+
+    case START:
+      if(!timer[3]){timer[3] = millis();DO_HYD_XV557_DCV2_B = true;stateHistory2 = stateHistory2 + "-";}
+      if(millis() - timer[3] > 3000 && timer[3]){
+        DO_HYD_XV557_DCV2_B = false;
+        SUB_STATE2 = DEADHEAD1;//(!deadHeadPsi2A || !deadHeadPsi2B) ? DEADHEAD1 : SIDE_A;
+      }
+      
+    break;
+
+    case DEADHEAD1:
+      if(!timer[3]){timer[3] = millis();DO_HYD_XV554_DCV2_A = true;stateHistory2 = stateHistory2 + "+";}
+      if(millis() - timer[3] > 500 && timer[3]){
+        if(AI_HYD_psig_PT561_HydraulicInlet2 > peakPsi2A){peakPsi2A = AI_HYD_psig_PT561_HydraulicInlet2;}
+      }
+      if(millis() - timer[3] > 3000 && timer[3]){
+        deadHeadPsi2A = peakPsi2A;
+        DO_HYD_XV554_DCV2_A = false;
+        SUB_STATE2 = DEADHEAD2;
+      }
+    break;
+
+    case DEADHEAD2:
+      if(!timer[3]){timer[3] = millis();DO_HYD_XV557_DCV2_B = true;stateHistory2 = stateHistory2 + "-";}
+      if(millis() - timer[3] > 500 && timer[3]){
+        if(AI_HYD_psig_PT561_HydraulicInlet2 > peakPsi2B){peakPsi2B = AI_HYD_psig_PT561_HydraulicInlet2;}
+      }
+      if(millis() - timer[3] > 3000 && timer[3]){
+        deadHeadPsi2B = peakPsi2B;
+        DO_HYD_XV557_DCV2_B = false;
+        SUB_STATE2 = SIDE_A;
+      }
+    break;
+
+    case SIDE_A:
+      if(!timer[3]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = true; stateHistory2 = stateHistory2 + "+";}
+      if(millis() - timer[3] > 500 && timer[3]){
+        if(AI_HYD_psig_PT561_HydraulicInlet2 > deadHeadPsi2A-400){ DO_HYD_XV554_DCV2_A = false; }
+      }
+      if(millis() - timer[2] > switchingTimeHigh-500 && timer[2] && !DO_HYD_XV554_DCV2_A){//check if minimum time has passed
+        SUB_STATE2 = SIDE_B;
+        ///highCycleCnt++; //reached end of cycle time, switch sides 
+      }
+    break;
+
+    case SIDE_B:
+      if(!timer[3]){ timer[3] = millis(); DO_HYD_XV557_DCV2_B = true; stateHistory2 = stateHistory2 + "-";}
+      if(millis() - timer[3] > 500 && timer[3]){
+        if(AI_HYD_psig_PT561_HydraulicInlet2 > deadHeadPsi2B-400){ DO_HYD_XV557_DCV2_B = false; }
+      }
+      if(millis() - timer[2] > switchingTimeHigh-500 && timer[2] && !DO_HYD_XV557_DCV2_B){//check if minimum time has passed
+        SUB_STATE2 = SIDE_A;
+        //highCycleCnt++; //reached end of cycle time, switch sides 
+      }
+    break;
+
+    case PAUSE:
+      if(!timer[3]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = false; DO_HYD_XV557_DCV2_B = false;}
       
       if(manualPause){break;}
       for(int i = 0; i < PTsize;i++){

@@ -36,11 +36,11 @@ void SerialCLI() {
           break;
         }
       }
-      // for(int i = 0; i < varSize; i++){
-      //   if(argStr.equalsIgnoreCase(varData[i].key)){
+      // for(int i = 0; i < VARsize; i++){
+      //   if(argStr.equalsIgnoreCase(VARdata[i].key)){
       //     String argStrVal = argBuf[++n];
       //     argVal = argStrVal.toDouble();
-      //     *varData[i].value = argVal;
+      //     *VARdata[i].value = argVal;
       //     digital = true;
       //     break;
       //   }
@@ -87,9 +87,9 @@ void SerialCLI() {
         printMode = (printMode == PT)?NONE:PT;
       }
 
-      // else if(argStr.equalsIgnoreCase("var")){
-      //   printMode = (printMode == VAR)?NONE:VAR;
-      // }
+      else if(argStr.equalsIgnoreCase("var")){
+        printMode = (printMode == VAR)?NONE:VAR;
+      }
 
       else if(argStr.equalsIgnoreCase("fm")){
         printMode = (printMode == FM)?NONE:FM;
@@ -103,6 +103,17 @@ void SerialCLI() {
       else if(argStr.equalsIgnoreCase("rbn")){
         virtualRedButton = 1;
       }
+
+      else if(argStr.equalsIgnoreCase("lowside")){
+        tog[0] = !tog[0];
+      }
+      else if(argStr.equalsIgnoreCase("highside")){
+        tog[1] = !tog[1];
+      }
+      else if(argStr.equalsIgnoreCase("oldhigh")){
+        tog[2] = !tog[2];
+      }
+
       else if(argStr.equalsIgnoreCase("estop")){
         STATE = ESTOP;
       }
@@ -140,12 +151,12 @@ void SerialCLI() {
         }
       }
 
-      else if(argStr.equalsIgnoreCase("stop") || argStr.equalsIgnoreCase("quiet")){
+      else if(argStr.equalsIgnoreCase("stop") || argStr.equalsIgnoreCase("quiet") || argStr.equalsIgnoreCase("q")){
         printMode = NONE;
       }
 
       else{
-        Serial.println("Invalid Entry");
+        Serial.println("Invalid Entry, type \"help\" or \"h\" for a list of commands.");
       }
     }
   }
@@ -153,26 +164,21 @@ void SerialCLI() {
 
 void printHelp(){
   Serial.println("################## HELP MENU ##################");
-  Serial.println("off                -> Turn off ALL devices");
   Serial.println("packet             -> Print data in standardized packet format");
   Serial.println("di                 -> Print all gpio digital inputs");
   Serial.println("do                 -> Print all gpio digital outputs");
   Serial.println("pt                 -> Print all PT values");
   Serial.println("tt                 -> Print all TT values");
   Serial.println("fm                 -> Print all Flow meter values");
-  //Serial.println("var                -> Print all adaptive variables");
+  Serial.println("var                -> Print all user adjustable variables");
   Serial.println("gbn                -> Simulate Green Button Push");
   Serial.println("abn                -> Simulate Amber Button Push");
   Serial.println("rbn                -> Simulate Red Button Push");
   Serial.println("estop              -> Simulate ESTOP Button Push");
-  Serial.println("ratio              -> Change Stage1 max compression ratio");
-  Serial.println("delay              -> Designate print delay time in ms (default: 1000)");
   Serial.println("pretty             -> Toggle print mode labeled lists <--> csv list");
   Serial.println("raw                -> Toggle to print only raw values");
-  Serial.println("plot               -> Toggle Plotting of all values using Arduino Serial Plotter");
-  Serial.println("stop/quiet         -> Silence all printouts");
-  Serial.println("manual             -> Control all output manually");
-  Serial.println("help/h             -> This help menu");
+  Serial.println("plot               -> Toggle hydraulic PSI plotting for Arduino Serial Plotter");
+  Serial.println("stop/quiet/q       -> Silence all printouts");
   for(int i = 0; i < DOsize; i++){
     String cc = DOdata[i].key;
     for(int b = 1;b < (19 - cc.length());b++){
@@ -181,14 +187,16 @@ void printHelp(){
     cc = cc + "-> Toggle " + DOdata[i].name;
     Serial.println(cc);
   }
-  // for(int i = 0; i < varSize; i++){
-  //   String cc = varData[i].key;
-  //   for(int b = 1;b < (19 - cc.length());b++){
-  //     cc = cc + " ";
-  //   }
-  //   cc = cc + "-> Change " + varData[i].name;
-  //   Serial.println(cc);
-  // }
+  for(int i = 0; i < VARsize; i++){
+    String cc = VARdata[i].key;
+    for(int b = 1;b < (19 - cc.length());b++){
+      cc = cc + " ";
+    }
+    cc = cc + "-> Change " + VARdata[i].name + " (Default: " + VARdata[i].defaultValue + ")";
+    Serial.println(cc);
+  }
+  Serial.println("manual             -> Control all output manually");
+  Serial.println("help/h             -> This help menu");
   Serial.println("###############################################");
 
 }
@@ -215,8 +223,8 @@ void dataPrint(unsigned long dly){
   //       msgC = msgC + "\"" + flowMeters[i].flowData[j].key + "\"" + ":" + *flowMeters[i].flowData[j].value + ",";
   //     }
   //   }
-  //   for(int i = 0; i < varSize;i++){
-  //     msgD = msgD + "\"" + varData[i].key + "\"" + ":" + *varData[i].value + ",";
+  //   for(int i = 0; i < VARsize;i++){
+  //     msgD = msgD + "\"" + VARdata[i].key + "\"" + ":" + *VARdata[i].value + ",";
   //   }
   //   for(int i = 0; i < DOsize;i++){
   //     msgE = msgE + "\"" + DOdata[i].key + "\"" + ":" + *DOdata[i].value + ",";
@@ -233,12 +241,7 @@ void dataPrint(unsigned long dly){
   //   Serial.print(msgE);
   //   Serial.print(msgF);
   //   Serial.println(msgG);
-  // Serial.print("StdDevLOW:");
-  // Serial.print(deltasLow.getValue(deltasLow.getCount()-1));
-  // Serial.print(",");
-  // Serial.print("StdDevHIGH:");
-  // Serial.print(deltasHigh.getValue(deltasHigh.getCount()-1)); 
-  // Serial.print(",");
+
   Serial.print("low:");
   Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);
   Serial.print(",");
@@ -293,13 +296,13 @@ void dataPrint(unsigned long dly){
           }
         }
 
-        // for(int i = 0; i < varSize;i++){
-        //   if(*varData[i].value != varData[i].prev){
-        //     if(msg != "{"){msg = msg + ",";}
-        //     msg = msg + "\"" + varData[i].key + "\":" + *varData[i].value;
-        //     varData[i].prev = *varData[i].value;
-        //   }
-        // }
+        for(int i = 0; i < VARsize;i++){
+          if(*VARdata[i].value != VARdata[i].prev){
+            if(msg != "{"){msg = msg + ",";}
+            msg = msg + "\"" + VARdata[i].key + "\":" + *VARdata[i].value;
+            VARdata[i].prev = *VARdata[i].value;
+          }
+        }
         if(msg != "{"){
           msg = msg + "}";
           Serial.println(msg);
@@ -334,19 +337,19 @@ void dataPrint(unsigned long dly){
         Serial.println();
       break;
 
-      // case VAR:
-      //   for(int i = 0; i < varSize; i++){
-      //     if(prettyPrint){
-      //       Serial.print("\"");
-      //       Serial.print(varData[i].name);
-      //       Serial.print("\": ");
-      //     }
-      //     Serial.print(*varData[i].value);
-      //     if(prettyPrint){ Serial.println(); }
-      //     else{ Serial.print(", "); }
-      //   }
-      //   Serial.println();
-      // break;
+      case VAR:
+        for(int i = 0; i < VARsize; i++){
+          if(prettyPrint){
+            Serial.print("\"");
+            Serial.print(VARdata[i].name);
+            Serial.print("\": ");
+          }
+          Serial.print(*VARdata[i].value);
+          if(prettyPrint){ Serial.println(); }
+          else{ Serial.print(", "); }
+        }
+        Serial.println();
+      break;
 
       case FM:
         for(int i = 0; i < 2; i++){
@@ -432,42 +435,20 @@ void dataPrint(unsigned long dly){
       Serial.print(DO_HYD_XV554_DCV2_A);
       Serial.println(DO_HYD_XV557_DCV2_B);
 
-      Serial.print("switchingTime:1A,1B,2A,2B: ");
-      Serial.print(switchingTime1A);Serial.print(", ");
-      Serial.print(switchingTime1B);Serial.print(", ");
-      Serial.print(switchingTime2A);Serial.print(", ");
-      Serial.println(switchingTime2B);
+      Serial.print("S1_ratio: ");
+      Serial.println(Stage1_Compression_RATIO);
 
-      Serial.print("deadHeadPsi:1A,1B,2A,2B: ");
-      Serial.print(deadHeadPsi1A);Serial.print(", ");
-      Serial.print(deadHeadPsi1B);Serial.print(", ");
-      Serial.print(deadHeadPsi2A);Serial.print(", ");
-      Serial.println(deadHeadPsi2B);
+      Serial.print("switchingTime:Low/High: ");
+      Serial.print(switchingTimeLow);Serial.print(", ");
+      Serial.println(switchingTimeHigh);
 
-      Serial.print("peakPsi:1A,1B,2A,2B: ");
-      Serial.print(peakPsi1A);Serial.print(", ");
-      Serial.print(peakPsi1B);Serial.print(", ");
-      Serial.print(peakPsi2A);Serial.print(", ");
-      Serial.println(peakPsi2B);
+      Serial.print("lowCPM: ");
+      Serial.print(lowCPM);Serial.print(">>");
+      Serial.println(lowCPMCnt_);
 
-      // Serial.print("stdDevMult:1A,1B,2A,2B: ");
-      // Serial.print(stdDevMult1A);Serial.print(", ");
-      // Serial.print(stdDevMult1B);Serial.print(", ");
-      // Serial.print(stdDevMult2A);Serial.print(", ");
-      // Serial.println(stdDevMult2B);
-
-      // Serial.print("deadHeadDelta:1A,1B,2A,2B: ");
-      // Serial.print(deadHeadDelta1A);Serial.print(", ");
-      // Serial.print(deadHeadDelta1B);Serial.print(", ");
-      // Serial.print(deadHeadDelta2A);Serial.print(", ");
-      // Serial.println(deadHeadDelta2B);
-
-      // Serial.print("S1_ratio: ");
-      // Serial.println(Stage1_Compression_RATIO);
-
-      // Serial.print("Std.Dev: ");
-      // Serial.print(deltasLow.getStandardDeviation());Serial.print(", ");
-      // Serial.println(deltasHigh.getStandardDeviation());
+      Serial.print("highCPM: ");
+      Serial.print(highCPM);Serial.print(">>");
+      Serial.println(highCPMCnt_);
 
       Serial.print("inlets: ");
       Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);Serial.print(", ");

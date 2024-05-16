@@ -97,8 +97,6 @@ String stateHistory2 = "";
 uint8_t mcpExist = 0;
 int scrollCnt, errCnt = 0;
 int flashGreen, flashAmber, flashRed = 0;
-int delayTime = 100;
-int lowCycleCnt_, highCycleCnt_, lowCycleCnt, highCycleCnt = 0;
 
 bool flashTog[3] = { false };
 bool tog[5] = { false };
@@ -112,19 +110,53 @@ unsigned long virtualRedButton, virtualGreenButton, virtualAmberButton = 0;
 
 double loopTime = 0;
 
+double delayTime = 100;
+
 double Stage1_Compression_RATIO = 6.5;
 
+double lowCPMCnt_, highCPMCnt_, lowCPMCnt, highCPMCnt = 0;
+
 double MOVING_AVG_SIZE = 0.02; //equivilent to 200 samples
+double HYD_MOVING_AVG_SIZE = 0.95;
 
 double switchingPsi1A = 0;
 double switchingPsi1B = 0;
 double switchingPsi2A = 0;
 double switchingPsi2B = 0;
 
-double switchingTime1A = 1500;
-double switchingTime1B = 1500;
-double switchingTime2A = 1500;
-double switchingTime2B = 1500;
+double switchingTimeLow = 1500;
+double switchingTimeHigh = 1500;
+
+double highCPM = 15;
+double lowCPM = 15;
+
+struct var{
+  String name;
+  String key;
+  double* value;
+  double defaultValue;
+  double prev;
+};
+
+var VARdata[] = {
+  {"Ideal_Low_CPM","LCPM",&lowCPM,15,0},
+  {"Ideal_High_CPM","HCPM",&highCPM,15,0},
+  {"NonHydraulic_MovingAverage_size","NHMAS",&MOVING_AVG_SIZE,0.02,0},
+  {"Hydraulic_MovingAverage_size","HYMAS",&HYD_MOVING_AVG_SIZE,0.95,0},
+  {"Print_Delay_Time","PRDTM",&delayTime,100,0},
+  {"Stage1_Compression_Ratio","S1CRO",&Stage1_Compression_RATIO,6.5,0}
+};int VARsize = 6;
+
+
+double peakPsi1A = 0;
+double peakPsi1B = 0;
+double peakPsi2A = 0;
+double peakPsi2B = 0;
+
+double deadHeadPsi1A = 0;
+double deadHeadPsi1B = 0;
+double deadHeadPsi2A = 0;
+double deadHeadPsi2B = 0;
 
 double AI_HYD_C_TT454_HydraulicTank = 0;
 double AI_CLT_C_TT107_CoolantSupply1 = 0;
@@ -219,8 +251,8 @@ Ewma avgPT712(MOVING_AVG_SIZE);
 Ewma avgPT519(MOVING_AVG_SIZE);
 Ewma avgPT407(MOVING_AVG_SIZE);
 Ewma avgPT410(MOVING_AVG_SIZE);
-Ewma avgPT467(0.95);
-Ewma avgPT561(0.95);
+Ewma avgPT467(HYD_MOVING_AVG_SIZE);
+Ewma avgPT561(HYD_MOVING_AVG_SIZE);
 Ewma avgPT556(MOVING_AVG_SIZE);
 Ewma avgPT555(MOVING_AVG_SIZE);
 Ewma avgPT113(MOVING_AVG_SIZE);
