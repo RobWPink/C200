@@ -438,6 +438,12 @@ void dataPrint(unsigned long dly){
       Serial.print("S1_ratio: ");
       Serial.println(Stage1_Compression_RATIO);
 
+      Serial.print("switchingPSI:1A/1B/2A/2B: ");
+      Serial.print(switchingPsi1A);Serial.print(", ");
+      Serial.println(switchingPsi1B);Serial.print(", ");
+      Serial.print(switchingPsi2A);Serial.print(", ");
+      Serial.println(switchingPsi2B);
+
       Serial.print("switchingTime:Low/High: ");
       Serial.print(switchingTimeLow);Serial.print(", ");
       Serial.println(switchingTimeHigh);
@@ -449,6 +455,10 @@ void dataPrint(unsigned long dly){
       Serial.print("highCPM: ");
       Serial.print(highCPM);Serial.print(">>");
       Serial.println(highCPMCnt_);
+
+      Serial.print("max: ");
+      Serial.print(lowMax);Serial.print(", ");
+      Serial.println(highMax);
 
       Serial.print("inlets: ");
       Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);Serial.print(", ");

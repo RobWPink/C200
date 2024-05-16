@@ -25,11 +25,11 @@ void intensifier1Operation(){
 
       switchingPsi1A = getStage1SwitchingPsi();
 
-      if(millis() - timer[2] > 500 && timer[2] && AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){ DO_HYD_XV460_DCV1_A = false; }
+      if(millis() - timer[2] > 500 && timer[2] && AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){ DO_HYD_XV460_DCV1_A = false; temp = millis() - timer[2]; }
 
       if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = faultString + "|1A Timeout|";}
       
-      if(millis() - timer[2] > switchingTimeLow && timer[2] && !DO_HYD_XV460_DCV1_A){//check if minimum time has passed
+      if(millis() - timer[2] > switchingTimeLow + temp && timer[2] && !DO_HYD_XV460_DCV1_A){//check if minimum time has passed
         lowCPMCnt = millis() - timer[2];
 
         SUB_STATE1 = SIDE_B;
@@ -41,16 +41,16 @@ void intensifier1Operation(){
 
       switchingPsi1B = getStage1SwitchingPsi();
 
-      if(millis() - timer[2] > 500 && timer[2] && AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B){ DO_HYD_XV463_DCV1_B = false; }
+      if(millis() - timer[2] > 500 && timer[2] && AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B){ DO_HYD_XV463_DCV1_B = false; temp = millis() - timer[2];}
         
       if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = faultString + "|1B Timeout|";}
 
-      if(millis() - timer[2] > switchingTimeLow && timer[2] && !DO_HYD_XV463_DCV1_B){//check if minimum time has passed
+      if(millis() - timer[2] > switchingTimeLow + temp && timer[2] && !DO_HYD_XV463_DCV1_B){//check if minimum time has passed
         lowCPMCnt = lowCPMCnt + millis() - timer[2];
         lowCPMCnt_ = 60 / lowCPMCnt;
-
-        if(lowCPMCnt_ > lowCPM+0.99){switchingTimeLow = switchingTimeLow + ((lowCPMCnt_ - lowCPM+1) + (lowMax>110)?((lowMax-110)/2):0)*time2CPMmult;}
-        else if(lowCPMCnt_ < lowCPM){switchingTimeLow = switchingTimeLow - ((lowCPM - lowCPMCnt_) + (lowMax>110)?((lowMax-110)/2):0)*time2CPMmult;}
+        switchingTimeLow = ((lowMax>60)?((lowMax-60)/2):0)*time2CPMmult;
+        //if(lowCPMCnt_ > lowCPM+0.99){switchingTimeLow = switchingTimeLow + (/*(lowCPMCnt_ - lowCPM+1) + */(lowMax>110)?((lowMax-110)/2):0)*time2CPMmult;}
+        //else if(lowCPMCnt_ < lowCPM){switchingTimeLow = switchingTimeLow - (/*(lowCPM - lowCPMCnt_) + */(lowMax>110)?((lowMax-110)/2):0)*time2CPMmult;}
 
         SUB_STATE1 = SIDE_A;
       }
@@ -60,10 +60,13 @@ void intensifier1Operation(){
       if(!timer[2]){ timer[2] = millis(); DO_HYD_XV460_DCV1_A = false; DO_HYD_XV463_DCV1_B = false;}
       
       if(manualPause){break;}
-      for(int i = 0; i < PTsize;i++){
-        if(PTdata[i].overPressure){ break; }
+      if(millis() - timer[2] > 5000 && timer[2]){ 
+        for(int i = 0; i < PTsize;i++){
+          if(PTdata[i].overPressure){ break; }
+          if(i == PTsize - 1){SUB_STATE1 = SIDE_A;}
+        }
       }
-      if(millis() - timer[2] > 5000 && timer[2]){ SUB_STATE1 = SIDE_A; }
+      
       
     break;
 
@@ -134,10 +137,12 @@ void intensifier2Operation(){
       if(!timer[2]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = false; DO_HYD_XV557_DCV2_B = false;}
       
       if(manualPause){break;}
-      for(int i = 0; i < PTsize;i++){
-        if(PTdata[i].overPressure){ break; }
+      if(millis() - timer[3] > 5000 && timer[3]){ 
+        for(int i = 0; i < PTsize;i++){
+          if(PTdata[i].overPressure){ break; }
+          if(i == PTsize - 1){SUB_STATE2 = SIDE_A; }
+        }
       }
-      if(millis() - timer[3] > 5000 && timer[3]){ SUB_STATE2 = SIDE_A; }
       
     break;
 
@@ -222,10 +227,12 @@ void intensifier2Operation_OLD(){
       if(!timer[3]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = false; DO_HYD_XV557_DCV2_B = false;}
       
       if(manualPause){break;}
-      for(int i = 0; i < PTsize;i++){
-        if(PTdata[i].overPressure){ break; }
+      if(millis() - timer[3] > 5000 && timer[3]){ 
+        for(int i = 0; i < PTsize;i++){
+          if(PTdata[i].overPressure){ break; }
+          if(i == PTsize - 1){SUB_STATE2 = SIDE_A; }
+        }
       }
-      if(millis() - timer[3] > 5000 && timer[3]){ SUB_STATE2 = SIDE_A; }
       
     break;
 

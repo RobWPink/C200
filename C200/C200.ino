@@ -57,7 +57,7 @@ void loop() {
   PTdata[2].max = (PTdata[2].max > 1400)?1400:PTdata[2].max;
   PTdata[2].maxRecovery =  PTdata[2].max - 200;
 
-  lowMax = mcpExist?max(AI_H2_C_TT917_Stage1_SuctionTank, max(AI_H2_C_TT701_Stage1_DischargePreTank, max(AI_H2_C_TT809_Stage1_Discharge1, AI_H2_C_TT810_Stage1_Discharge2))):0;
+  lowMax = max(AI_H2_C_TT917_Stage1_SuctionTank, max(AI_H2_C_TT701_Stage1_DischargePreTank, max(AI_H2_C_TT809_Stage1_Discharge1, AI_H2_C_TT810_Stage1_Discharge2)));
   lowMax = (lowMax > 800)?0:lowMax;
 
   highMax = mcpExist?max(AI_H2_C_TT715_Stage2_SuctionTank,max(AI_H2_C_TT520_Stage2_Discharge,max(AI_H2_C_TT521_Stage3_Suction,AI_H2_C_TT522_Stage3_Discharge))):0;
@@ -161,12 +161,13 @@ void loop() {
 
       if(manualPause){ smallMatrix[2].displayPause(false); }
       else{ smallMatrix[2].displayQuadrants(DO_HYD_XV460_DCV1_A,DO_HYD_XV463_DCV1_B,DO_HYD_XV554_DCV2_A,DO_HYD_XV557_DCV2_B,(SUB_STATE1==PAUSE),(SUB_STATE2==PAUSE)); }
-      
+        if(tog[2]){SUB_STATE2 = PAUSE;}
 
       //Main operation of compressing
       if(!tog[0]){intensifier1Operation();}
       if(millis() - timer[0] > 20000 && timer[0]){tog[1] = true;}
-      if(tog[1]){if(!tog[2]){intensifier2Operation_OLD();}else{intensifier2Operation();}}
+      if(tog[1]){intensifier2Operation_OLD();}
+   
 
       
 

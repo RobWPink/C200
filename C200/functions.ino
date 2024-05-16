@@ -315,7 +315,7 @@ void i2cTransceive(int ptInterval){
             errCnt++;
           }
         }
-        else if(*PTdata[i].value >= PTdata[i].minRecovery && PTdata[i].overPressure){
+        else if(*PTdata[i].value > PTdata[i].minRecovery && PTdata[i].overPressure){
           PTdata[i].overPressure = false;
         }
       }
