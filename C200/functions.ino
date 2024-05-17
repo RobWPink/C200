@@ -268,39 +268,46 @@ void i2cTransceive(int ptInterval){
       TTdata[i].rawTemp = potToTemp(TTdata[i].raw,TTdata[i].coef);
       *TTdata[i].value = TTdata[i].avg.filter(TTdata[i].rawTemp);    
     }
-
-    /*
+/*
     if(TTdata[i].max != -1 && TTdata[i].maxPause != -1){
       if(*TTdata[i].value >= TTdata[i].max && !TTdata[i].overheat){
-        TTdata[i].overheat = true;
+        TTdata[i].overheat = millis();
         if(STATE == PRODUCTION){
           if(!TTdata[i].maxPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; errMsg[errCnt] = "MAX[BOTH]:\"";}
           else if(TTdata[i].maxPause == 1){SUB_STATE1 = PAUSE;errMsg[errCnt] = "MAX[LOW]:\"";}
           else if(TTdata[i].maxPause == 2){SUB_STATE2 = PAUSE;errMsg[errCnt] = "MAX[HIGH]:\"";}
+          else if(TTdata[i].maxPause == 3){SUB_STATE1 = OFF; SUB_STATE2 = OFF; STATE = FAULT; faultString = "Maximum Fault";errMsg[errCnt] = "MAX[FAULT]:\"";}
           else{Serial.println("pause state error");}
           errMsg[errCnt] = errMsg[errCnt] + TTdata[i].key + "\"";
           errCnt++;
         }
       }
-      else if(*TTdata[i].value <= TTdata[i].maxRecovery && TTdata[i].overheat){
-        TTdata[i].overheat = false;
+      else if(*TTdata[i].value <= TTdata[i].maxRecovery && millis() - TTdata[i].overheat > 10000){
+        TTdata[i].overheat = 0;
+        if(!TTdata[i].maxPause){ SUB_STATE1 = SIDE_A; SUB_STATE2 = SIDE_A;}
+        else if(TTdata[i].maxPause == 1){SUB_STATE1 = SIDE_A;}
+        else if(TTdata[i].maxPause == 2){SUB_STATE2 = SIDE_A;}
       }
     }
 
     if(TTdata[i].min != -1 && TTdata[i].minPause != 1){
-      if(*TTdata[i].value < TTdata[i].min && !TTdata[i].overheat){
-        TTdata[i].overheat = true;
+      if(*TTdata[i].value < TTdata[i].min && !TTdata[i].underheat){
+        TTdata[i].underheat = millis();
         if(STATE == PRODUCTION){
           if(!TTdata[i].minPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; errMsg[errCnt] = "MIN[BOTH]:\"";}
           else if(TTdata[i].minPause == 1){SUB_STATE1 = PAUSE;errMsg[errCnt] = "MIN[LOW]:\"";}
           else if(TTdata[i].minPause == 2){SUB_STATE2 = PAUSE;errMsg[errCnt] = "MIN[HIGH]:\"";}
+          else if(TTdata[i].minPause == 3){SUB_STATE1 = OFF; SUB_STATE2 = OFF; STATE = FAULT; faultString = "Minimum Fault";errMsg[errCnt] = "MIN[FAULT]:\"";}
           else{Serial.println("pause state error");}
           errMsg[errCnt] = errMsg[errCnt] + TTdata[i].key + "\"";
           errCnt++;
         }
       }
-      else if(*TTdata[i].value >= TTdata[i].minRecovery && TTdata[i].overheat){
-        TTdata[i].overheat = false;
+      else if(*TTdata[i].value > TTdata[i].minRecovery && millis() - TTdata[i].underheat > 10000){
+        TTdata[i].underheat = 0;
+        if(!TTdata[i].minPause){ SUB_STATE1 = SIDE_A; SUB_STATE2 = SIDE_A;}
+        else if(TTdata[i].minPause == 1){SUB_STATE1 = SIDE_A;}
+        else if(TTdata[i].minPause == 2){SUB_STATE2 = SIDE_A;}
       }
     }
     */
@@ -319,7 +326,7 @@ void i2cTransceive(int ptInterval){
 
       if(PTdata[i].max != -1 && PTdata[i].maxPause != -1){
         if(*PTdata[i].value >= PTdata[i].max && !PTdata[i].overPressure){
-          PTdata[i].overPressure = true;
+          PTdata[i].overPressure = millis();
           if(STATE == PRODUCTION){
             if(!PTdata[i].maxPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; errMsg[errCnt] = "MAX[BOTH]:\"";}
             else if(PTdata[i].maxPause == 1){SUB_STATE1 = PAUSE;errMsg[errCnt] = "MAX[LOW]:\"";}
@@ -330,14 +337,17 @@ void i2cTransceive(int ptInterval){
             errCnt++;
           }
         }
-        else if(*PTdata[i].value <= PTdata[i].maxRecovery && PTdata[i].overPressure){
-          PTdata[i].overPressure = false;
+        else if(*PTdata[i].value <= PTdata[i].maxRecovery && millis() - PTdata[i].overPressure > 10000){
+          PTdata[i].overPressure = 0;
+          if(!PTdata[i].maxPause){ SUB_STATE1 = SIDE_A; SUB_STATE2 = SIDE_A;}
+          else if(PTdata[i].maxPause == 1){SUB_STATE1 = SIDE_A;}
+          else if(PTdata[i].maxPause == 2){SUB_STATE2 = SIDE_A;}
         }
       }
 
       if(PTdata[i].min != -1 && PTdata[i].minPause != 1){
         if(*PTdata[i].value < PTdata[i].min && !PTdata[i].underPressure){
-          PTdata[i].underPressure = true;
+          PTdata[i].underPressure = millis();
           if(STATE == PRODUCTION){
             if(!PTdata[i].minPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; errMsg[errCnt] = "MIN[BOTH]:\"";}
             else if(PTdata[i].minPause == 1){SUB_STATE1 = PAUSE;errMsg[errCnt] = "MIN[LOW]:\"";}
@@ -348,8 +358,11 @@ void i2cTransceive(int ptInterval){
             errCnt++;
           }
         }
-        else if(*PTdata[i].value > PTdata[i].minRecovery && PTdata[i].underPressure){
-          PTdata[i].underPressure = false;
+        else if(*PTdata[i].value > PTdata[i].minRecovery && millis() - PTdata[i].underPressure > 10000){
+          PTdata[i].underPressure = 0;
+          if(!PTdata[i].minPause){ SUB_STATE1 = SIDE_A; SUB_STATE2 = SIDE_A;}
+          else if(PTdata[i].minPause == 1){SUB_STATE1 = SIDE_A;}
+          else if(PTdata[i].minPause == 2){SUB_STATE2 = SIDE_A;}
         }
       }
     }
