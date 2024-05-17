@@ -55,7 +55,7 @@ void loop() {
   //never go above 6.5/1 s1s/s2s
   PTdata[2].max = AI_H2_psig_PT911_Stage1_SuctionTank*Stage1_Compression_RATIO;
   PTdata[2].max = (PTdata[2].max > 1400)?1400:PTdata[2].max;
-  PTdata[2].maxRecovery =  PTdata[2].max - 200;
+  PTdata[2].maxRecovery =  PTdata[2].max - 50;
 
   // lowMax = max(AI_H2_C_TT917_Stage1_SuctionTank, max(AI_H2_C_TT701_Stage1_DischargePreTank, max(AI_H2_C_TT809_Stage1_Discharge1, AI_H2_C_TT810_Stage1_Discharge2)));
   // lowMax = (0 < lowMax < 800)?lowMax:0;
@@ -91,6 +91,8 @@ void loop() {
     flashRed = 0;
     flashAmber = 0;
     manualPause = false;
+    CPMlowTimer = 0;
+    CPMhighTimer = 0;
     stateHistory1 = stateHistory1 + "(" + String(STATE) + ")";
     stateHistory2 = stateHistory2 + "(" + String(STATE) + ")";
     CHANGED_STATE = STATE;

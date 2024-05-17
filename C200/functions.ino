@@ -339,9 +339,11 @@ void i2cTransceive(int ptInterval){
         }
         else if(*PTdata[i].value <= PTdata[i].maxRecovery && millis() - PTdata[i].overPressure > 10000){
           PTdata[i].overPressure = 0;
-          if(!PTdata[i].maxPause){ SUB_STATE1 = SIDE_A; SUB_STATE2 = SIDE_A;}
-          else if(PTdata[i].maxPause == 1){SUB_STATE1 = SIDE_A;}
-          else if(PTdata[i].maxPause == 2){SUB_STATE2 = SIDE_A;}
+          if(STATE == PRODUCTION){
+            if(!PTdata[i].maxPause){ SUB_STATE1 = SIDE_A; SUB_STATE2 = SIDE_A;}
+            else if(PTdata[i].maxPause == 1){SUB_STATE1 = SIDE_A;}
+            else if(PTdata[i].maxPause == 2){SUB_STATE2 = SIDE_A;}
+          }
         }
       }
 
@@ -360,9 +362,11 @@ void i2cTransceive(int ptInterval){
         }
         else if(*PTdata[i].value > PTdata[i].minRecovery && millis() - PTdata[i].underPressure > 10000){
           PTdata[i].underPressure = 0;
-          if(!PTdata[i].minPause){ SUB_STATE1 = SIDE_A; SUB_STATE2 = SIDE_A;}
-          else if(PTdata[i].minPause == 1){SUB_STATE1 = SIDE_A;}
-          else if(PTdata[i].minPause == 2){SUB_STATE2 = SIDE_A;}
+          if(STATE == PRODUCTION){
+            if(!PTdata[i].minPause){ SUB_STATE1 = SIDE_A; SUB_STATE2 = SIDE_A;}
+            else if(PTdata[i].minPause == 1){SUB_STATE1 = SIDE_A;}
+            else if(PTdata[i].minPause == 2){SUB_STATE2 = SIDE_A;}
+          }
         }
       }
     }

@@ -75,6 +75,11 @@ void SerialCLI() {
         rawPrint = !rawPrint;
       }
 
+      else if(argStr.equalsIgnoreCase("S3")){
+        String argStrVal = argBuf[++n];
+        switchingPsi2A = argStrVal.toDouble();
+      }
+
       else if(argStr.equalsIgnoreCase("packet")){
         printMode = (printMode == PACKET)?NONE:PACKET;
       }
@@ -453,28 +458,28 @@ void dataPrint(unsigned long dly){
       Serial.print(switchingTimeLow);Serial.print(", ");
       Serial.println(switchingTimeHigh);
 
-      Serial.print("lowCPM: ");
-      Serial.print(lowCPM);Serial.print(">>");
-      Serial.println(lowCPMCnt_);
-
       Serial.print("UnderPressure:");
       for(int i = 0; i < PTsize; i++){
-        Serial.print(PTdata[i].underPressure);
-      }
-      Serial.println();
-      Serial.print("OverPressure:");
-      for(int i = 0; i < PTsize; i++){
-        Serial.print(PTdata[i].overPressure);
+        Serial.print(PTdata[i].underPressure?1:0);
       }
       Serial.println();
 
-      Serial.print("highCPM: ");
-      Serial.print(highCPM);Serial.print(">>");
-      Serial.println(highCPMCnt_);
+      Serial.print("OverPressure:");
+      for(int i = 0; i < PTsize; i++){
+        Serial.print(PTdata[i].overPressure?1:0);
+      }
+      Serial.println();
+
+      Serial.print("CPM: ");
+      Serial.print(CPMlow);Serial.print(", ");
+      Serial.println(CPMhigh);
 
       Serial.print("max: ");
       Serial.print(lowMax);Serial.print(", ");
       Serial.println(highMax);
+
+      Serial.print("Stage1 Max: ");
+      Serial.println(PTdata[2].max);
 
       Serial.print("inlets: ");
       Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);Serial.print(", ");
