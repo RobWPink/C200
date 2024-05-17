@@ -126,7 +126,7 @@ double switchingPsi2A = 0;
 double switchingPsi2B = 0;
 
 double switchingTimeLow = 0;
-double switchingTimeHigh = 1500;
+double switchingTimeHigh = 0;
 
 double highCPM = 15;
 double lowCPM = 15;
@@ -310,18 +310,19 @@ struct tt {
   int channel;
   int pause;
   bool overheat;
+  bool underheat;
 } TTdata[] = {
-  { "AI_HYD_C_TT454_HydraulicTank", "TT454", 0, 0, avgTT454, &AI_HYD_C_TT454_HydraulicTank, 0, 20, 23, 0, 55, 30, 0,  BCOEFFICIENT, adc1, -1, 0, 0, false },
-  { "AI_CLT_C_TT107_CoolantSupply1", "TT107", 0, 0, avgTT107, &AI_CLT_C_TT107_CoolantSupply1, 0, -1, -1, 0, 140, 130, 0,  BCOEFFICIENT, adc1, -1, 1, 0, false },
-  { "AI_CLT_C_TT207_CoolantSupply2", "TT207", 0, 0, avgTT207, &AI_CLT_C_TT207_CoolantSupply2, 0, -1, -1, 0, 140, 130, 0,  BCOEFFICIENT, adc1, -1, 2, 0, false },
-  { "AI_H2_C_TT917_Stage1_SuctionTank", "TT917", 0, 0, avgTT917, &AI_H2_C_TT917_Stage1_SuctionTank, 0, -1, -1, 0, 140, 130, 0,  BCOEFFICIENT, adc1, -1, 3, 0, false },
-  { "AI_H2_C_TT809_Stage1_Discharge1", "TT809", 0, 0, avgTT809, &AI_H2_C_TT809_Stage1_Discharge1, 0, -1, -1, 0, 140, 130, 0,  1, -1, 1, -1, 0, false },
-  { "AI_H2_C_TT810_Stage1_Discharge2", "TT810", 0, 0, avgTT810, &AI_H2_C_TT810_Stage1_Discharge2, 0, -1, -1, 0, 140, 130, 0,  1, -1, 2, -1, 0, false },
-  //{ "AI_H2_C_TT701_Stage1_DischargePreTank", "TT701", 0, 0, avgTT701, &AI_H2_C_TT701_Stage1_DischargePreTank, 0, -1, -1, 0, -1, -1,0,  -1,-1, -1, -1, 0, false }
-  { "AI_H2_C_TT715_Stage2_SuctionTank", "TT715", 0, 0, avgTT715, &AI_H2_C_TT715_Stage2_SuctionTank, 0, -1, -1, 0, 140, 130, 0,  1, -1, 3, -1, 0, false },
-  { "AI_H2_C_TT520_Stage2_Discharge", "TT520", 0, 0, avgTT520, &AI_H2_C_TT520_Stage2_Discharge, 0, -1, -1, 0, 140, 130, 0,  1, -1, 4, -1, 0, false },
-  { "AI_H2_C_TT521_Stage3_Suction", "TT521", 0, 0, avgTT521, &AI_H2_C_TT521_Stage3_Suction, 0, -1, -1, 0, 140, 130, 0,  1, -1, 5, -1, 0, false },
-  { "AI_H2_C_TT522_Stage3_Discharge", "TT522", 0, 0, avgTT522, &AI_H2_C_TT522_Stage3_Discharge, 0, -1, -1, 0, 140, 130, 0,  1, -1, 6, -1, 0, false },
+  { "AI_HYD_C_TT454_HydraulicTank", "TT454", 0, 0, avgTT454, &AI_HYD_C_TT454_HydraulicTank, 0, 20, 23, 0, 55, 30, 0,  BCOEFFICIENT, adc1, -1, 0, 0, false, false },
+  { "AI_CLT_C_TT107_CoolantSupply1", "TT107", 0, 0, avgTT107, &AI_CLT_C_TT107_CoolantSupply1, 0, -1, -1, 0, 140, 130, 0,  BCOEFFICIENT, adc1, -1, 1, 0, false, false },
+  { "AI_CLT_C_TT207_CoolantSupply2", "TT207", 0, 0, avgTT207, &AI_CLT_C_TT207_CoolantSupply2, 0, -1, -1, 0, 140, 130, 0,  BCOEFFICIENT, adc1, -1, 2, 0, false, false },
+  { "AI_H2_C_TT917_Stage1_SuctionTank", "TT917", 0, 0, avgTT917, &AI_H2_C_TT917_Stage1_SuctionTank, 0, -1, -1, 0, 140, 130, 0,  BCOEFFICIENT, adc1, -1, 3, 0, false, false },
+  { "AI_H2_C_TT809_Stage1_Discharge1", "TT809", 0, 0, avgTT809, &AI_H2_C_TT809_Stage1_Discharge1, 0, -1, -1, 0, 140, 130, 0,  1, -1, 1, -1, 0, false, false },
+  { "AI_H2_C_TT810_Stage1_Discharge2", "TT810", 0, 0, avgTT810, &AI_H2_C_TT810_Stage1_Discharge2, 0, -1, -1, 0, 140, 130, 0,  1, -1, 2, -1, 0, false, false },
+  //{ "AI_H2_C_TT701_Stage1_DischargePreTank", "TT701", 0, 0, avgTT701, &AI_H2_C_TT701_Stage1_DischargePreTank, 0, -1, -1, 0, -1, -1,0,  -1,-1, -1, -1, 0, false, false }
+  { "AI_H2_C_TT715_Stage2_SuctionTank", "TT715", 0, 0, avgTT715, &AI_H2_C_TT715_Stage2_SuctionTank, 0, -1, -1, 0, 140, 130, 0,  1, -1, 3, -1, 0, false, false },
+  { "AI_H2_C_TT520_Stage2_Discharge", "TT520", 0, 0, avgTT520, &AI_H2_C_TT520_Stage2_Discharge, 0, -1, -1, 0, 140, 130, 0,  1, -1, 4, -1, 0, false, false },
+  { "AI_H2_C_TT521_Stage3_Suction", "TT521", 0, 0, avgTT521, &AI_H2_C_TT521_Stage3_Suction, 0, -1, -1, 0, 140, 130, 0,  1, -1, 5, -1, 0, false, false },
+  { "AI_H2_C_TT522_Stage3_Discharge", "TT522", 0, 0, avgTT522, &AI_H2_C_TT522_Stage3_Discharge, 0, -1, -1, 0, 140, 130, 0,  1, -1, 6, -1, 0, false, false },
 }; int TTsize = 10;
 
 struct pt {
@@ -346,21 +347,22 @@ struct pt {
   ADS7828 adc;
   int channel;
   bool overPressure;
+  bool underPressure;
 } PTdata[] = {
-  { "AI_H2_psig_PT911_Stage1_SuctionTank", "PT911", 0, 0, 0, avgPT911, &AI_H2_psig_PT911_Stage1_SuctionTank, 0, 75, 85, 1, 400, 390, 0, 820, 4096, 0, 500, adc2, 3, false },
-  { "AI_H2_psig_PT716_Stage1_Discharge", "PT716", 0, 0, 0, avgPT716, &AI_H2_psig_PT716_Stage1_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 2000, adc2, 4, false },
-  { "AI_H2_psig_PT712_Stage1_DischargeTank", "PT712", 0, 0, 0, avgPT712, &AI_H2_psig_PT712_Stage1_DischargeTank, 0, 400, 480, 2, -1, -1, 1, 820, 4096, 0, 2000, adc2, 5, false },
-  { "AI_H2_psig_PT519_Stage2_Discharge", "PT519", 0, 0, 0, avgPT519, &AI_H2_psig_PT519_Stage2_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 10000, adc2, 6, false },
-  { "AI_H2_psig_PT407_Stage3_Discharge", "PT407", 0, 0, 0, avgPT407, &AI_H2_psig_PT407_Stage3_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 20000, adc2, 7, false },
-  { "AI_H2_psig_PT410_Stage3_DischargeTank", "PT410", 0, 0, 0, avgPT410, &AI_H2_psig_PT410_Stage3_DischargeTank, 0, -1, -1, -1, 8100, 7500, 0,  820, 4096, 0, 20000, adc3, 0, false },
-  { "AI_HYD_psig_PT467_HydraulicInlet1", "PT467", 0, 0, 0, avgPT467, &AI_HYD_psig_PT467_HydraulicInlet1, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc3, 1, false },
-  { "AI_HYD_psig_PT561_HydraulicInlet2", "PT561", 0, 0, 0, avgPT561, &AI_HYD_psig_PT561_HydraulicInlet2, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc3, 2, false },
-  { "AI_HYD_psig_PT556_HydraulicIntake2_B", "PT556", 0, 0, 0, avgPT556, &AI_HYD_psig_PT556_HydraulicIntake2_B, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 20000, adc3, 3, false },
-  { "AI_HYD_psig_PT555_HydraulicIntake2_A", "PT555", 0, 0, 0, avgPT555, &AI_HYD_psig_PT555_HydraulicIntake2_A, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 20000, adc3, 4, false },
-  { "AI_CLT_psig_PT113_CoolantSupply1", "PT113", 0, 0, 0, avgPT113, &AI_CLT_psig_PT113_CoolantSupply1, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 250, adc3, 5, false },
-  { "AI_CLT_psig_PT213_CoolantSupply2", "PT213", 0, 0, 0, avgPT213, &AI_CLT_psig_PT213_CoolantSupply2, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 250, adc3, 6, false },
-  { "AI_HYD_psig_PT461_HydraulicIntake1_A", "PT461", 0, 0, 0, avgPT461, &AI_HYD_psig_PT461_HydraulicIntake1_A, -1, -1, -1, -1, -1, -1, -1,  -1, -1, -1, -1, false },
-  { "AI_HYD_psig_PT462_HydraulicIntake1_B", "PT462", 0, 0, 0, avgPT462, &AI_HYD_psig_PT462_HydraulicIntake1_B, -1, -1, -1, -1, -1, -1, -1,  -1, -1, -1, -1, false }
+  { "AI_H2_psig_PT911_Stage1_SuctionTank", "PT911", 0, 0, 0, avgPT911, &AI_H2_psig_PT911_Stage1_SuctionTank, 0, 75, 85, 1, 400, 390, 0, 820, 4096, 0, 500, adc2, 3, false, false },
+  { "AI_H2_psig_PT716_Stage1_Discharge", "PT716", 0, 0, 0, avgPT716, &AI_H2_psig_PT716_Stage1_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 2000, adc2, 4, false, false },
+  { "AI_H2_psig_PT712_Stage1_DischargeTank", "PT712", 0, 0, 0, avgPT712, &AI_H2_psig_PT712_Stage1_DischargeTank, 0, 400, 450, 2, -1, -1, 1, 820, 4096, 0, 2000, adc2, 5, false, false },
+  { "AI_H2_psig_PT519_Stage2_Discharge", "PT519", 0, 0, 0, avgPT519, &AI_H2_psig_PT519_Stage2_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 10000, adc2, 6, false, false },
+  { "AI_H2_psig_PT407_Stage3_Discharge", "PT407", 0, 0, 0, avgPT407, &AI_H2_psig_PT407_Stage3_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 20000, adc2, 7, false, false },
+  { "AI_H2_psig_PT410_Stage3_DischargeTank", "PT410", 0, 0, 0, avgPT410, &AI_H2_psig_PT410_Stage3_DischargeTank, 0, -1, -1, -1, 8100, 7500, 0,  820, 4096, 0, 20000, adc3, 0, false, false },
+  { "AI_HYD_psig_PT467_HydraulicInlet1", "PT467", 0, 0, 0, avgPT467, &AI_HYD_psig_PT467_HydraulicInlet1, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc3, 1, false, false },
+  { "AI_HYD_psig_PT561_HydraulicInlet2", "PT561", 0, 0, 0, avgPT561, &AI_HYD_psig_PT561_HydraulicInlet2, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc3, 2, false, false },
+  { "AI_HYD_psig_PT556_HydraulicIntake2_B", "PT556", 0, 0, 0, avgPT556, &AI_HYD_psig_PT556_HydraulicIntake2_B, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 20000, adc3, 3, false, false },
+  { "AI_HYD_psig_PT555_HydraulicIntake2_A", "PT555", 0, 0, 0, avgPT555, &AI_HYD_psig_PT555_HydraulicIntake2_A, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 20000, adc3, 4, false, false },
+  { "AI_CLT_psig_PT113_CoolantSupply1", "PT113", 0, 0, 0, avgPT113, &AI_CLT_psig_PT113_CoolantSupply1, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 250, adc3, 5, false, false },
+  { "AI_CLT_psig_PT213_CoolantSupply2", "PT213", 0, 0, 0, avgPT213, &AI_CLT_psig_PT213_CoolantSupply2, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 250, adc3, 6, false, false },
+  { "AI_HYD_psig_PT461_HydraulicIntake1_A", "PT461", 0, 0, 0, avgPT461, &AI_HYD_psig_PT461_HydraulicIntake1_A, -1, -1, -1, -1, -1, -1, -1,  -1, -1, -1, -1, false, false },
+  { "AI_HYD_psig_PT462_HydraulicIntake1_B", "PT462", 0, 0, 0, avgPT462, &AI_HYD_psig_PT462_HydraulicIntake1_B, -1, -1, -1, -1, -1, -1, -1,  -1, -1, -1, -1, false, false }
 }; int PTsize = 14;
 
 struct digital {

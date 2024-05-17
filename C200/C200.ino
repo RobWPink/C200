@@ -4,7 +4,7 @@ void setup() {
   RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200v2_Longview", "V0.6.5");
+  matrixSetup("C200v2_Longview", "V0.6.7");
   i2cSetup();
   Serial.println("OK");
   delay(3000);
@@ -142,9 +142,11 @@ void loop() {
       else{ smallMatrix[2].displayQuadrants(DO_HYD_XV460_DCV1_A,DO_HYD_XV463_DCV1_B,DO_HYD_XV554_DCV2_A,DO_HYD_XV557_DCV2_B,(SUB_STATE1==PAUSE),(SUB_STATE2==PAUSE)); }
 
       //Main operation of compressing
+      if(tog[2]){SUB_STATE1 = PAUSE;}
+      if(tog[3]){SUB_STATE2 = PAUSE;}
       intensifier1Operation();
       if(millis() - timer[0] > 20000 && timer[0]){tog[1] = true;}
-      if(tog[1]){if(tog[2]){intensifier2Operation_OLD();}else{intensifier2Operation();}}
+      if(tog[1]){intensifier2Operation();}
    
     break;
   //#####################################################################

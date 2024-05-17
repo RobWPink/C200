@@ -336,8 +336,8 @@ void i2cTransceive(int ptInterval){
       }
 
       if(PTdata[i].min != -1 && PTdata[i].minPause != 1){
-        if(*PTdata[i].value < PTdata[i].min && !PTdata[i].overPressure){
-          PTdata[i].overPressure = true;
+        if(*PTdata[i].value < PTdata[i].min && !PTdata[i].underPressure){
+          PTdata[i].underPressure = true;
           if(STATE == PRODUCTION){
             if(!PTdata[i].minPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; errMsg[errCnt] = "MIN[BOTH]:\"";}
             else if(PTdata[i].minPause == 1){SUB_STATE1 = PAUSE;errMsg[errCnt] = "MIN[LOW]:\"";}
@@ -348,9 +348,8 @@ void i2cTransceive(int ptInterval){
             errCnt++;
           }
         }
-        else if(*PTdata[i].value > PTdata[i].minRecovery && PTdata[i].overPressure){
-          if(tog[3]){Serial.print(PTdata[i].name);Serial.print(": ");Serial.print(PTdata[i].minRecovery);Serial.print("/");Serial.println(*PTdata[i].value);}
-          PTdata[i].overPressure = false;
+        else if(*PTdata[i].value > PTdata[i].minRecovery && PTdata[i].underPressure){
+          PTdata[i].underPressure = false;
         }
       }
     }

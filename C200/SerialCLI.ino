@@ -53,13 +53,18 @@ void SerialCLI() {
         if(argVal > 0){delayTime = argVal;}
       }
 
-      else if(argStr.equalsIgnoreCase("min")){
-        tog[3] = !tog[3];
-      }
-
       else if(argStr.equalsIgnoreCase("ratio")) {
         String argStrVal = argBuf[++n];
         Stage1_Compression_RATIO = argStrVal.toDouble();
+      }
+
+      else if(argStr.equalsIgnoreCase("swlow")) {
+        String argStrVal = argBuf[++n];
+        switchingTimeLow = argStrVal.toDouble();
+      }
+      else if(argStr.equalsIgnoreCase("swhigh")) {
+        String argStrVal = argBuf[++n];
+        switchingTimeHigh = argStrVal.toDouble();
       }
    
       else if(argStr.equalsIgnoreCase("help") || argStr.equalsIgnoreCase("h")){
@@ -108,13 +113,10 @@ void SerialCLI() {
       }
 
       else if(argStr.equalsIgnoreCase("pauselow")){
-        SUB_STATE1 = (SUB_STATE1 == PAUSE)?SIDE_A:PAUSE;
+        tog[2] = !tog[2];
       }
       else if(argStr.equalsIgnoreCase("pausehigh")){
-        SUB_STATE2 = (SUB_STATE2 == PAUSE)?SIDE_A:PAUSE;
-      }
-      else if(argStr.equalsIgnoreCase("oldhigh")){
-        tog[2] = !tog[2];
+        tog[3] = !tog[3];
       }
 
       else if(argStr.equalsIgnoreCase("estop")){
@@ -454,6 +456,17 @@ void dataPrint(unsigned long dly){
       Serial.print("lowCPM: ");
       Serial.print(lowCPM);Serial.print(">>");
       Serial.println(lowCPMCnt_);
+
+      Serial.print("UnderPressure:");
+      for(int i = 0; i < PTsize; i++){
+        Serial.print(PTdata[i].underPressure);
+      }
+      Serial.println();
+      Serial.print("OverPressure:");
+      for(int i = 0; i < PTsize; i++){
+        Serial.print(PTdata[i].overPressure);
+      }
+      Serial.println();
 
       Serial.print("highCPM: ");
       Serial.print(highCPM);Serial.print(">>");

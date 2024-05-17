@@ -59,9 +59,9 @@ void intensifier1Operation(){
       if(!timer[2]){ timer[2] = millis(); DO_HYD_XV460_DCV1_A = false; DO_HYD_XV463_DCV1_B = false;}
       
       if(manualPause){return;}
-      if(millis() - timer[2] > 5000 && timer[2]){ 
+      if(millis() - timer[2] > 10000 && timer[2]){ 
         for(int i = 0; i < PTsize;i++){
-          if(PTdata[i].overPressure){ return; }
+          if(PTdata[i].overPressure || PTdata[i].underPressure){ return; }
           //if(i == PTsize - 1){SUB_STATE1 = SIDE_A;}
         }
         SUB_STATE1 = SIDE_A;
@@ -96,7 +96,7 @@ void intensifier2Operation(){
     break;
 
     case SIDE_A:
-      if(!timer[2]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = true; stateHistory2 = stateHistory2 + "+";}
+      if(!timer[3]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = true; stateHistory2 = stateHistory2 + "+";}
 
       switchingPsi2A = getStage2SwitchingPsi();
 
@@ -110,7 +110,7 @@ void intensifier2Operation(){
     break;
 
     case SIDE_B:
-      if(!timer[2]){ timer[3] = millis(); DO_HYD_XV557_DCV2_B = true; stateHistory2 = stateHistory2 + "-";}
+      if(!timer[3]){ timer[3] = millis(); DO_HYD_XV557_DCV2_B = true; stateHistory2 = stateHistory2 + "-";}
 
       switchingPsi2B = getStage3SwitchingPsi();
 
@@ -129,12 +129,12 @@ void intensifier2Operation(){
     break;
 
     case PAUSE:
-      if(!timer[2]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = false; DO_HYD_XV557_DCV2_B = false;}
+      if(!timer[3]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = false; DO_HYD_XV557_DCV2_B = false;}
       
       if(manualPause){return;}
-      if(millis() - timer[3] > 5000 && timer[3]){ 
+      if(millis() - timer[3] > 10000 && timer[3]){ 
         for(int i = 0; i < PTsize;i++){
-          if(PTdata[i].overPressure){ return; }
+          if(PTdata[i].overPressure || PTdata[i].underPressure){ return; }
           //if(i == PTsize - 1){SUB_STATE2 = SIDE_A; }
         }
         SUB_STATE2 = SIDE_A;
@@ -223,9 +223,9 @@ void intensifier2Operation_OLD(){
       if(!timer[3]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = false; DO_HYD_XV557_DCV2_B = false;}
       
       if(manualPause){return;}
-      if(millis() - timer[3] > 5000 && timer[3]){ 
+      if(millis() - timer[3] > 10000 && timer[3]){ 
         for(int i = 0; i < PTsize;i++){
-          if(PTdata[i].overPressure){ return; }
+          if(PTdata[i].overPressure || PTdata[i].underPressure){ return; }
           //if(i == PTsize - 1){SUB_STATE2 = SIDE_A; }
         }
         SUB_STATE2 = SIDE_A;
