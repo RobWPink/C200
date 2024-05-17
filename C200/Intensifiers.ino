@@ -30,7 +30,6 @@ void intensifier1Operation(){
       if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = faultString + "|1A Timeout|";}
       
       if(millis() - timer[2] > switchingTimeLow + temp && timer[2] && !DO_HYD_XV460_DCV1_A){//check if minimum time has passed
-        lowCPMCnt = millis() - timer[2];
 
         SUB_STATE1 = SIDE_B;
       }
@@ -46,9 +45,9 @@ void intensifier1Operation(){
       if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = faultString + "|1B Timeout|";}
 
       if(millis() - timer[2] > switchingTimeLow + temp && timer[2] && !DO_HYD_XV463_DCV1_B){//check if minimum time has passed
-        lowCPMCnt = lowCPMCnt + millis() - timer[2];
-        lowCPMCnt_ = 60 / lowCPMCnt;
-        switchingTimeLow = ((lowMax>60)?((lowMax-60)/2):0)*time2CPMmult;
+        
+        //switchingTimeLow = ((lowMax>lowOverHeat)?((lowMax-lowOverHeat)/2):0)*time2CPMmult;
+
         //if(lowCPMCnt_ > lowCPM+0.99){switchingTimeLow = switchingTimeLow + (/*(lowCPMCnt_ - lowCPM+1) + */(lowMax>110)?((lowMax-110)/2):0)*time2CPMmult;}
         //else if(lowCPMCnt_ < lowCPM){switchingTimeLow = switchingTimeLow - (/*(lowCPM - lowCPMCnt_) + */(lowMax>110)?((lowMax-110)/2):0)*time2CPMmult;}
 
@@ -59,15 +58,14 @@ void intensifier1Operation(){
     case PAUSE:
       if(!timer[2]){ timer[2] = millis(); DO_HYD_XV460_DCV1_A = false; DO_HYD_XV463_DCV1_B = false;}
       
-      if(manualPause){break;}
+      if(manualPause){return;}
       if(millis() - timer[2] > 5000 && timer[2]){ 
         for(int i = 0; i < PTsize;i++){
-          if(PTdata[i].overPressure){ break; }
-          if(i == PTsize - 1){SUB_STATE1 = SIDE_A;}
+          if(PTdata[i].overPressure){ return; }
+          //if(i == PTsize - 1){SUB_STATE1 = SIDE_A;}
         }
+        SUB_STATE1 = SIDE_A;
       }
-      
-      
     break;
 
     default:
@@ -107,8 +105,6 @@ void intensifier2Operation(){
       if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = faultString + "|2A Timeout|";}
       
       if(millis() - timer[3] > switchingTimeHigh && timer[3] && !DO_HYD_XV554_DCV2_A){//check if minimum time has passed
-        highCPMCnt = millis() - timer[3];
-
         SUB_STATE2 = SIDE_B;
       }
     break;
@@ -123,11 +119,10 @@ void intensifier2Operation(){
       if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = faultString + "|2B Timeout|";}
 
       if(millis() - timer[3] > switchingTimeHigh && timer[3] && !DO_HYD_XV557_DCV2_B){//check if minimum time has passed
-        highCPMCnt = highCPMCnt + millis() - timer[3];
-        highCPMCnt_ = 60 / highCPMCnt;
+        //switchingTimeLow = ((highMax>highOverHeat)?((highMax-highOverHeat)/2):0)*time2CPMmult;
 
-        if(highCPMCnt_ > highCPM+0.99){switchingTimeHigh = switchingTimeHigh + ((highCPMCnt_ - highCPM+1) + (highMax>110)?((highMax-110)/2):0)*time2CPMmult;}
-        else if(highCPMCnt_ < highCPM){switchingTimeHigh = switchingTimeHigh - ((highCPM - highCPMCnt_)+ (highMax>110)?((highMax-110)/2):0)*time2CPMmult;}
+        // if(highCPMCnt_ > highCPM+0.99){switchingTimeHigh = switchingTimeHigh + ((highCPMCnt_ - highCPM+1) + (highMax>110)?((highMax-110)/2):0)*time2CPMmult;}
+        // else if(highCPMCnt_ < highCPM){switchingTimeHigh = switchingTimeHigh - ((highCPM - highCPMCnt_)+ (highMax>110)?((highMax-110)/2):0)*time2CPMmult;}
 
         SUB_STATE2 = SIDE_A;
       }
@@ -136,12 +131,13 @@ void intensifier2Operation(){
     case PAUSE:
       if(!timer[2]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = false; DO_HYD_XV557_DCV2_B = false;}
       
-      if(manualPause){break;}
+      if(manualPause){return;}
       if(millis() - timer[3] > 5000 && timer[3]){ 
         for(int i = 0; i < PTsize;i++){
-          if(PTdata[i].overPressure){ break; }
-          if(i == PTsize - 1){SUB_STATE2 = SIDE_A; }
+          if(PTdata[i].overPressure){ return; }
+          //if(i == PTsize - 1){SUB_STATE2 = SIDE_A; }
         }
+        SUB_STATE2 = SIDE_A;
       }
       
     break;
@@ -226,12 +222,13 @@ void intensifier2Operation_OLD(){
     case PAUSE:
       if(!timer[3]){ timer[3] = millis(); DO_HYD_XV554_DCV2_A = false; DO_HYD_XV557_DCV2_B = false;}
       
-      if(manualPause){break;}
+      if(manualPause){return;}
       if(millis() - timer[3] > 5000 && timer[3]){ 
         for(int i = 0; i < PTsize;i++){
-          if(PTdata[i].overPressure){ break; }
-          if(i == PTsize - 1){SUB_STATE2 = SIDE_A; }
+          if(PTdata[i].overPressure){ return; }
+          //if(i == PTsize - 1){SUB_STATE2 = SIDE_A; }
         }
+        SUB_STATE2 = SIDE_A;
       }
       
     break;

@@ -4,7 +4,7 @@ void setup() {
   RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200v2_Longview", "V0.6.3");
+  matrixSetup("C200v2_Longview", "V0.6.5");
   i2cSetup();
   Serial.println("OK");
   delay(3000);
@@ -57,11 +57,11 @@ void loop() {
   PTdata[2].max = (PTdata[2].max > 1400)?1400:PTdata[2].max;
   PTdata[2].maxRecovery =  PTdata[2].max - 200;
 
-  lowMax = max(AI_H2_C_TT917_Stage1_SuctionTank, max(AI_H2_C_TT701_Stage1_DischargePreTank, max(AI_H2_C_TT809_Stage1_Discharge1, AI_H2_C_TT810_Stage1_Discharge2)));
-  lowMax = (lowMax > 800)?0:lowMax;
+  // lowMax = max(AI_H2_C_TT917_Stage1_SuctionTank, max(AI_H2_C_TT701_Stage1_DischargePreTank, max(AI_H2_C_TT809_Stage1_Discharge1, AI_H2_C_TT810_Stage1_Discharge2)));
+  // lowMax = (0 < lowMax < 800)?lowMax:0;
 
-  highMax = mcpExist?max(AI_H2_C_TT715_Stage2_SuctionTank,max(AI_H2_C_TT520_Stage2_Discharge,max(AI_H2_C_TT521_Stage3_Suction,AI_H2_C_TT522_Stage3_Discharge))):0;
-  highMax = (highMax > 800)?0:highMax;
+  // highMax = max(AI_H2_C_TT715_Stage2_SuctionTank,max(AI_H2_C_TT520_Stage2_Discharge,max(AI_H2_C_TT521_Stage3_Suction,AI_H2_C_TT522_Stage3_Discharge)));
+  // highMax = (0 < highMax < 800)?highMax:0;
 
   if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
@@ -138,39 +138,14 @@ void loop() {
         DO_HYD_XV557_DCV2_B = false;
       }
 
-      // //if the red button is held for less than 5 seconds pause it otherwise safe shutdown
-      // if(DI_Encl_ButtonRed && !prevR){
-      //   prevR = true;
-      //   if(!holdR){holdR = millis();}
-      // }
-      // if(!DI_Encl_ButtonRed && prevR){
-      //   prevR = false;
-      //   if(millis() - holdR < 5000 && holdR){
-      //     SUB_STATE1 = PAUSE;
-      //     SUB_STATE2 = PAUSE;
-      //     manualPause = true;
-      //   }
-      //   else{STATE = SHUTDOWN;}
-      //   holdR = 0;
-      // }
-      // if(manualPause && DI_Encl_ButtonGreen){
-      //   manualPause = false;
-      //   SUB_STATE1 = START;
-      //   SUB_STATE2 = START;
-      // }
-
       if(manualPause){ smallMatrix[2].displayPause(false); }
       else{ smallMatrix[2].displayQuadrants(DO_HYD_XV460_DCV1_A,DO_HYD_XV463_DCV1_B,DO_HYD_XV554_DCV2_A,DO_HYD_XV557_DCV2_B,(SUB_STATE1==PAUSE),(SUB_STATE2==PAUSE)); }
-        if(tog[2]){SUB_STATE2 = PAUSE;}
 
       //Main operation of compressing
-      if(!tog[0]){intensifier1Operation();}
+      intensifier1Operation();
       if(millis() - timer[0] > 20000 && timer[0]){tog[1] = true;}
-      if(tog[1]){intensifier2Operation_OLD();}
+      if(tog[1]){if(tog[2]){intensifier2Operation_OLD();}else{intensifier2Operation();}}
    
-
-      
-
     break;
   //#####################################################################
     case SHUTDOWN:

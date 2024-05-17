@@ -118,7 +118,7 @@ void RPCtransceive(){
       rhe28msg.remove(rhe28msg.indexOf("RHE28:"),6);
       if(rhe28msg.indexOf("ERROR:") >= 0){
         rhe28msg.remove(rhe28msg.indexOf("ERROR:"),6);
-        Serial.print("RHE28 Revieving Error: ");Serial.println(rhe28msg);
+        Serial.print("RHE28 Receiving Error: ");Serial.println(rhe28msg);
       }
       else{
         AI_H2_KGPM_RHE28_Flow = parseString(rhe28msg,',',0).toFloat();
@@ -131,7 +131,7 @@ void RPCtransceive(){
       redmsg.remove(redmsg.indexOf("RED:"),4);
       if(redmsg.indexOf("ERROR:") >= 0){
         redmsg.remove(redmsg.indexOf("ERROR:"),6);
-        Serial.print("RED Revieving Error: ");Serial.println(redmsg);
+        Serial.print("RED Receiving Error: ");Serial.println(redmsg);
       }
       else{
         AI_H2_KGPM_RED_Flow = parseString(redmsg,',',0).toFloat();
@@ -199,7 +199,38 @@ double getStage2SwitchingPsi(){
   else{return -1;}
 }
 
-double getStage3SwitchingPsi(){;}
+double getStage3SwitchingPsi(){
+  if(450 <= AI_H2_psig_PT519_Stage2_Discharge < 550){ return 0.2*AI_H2_psig_PT407_Stage3_Discharge + 180;}
+  else if(550 <= AI_H2_psig_PT519_Stage2_Discharge < 650){ return 0.2*AI_H2_psig_PT407_Stage3_Discharge + 160;}
+  else if(650 <= AI_H2_psig_PT519_Stage2_Discharge < 750){ return 0.208*AI_H2_psig_PT407_Stage3_Discharge + 127;}
+  else if(750 <= AI_H2_psig_PT519_Stage2_Discharge < 850){ return 0.198*AI_H2_psig_PT407_Stage3_Discharge + 133;}
+  else if(850 <= AI_H2_psig_PT519_Stage2_Discharge < 950){ return 292.9*log(0.0003*AI_H2_psig_PT407_Stage3_Discharge);}
+  else if(950 <= AI_H2_psig_PT519_Stage2_Discharge < 1050){ return 309.83*log(0.0003*AI_H2_psig_PT407_Stage3_Discharge);}
+  else if(1050 <= AI_H2_psig_PT519_Stage2_Discharge < 1150){ return 325.58*log(0.0002*AI_H2_psig_PT407_Stage3_Discharge);}
+  else if(1150 <= AI_H2_psig_PT519_Stage2_Discharge < 1250){ if(AI_H2_psig_PT407_Stage3_Discharge < 2500){ return 535; }else{ return 0.2046*AI_H2_psig_PT407_Stage3_Discharge + 29.524; }}
+  else if(1250 <= AI_H2_psig_PT519_Stage2_Discharge < 1350){ if(AI_H2_psig_PT407_Stage3_Discharge < 2500){ return 545; }else{ return 0.1971*AI_H2_psig_PT407_Stage3_Discharge + 45.714; }}
+  else if(1350 <= AI_H2_psig_PT519_Stage2_Discharge < 1450){ if(AI_H2_psig_PT407_Stage3_Discharge < 2500){ return 570; }else{ return 310.98*log(0.0002*AI_H2_psig_PT407_Stage3_Discharge); }}
+  else if(1450 <= AI_H2_psig_PT519_Stage2_Discharge < 1550){ if(AI_H2_psig_PT407_Stage3_Discharge < 3000){ return 590; }else{ return 0.2043*AI_H2_psig_PT407_Stage3_Discharge - 25; }}
+  else if(1550 <= AI_H2_psig_PT519_Stage2_Discharge < 1650){ if(AI_H2_psig_PT407_Stage3_Discharge < 3000){ return 615; }else{ return 315.32*log(0.0002*AI_H2_psig_PT407_Stage3_Discharge); }}
+  else if(1650 <= AI_H2_psig_PT519_Stage2_Discharge < 1750){ if(AI_H2_psig_PT407_Stage3_Discharge < 3500){ return 640; }else{ return 0.2043*AI_H2_psig_PT407_Stage3_Discharge - 67.143; }}
+  else if(1750 <= AI_H2_psig_PT519_Stage2_Discharge < 1850){ if(AI_H2_psig_PT407_Stage3_Discharge < 3500){ return 660; }else{ return 0.1988*AI_H2_psig_PT407_Stage3_Discharge - 55; }}
+  else if(1850 <= AI_H2_psig_PT519_Stage2_Discharge < 1950){ if(AI_H2_psig_PT407_Stage3_Discharge < 4000){ return 690; }else{ return 0.2057*AI_H2_psig_PT407_Stage3_Discharge - 112.86; }}
+  else if(1950 <= AI_H2_psig_PT519_Stage2_Discharge < 2050){ if(AI_H2_psig_PT407_Stage3_Discharge < 4000){ return 700; }else{ return 0.2033*AI_H2_psig_PT407_Stage3_Discharge - 115.56; }}
+  else if(2050 <= AI_H2_psig_PT519_Stage2_Discharge < 2150){ if(AI_H2_psig_PT407_Stage3_Discharge < 4000){ return 720; }else{ return 0.1993*AI_H2_psig_PT407_Stage3_Discharge - 104.89; }}
+  else if(2150 <= AI_H2_psig_PT519_Stage2_Discharge < 2250){ if(AI_H2_psig_PT407_Stage3_Discharge < 4500){ return 740; }else{ return 0.2052*AI_H2_psig_PT407_Stage3_Discharge - 165.24; }}
+  else if(2250 <= AI_H2_psig_PT519_Stage2_Discharge < 2350){ if(AI_H2_psig_PT407_Stage3_Discharge < 4500){ return 760; }else{ return 0.2002*AI_H2_psig_PT407_Stage3_Discharge - 150.24; }}
+  else if(2350 <= AI_H2_psig_PT519_Stage2_Discharge < 2450){ if(AI_H2_psig_PT407_Stage3_Discharge < 5000){ return 785; }else{ return 0.2043*AI_H2_psig_PT407_Stage3_Discharge - 202.14; }}
+  else if(2450 <= AI_H2_psig_PT519_Stage2_Discharge < 2550){ if(AI_H2_psig_PT407_Stage3_Discharge < 5000){ return 805; }else{ return 0.2036*AI_H2_psig_PT407_Stage3_Discharge - 210.36; }}
+  else if(2550 <= AI_H2_psig_PT519_Stage2_Discharge < 2650){ if(AI_H2_psig_PT407_Stage3_Discharge < 5000){ return 825; }else{ return 0.1957*AI_H2_psig_PT407_Stage3_Discharge - 172.14; }}
+  else if(2650 <= AI_H2_psig_PT519_Stage2_Discharge < 2750){ if(AI_H2_psig_PT407_Stage3_Discharge < 5500){ return 845; }else{ return 0.2046*AI_H2_psig_PT407_Stage3_Discharge - 254.19; }}
+  else if(2750 <= AI_H2_psig_PT519_Stage2_Discharge < 2850){ if(AI_H2_psig_PT407_Stage3_Discharge < 5500){ return 865; }else{ return 0.2017*AI_H2_psig_PT407_Stage3_Discharge - 246.57; }}
+  else if(2850 <= AI_H2_psig_PT519_Stage2_Discharge < 2950){ if(AI_H2_psig_PT407_Stage3_Discharge < 5500){ return 885; }else{ return 341.32*log(0.0002*AI_H2_psig_PT407_Stage3_Discharge); }}
+  else if(2950 <= AI_H2_psig_PT519_Stage2_Discharge < 3050){ if(AI_H2_psig_PT407_Stage3_Discharge < 6000){ return 910; }else{ return 0.21*AI_H2_psig_PT407_Stage3_Discharge - 346; }}
+  else if(3050 <= AI_H2_psig_PT519_Stage2_Discharge < 3150){ if(AI_H2_psig_PT407_Stage3_Discharge < 6000){ return 930; }else{ return 0.192*AI_H2_psig_PT407_Stage3_Discharge - 230; }}
+  else if(3150 <= AI_H2_psig_PT519_Stage2_Discharge < 3250){ if(AI_H2_psig_PT407_Stage3_Discharge < 6000){ return 950; }else{ return 352.18*log(0.0002*AI_H2_psig_PT407_Stage3_Discharge); }}
+  else if(3250 <= AI_H2_psig_PT519_Stage2_Discharge < 3350){ if(AI_H2_psig_PT407_Stage3_Discharge < 6500){ return 978; }else{ return 0.197*AI_H2_psig_PT407_Stage3_Discharge - 302; }}
+  else if(3350 <= AI_H2_psig_PT519_Stage2_Discharge < 3450){ if(AI_H2_psig_PT407_Stage3_Discharge < 6000){ return 995; }else{ return 352.5*log(0.0002*AI_H2_psig_PT407_Stage3_Discharge); }}
+}
 
 void i2cTransceive(int ptInterval){
   errCnt = 0;
@@ -293,6 +324,7 @@ void i2cTransceive(int ptInterval){
             if(!PTdata[i].maxPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; errMsg[errCnt] = "MAX[BOTH]:\"";}
             else if(PTdata[i].maxPause == 1){SUB_STATE1 = PAUSE;errMsg[errCnt] = "MAX[LOW]:\"";}
             else if(PTdata[i].maxPause == 2){SUB_STATE2 = PAUSE;errMsg[errCnt] = "MAX[HIGH]:\"";}
+            else if(PTdata[i].maxPause == 3){SUB_STATE1 = OFF; SUB_STATE2 = OFF; STATE = FAULT; faultString = "Maximum Fault";errMsg[errCnt] = "MAX[FAULT]:\"";}
             else{Serial.println("pause state error");}
             errMsg[errCnt] = errMsg[errCnt] + PTdata[i].key + "\"";
             errCnt++;
@@ -310,12 +342,14 @@ void i2cTransceive(int ptInterval){
             if(!PTdata[i].minPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; errMsg[errCnt] = "MIN[BOTH]:\"";}
             else if(PTdata[i].minPause == 1){SUB_STATE1 = PAUSE;errMsg[errCnt] = "MIN[LOW]:\"";}
             else if(PTdata[i].minPause == 2){SUB_STATE2 = PAUSE;errMsg[errCnt] = "MIN[HIGH]:\"";}
+            else if(PTdata[i].minPause == 3){SUB_STATE1 = OFF; SUB_STATE2 = OFF; STATE = FAULT; faultString = "Minimum Fault";errMsg[errCnt] = "MIN[FAULT]:\"";}
             else{Serial.println("pause state error");}
             errMsg[errCnt] = errMsg[errCnt] + PTdata[i].key + "\"";
             errCnt++;
           }
         }
         else if(*PTdata[i].value > PTdata[i].minRecovery && PTdata[i].overPressure){
+          if(tog[3]){Serial.print(PTdata[i].name);Serial.print(": ");Serial.print(PTdata[i].minRecovery);Serial.print("/");Serial.println(*PTdata[i].value);}
           PTdata[i].overPressure = false;
         }
       }

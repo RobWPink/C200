@@ -53,6 +53,9 @@ void SerialCLI() {
         if(argVal > 0){delayTime = argVal;}
       }
 
+      else if(argStr.equalsIgnoreCase("min")){
+        tog[3] = !tog[3];
+      }
 
       else if(argStr.equalsIgnoreCase("ratio")) {
         String argStrVal = argBuf[++n];
@@ -104,11 +107,11 @@ void SerialCLI() {
         virtualRedButton = 1;
       }
 
-      else if(argStr.equalsIgnoreCase("lowside")){
-        tog[0] = !tog[0];
+      else if(argStr.equalsIgnoreCase("pauselow")){
+        SUB_STATE1 = (SUB_STATE1 == PAUSE)?SIDE_A:PAUSE;
       }
-      else if(argStr.equalsIgnoreCase("highside")){
-        tog[1] = !tog[1];
+      else if(argStr.equalsIgnoreCase("pausehigh")){
+        SUB_STATE2 = (SUB_STATE2 == PAUSE)?SIDE_A:PAUSE;
       }
       else if(argStr.equalsIgnoreCase("oldhigh")){
         tog[2] = !tog[2];
@@ -440,7 +443,7 @@ void dataPrint(unsigned long dly){
 
       Serial.print("switchingPSI:1A/1B/2A/2B: ");
       Serial.print(switchingPsi1A);Serial.print(", ");
-      Serial.println(switchingPsi1B);Serial.print(", ");
+      Serial.print(switchingPsi1B);Serial.print(", ");
       Serial.print(switchingPsi2A);Serial.print(", ");
       Serial.println(switchingPsi2B);
 

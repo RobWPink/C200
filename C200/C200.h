@@ -131,6 +131,9 @@ double switchingTimeHigh = 1500;
 double highCPM = 15;
 double lowCPM = 15;
 
+double lowOverHeat = 80;
+double highOverHeat = 100;
+
 double time2CPMmult = 100;
 
 struct var{
@@ -147,8 +150,10 @@ var VARdata[] = {
   {"NonHydraulic_MovingAverage_size","NHMAS",&MOVING_AVG_SIZE,0.02,0},
   {"Hydraulic_MovingAverage_size","HYMAS",&HYD_MOVING_AVG_SIZE,0.95,0},
   {"Print_Delay_Time","PRDTM",&delayTime,100,0},
-  {"Stage1_Compression_Ratio","S1CRO",&Stage1_Compression_RATIO,6.5,0}
-};int VARsize = 6;
+  {"Stage1_Compression_Ratio","S1CRO",&Stage1_Compression_RATIO,6.5,0},
+  {"lowOverHeat","LOWOH",&lowOverHeat,80,0},
+  {"highOverHeat","HIHOH",&highOverHeat,100,0}
+};int VARsize = 8;
 
 
 double peakPsi1A = 0;
