@@ -111,13 +111,8 @@ unsigned long virtualRedButton, virtualGreenButton, virtualAmberButton = 0;
 double lowMax,highMax = 0;
 double loopTime = 0;
 
-double delayTime = 100;
 
-double Stage1_Compression_RATIO = 6.5;
 
-double lowCPMCnt_, highCPMCnt_, lowCPMCnt, highCPMCnt = 0;
-
-unsigned long CPMlowTimer,CPMhighTimer = 0;
 
 
 double MOVING_AVG_SIZE = 0.02; //equivilent to 200 samples
@@ -134,20 +129,23 @@ double switchingPsi2A_Override = 0;
 double switchingPsi2B_Override = 0;
 
 double switchingTimeLow = 0;
-double switchingTimeHigh = 3000;
+double switchingTimeHigh = 0;
 
 double switchingTimeLow_Override = 0;
 double switchingTimeHigh_Override = 0;
-
+double CPMlowTempDelayBegin = 0; //what temp to begin to slow down CPM
+double CPMhighTempDelayBegin = 0;
+double CPMlowTempDelayEnd = 0; //what max temp to stop slowing down CPM
+double CPMhighTempDelayEnd = 0;
+double CPMlowTempMaxDelay = 0; //maximum seconds to slow down CPM (linear relation to Begin and End)
+double CPMhighTempMaxDelay = 0;
 double CPMlow,CPMhigh = 0;
-
-double idealHighCPM = 15;
-double idealLowCPM = 15;
-
-double lowOverHeat = 80;
-double highOverHeat = 100;
-
-double time2CPMmult = 100;
+unsigned long CPMlowTimer,CPMhighTimer = 0;
+double CPMhighIdeal = 0;
+double CPMlowIdeal = 0;
+double Stage1_Compression_RATIO = 0;
+double delayTime = 0;
+double CPMlowTemp, CPMhighTemp = 0;
 
 struct var{
   String name;
@@ -158,21 +156,23 @@ struct var{
 };
 
 var VARdata[] = {
-  {"Ideal_Low_CPM","LCPM",&idealLowCPM,15,0},
-  {"Ideal_High_CPM","HCPM",&idealHighCPM,15,0},
-  {"NonHydraulic_MovingAverage_size","NHMAS",&MOVING_AVG_SIZE,0.02,0},
-  {"Hydraulic_MovingAverage_size","HYMAS",&HYD_MOVING_AVG_SIZE,0.95,0},
+  {"Ideal_Low_CPM","CPMLI",&CPMlowIdeal,15,0},
+  {"Ideal_High_CPM","CPMHI",&CPMhighIdeal,15,0},
+  {"CPMlowTempDelayBegin","CPMLTB",&CPMlowTempDelayBegin,100,0},
+  {"CPMlowTempDelayEnd","CPMLTE",&CPMlowTempDelayEnd,140,0},
+  {"CPMlowTempMaxDelay","CPMLTM",&CPMlowTempMaxDelay,20,0},
+  {"CPMhighTempDelayBegin","CPMHTB",&CPMhighTempDelayBegin,100,0},
+  {"CPMhighTempDelayEnd","CPMHTE",&CPMhighTempDelayEnd,140,0},
+  {"CPMhighTempMaxDelay","CPMHTM",&CPMhighTempMaxDelay,20,0},
   {"Print_Delay_Time","PRDTM",&delayTime,100,0},
   {"Stage1_Compression_Ratio","S1CRO",&Stage1_Compression_RATIO,6.5,0},
-  {"LowOverHeat","LOWOH",&lowOverHeat,80,0},
-  {"HighOverHeat","HIHOH",&highOverHeat,100,0},
   {"SwitchingPsi1A_Override","SWP1AO",&switchingPsi1A_Override,0,0},
   {"SwitchingPsi1B_Override","SWP1BO",&switchingPsi1B_Override,0,0},
   {"SwitchingPsi2A_Override","SWP2AO",&switchingPsi2A_Override,0,0},
   {"SwitchingPsi2B_Override","SWP2BO",&switchingPsi2B_Override,0,0},
   {"SwitchingTimeLow_Override","SWTLO",&switchingTimeLow_Override,0,0},
   {"SwitchingTimeHigh_Override","SWTHO",&switchingTimeHigh_Override,0,0}
-};int VARsize = 14;
+};int VARsize = 16;
 
 
 double peakPsi1A = 0;

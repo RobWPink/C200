@@ -28,20 +28,14 @@ void intensifier1Operation(){
         CPMlowTimer = millis();
       }
 
-<<<<<<< HEAD
       if(switchingPsi1A_Override){switchingPsi1A = switchingPsi1A_Override;}
       else{switchingPsi1A = getStage1SwitchingPsi_90_63()-100;}
 
       if(millis() - timer[2] > 250 && timer[2] && AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){ DO_HYD_XV460_DCV1_A = false;}
-=======
-      switchingPsi1A = getStage1SwitchingPsi_90_63();
-
-      if(millis() - timer[2] > 250 && timer[2] && AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A_Override?switchingPsi1A_Override:switchingPsi1A){ DO_HYD_XV460_DCV1_A = false;}
->>>>>>> a32bb12331e497fbf9df68fa6e0b5be9fd988b16
 
       if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = faultString + "|1A Timeout|";}
 
-      if(millis() - timer[2] > switchingTimeLow_Override?switchingTimeLow_Override:switchingTimeLow && timer[2] && !DO_HYD_XV460_DCV1_A){//check if minimum time has passed
+      if(millis() - timer[2] > switchingTimeLow + CPMlowTemp && timer[2] && !DO_HYD_XV460_DCV1_A){//check if minimum time has passed
         SUB_STATE1 = SIDE_B;
       }
     break;
@@ -49,26 +43,18 @@ void intensifier1Operation(){
     case SIDE_B:
       if(!timer[2]){ timer[2] = millis(); DO_HYD_XV463_DCV1_B = true; stateHistory1 = stateHistory1 + "-";}
 
-<<<<<<< HEAD
       if(switchingPsi1B_Override){switchingPsi1B = switchingPsi1B_Override;}
       else{switchingPsi1B = getStage1SwitchingPsi_90_63()-100;}
+
+      if(switchingTimeLow_Override){switchingTimeLow = switchingTimeLow_Override;}
+      else{switchingTimeLow = (60/CPMlowIdeal)*1000;}
 
       if(millis() - timer[2] > 250 && timer[2] && AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B){ DO_HYD_XV463_DCV1_B = false;}
         
       if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = faultString + "|1B Timeout|";}
 
-      if(millis() - timer[2] > switchingTimeLow + temp && timer[2] && !DO_HYD_XV463_DCV1_B){//check if minimum time has passed
+      if(millis() - timer[2] > switchingTimeLow + CPMlowTemp && timer[2] && !DO_HYD_XV463_DCV1_B){//check if minimum time has passed
         CPMlow = 60000 / (millis() - CPMlowTimer);
-=======
-      switchingPsi1B = getStage1SwitchingPsi_90_63();
-
-      if(millis() - timer[2] > 250 && timer[2] && AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B_Override?switchingPsi1B_Override:switchingPsi1B){ DO_HYD_XV463_DCV1_B = false;}
-        
-      if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = faultString + "|1B Timeout|";}
-
-      if(millis() - timer[2] > switchingTimeLow_Override?switchingTimeLow_Override:switchingTimeLow && timer[2] && !DO_HYD_XV463_DCV1_B){//check if minimum time has passed
-        CPMlow = 60 / (millis() - CPMlowTimer);
->>>>>>> a32bb12331e497fbf9df68fa6e0b5be9fd988b16
         SUB_STATE1 = SIDE_A;
       }
     break;
@@ -114,34 +100,33 @@ void intensifier2Operation(){
         CPMhighTimer = millis();
       }
 
-      switchingPsi2A = getStage2SwitchingPsi_150_90()-150;
+      if(switchingPsi2A_Override){switchingPsi2A = switchingPsi2A_Override;}
+      else{switchingPsi2A = getStage2SwitchingPsi_150_90();}
 
-      if(millis() - timer[3] > 250 && timer[3] && AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2A_Override?switchingPsi2A_Override:switchingPsi2A){ DO_HYD_XV554_DCV2_A = false; }
+      if(millis() - timer[3] > 250 && timer[3] && AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2A){ DO_HYD_XV554_DCV2_A = false; }
 
       if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = faultString + "|2A Timeout|";}
 
-      if(millis() - timer[3] > switchingTimeHigh_Override?switchingTimeHigh_Override:switchingTimeHigh && timer[3] && !DO_HYD_XV554_DCV2_A){//check if minimum time has passed
+      if(millis() - timer[3] > switchingTimeHigh + CPMhighTemp && timer[3] && !DO_HYD_XV554_DCV2_A){//check if minimum time has passed
         SUB_STATE2 = SIDE_B;
       }
     break;
 
     case SIDE_B:
       if(!timer[3]){ timer[3] = millis(); DO_HYD_XV557_DCV2_B = true; stateHistory2 = stateHistory2 + "-";}
-      
-      switchingPsi2B = getStage3SwitchingPsi_150_90();
 
-      if(millis() - timer[3] > 250 && timer[3] && AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2B_Override?switchingPsi2B_Override:switchingPsi2B){ DO_HYD_XV557_DCV2_B = false; }
-        
+      if(switchingPsi2B_Override){switchingPsi2B = switchingPsi2B_Override;}
+      else{switchingPsi2B = getStage3SwitchingPsi_150_90();}
+
+      if(switchingTimeHigh_Override){switchingTimeHigh = switchingTimeHigh_Override;}
+      else{switchingTimeHigh = (60/CPMhighIdeal)*1000;}
+
+      if(millis() - timer[3] > 250 && timer[3] && AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2B){ DO_HYD_XV557_DCV2_B = false; }
+      
       if(millis() - timer[3] > 30000 && timer[3]){STATE = FAULT; faultString = faultString + "|2B Timeout|";}
-<<<<<<< HEAD
 
-      if(millis() - timer[3] > switchingTimeHigh && timer[3] && !DO_HYD_XV557_DCV2_B){//check if minimum time has passed
-        CPMhigh = 60000 / (millis() - CPMhighTimer);
-=======
-      
-      if(millis() - timer[3] > switchingTimeHigh_Override?switchingTimeHigh_Override:switchingTimeHigh && timer[3] && !DO_HYD_XV557_DCV2_B){//check if minimum time has passed
-        CPMhigh = 60 / (millis() - CPMhighTimer);
->>>>>>> a32bb12331e497fbf9df68fa6e0b5be9fd988b16
+      if(millis() - timer[3] > switchingTimeHigh + CPMhighTemp && timer[3] && !DO_HYD_XV557_DCV2_B){//check if minimum time has passed
+        CPMhigh = 60000 / (millis() - CPMhighTimer);       
         SUB_STATE2 = SIDE_A;
       }
     break;

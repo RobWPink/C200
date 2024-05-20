@@ -6,6 +6,9 @@ void setup() {
   Wire.begin();
   matrixSetup("C200v2_Longview", "V0.6.9");
   i2cSetup();
+  for(int i = 0; i < VARsize; i++){
+    *VARdata[i].value = VARdata[i].defaultValue;
+  }
   Serial.println("OK");
   delay(3000);
   printMode = PACKET;
@@ -60,8 +63,16 @@ void loop() {
   lowMax = max(AI_H2_C_TT917_Stage1_SuctionTank, max(AI_H2_C_TT701_Stage1_DischargePreTank, max(AI_H2_C_TT809_Stage1_Discharge1, AI_H2_C_TT810_Stage1_Discharge2)));
   lowMax = (0 < lowMax < 800)?lowMax:0;
 
+  if(lowMax > 100){ //40 degree gradiant until forceful pause
+    CPMlowTemp = map(lowMax - CPMlowTempDelayBegin,0,CPMlowTempDelayEnd - CPMlowTempDelayBegin,0,CPMlowTempMaxDelay*1000);
+  }
+
   highMax = max(AI_H2_C_TT715_Stage2_SuctionTank,max(AI_H2_C_TT520_Stage2_Discharge,max(AI_H2_C_TT521_Stage3_Suction,AI_H2_C_TT522_Stage3_Discharge)));
   highMax = (0 < highMax < 800)?highMax:0;
+
+  if(highMax > 100){ //40 degree gradiant until forceful pause
+    CPMhighTemp = map(highMax - CPMhighTempDelayBegin,0,CPMhighTempDelayEnd - CPMhighTempDelayBegin,0,CPMhighTempMaxDelay*1000);
+  }
 
   if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
@@ -101,7 +112,8 @@ void loop() {
   switch(STATE){
     case IDLE_OFF:
       if(!timer[0]){ timer[0] = millis(); }
-
+      timer[2] = 0;
+      timer[3] = 0;
       smallMatrix[2].displayPlay(DI_Comm_LSR_Local);
       DO_Comm_LSR_Local = true;
       DO_Encl_PilotGreen = !DI_Comm_LSR_Local;
@@ -198,6 +210,8 @@ void loop() {
         for(int i = 0; i < DOsize;i++){
           *DOdata[i].value = false;
         }
+        timer[2] = 0;
+        timer[3] = 0;
         flashRed = 1000;
         smallMatrix[2].displayStop(true);
       }
@@ -215,7 +229,11 @@ void loop() {
         }
         DO_Encl_PilotRed = true;
         smallMatrix[2].displayStop(false);
+        stateHistory1 = "(7)";
+        stateHistory2 = "(7)";
       }
+      timer[2] = 0;
+      timer[3] = 0;
       for(int i = 0; i < DOsize;i++){
         if(DOdata[i].key.indexOf("PL") == -1){
           *DOdata[i].value = false;

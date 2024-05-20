@@ -9,7 +9,7 @@ void daughterPrint(unsigned long dly){
     scrollCnt++;
     sprintf(ln0[0],"S2S.%03d.S2D.%03d ", (int)AI_H2_C_TT715_Stage2_SuctionTank, (int)AI_H2_C_TT520_Stage2_Discharge);
     sprintf(ln0[1],"S3S.%03d.S3D.%03d ", (int)AI_H2_C_TT521_Stage3_Suction, (int)AI_H2_C_TT522_Stage3_Discharge);
-    sprintf(ln1,"C%02dCT%02dHT%02dMX%03d", highCPMCnt_, (int)AI_CLT_C_TT207_CoolantSupply2, (int)AI_HYD_C_TT454_HydraulicTank, (int)PTdata[1].max/100);
+    sprintf(ln1,"C%02dCT%02dHT%02dMX%03d", CPMhigh, (int)AI_CLT_C_TT207_CoolantSupply2, (int)AI_HYD_C_TT454_HydraulicTank, (int)PTdata[1].max/100);
     switch(STATE){
       case FAULT:
         sprintf(ln0[2],"FAULT: %s",faultString);

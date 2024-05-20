@@ -486,6 +486,10 @@ void dataPrint(unsigned long dly){
       Serial.print(lowMax);Serial.print(", ");
       Serial.println(highMax);
 
+      Serial.print("TTDelay: ");
+      Serial.print(CPMlowTemp);Serial.print(", ");
+      Serial.println(CPMhighTemp);
+
       Serial.print("Stage1PT Max: ");
       Serial.println(PTdata[2].max);
 
