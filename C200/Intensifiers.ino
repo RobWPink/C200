@@ -121,7 +121,7 @@ void intensifier2Operation(){
       if(!timer[3]){ timer[3] = millis(); DO_HYD_XV557_DCV2_B = true; stateHistory2 = stateHistory2 + "-";}
 
       if(switchingPsi2B_Override){switchingPsi2B = switchingPsi2B_Override;}
-      else{switchingPsi2B = getStage3SwitchingPsi_150_90();}
+      else{switchingPsi2B = getStage3SwitchingPsi_150_90() - 200;}
 
       if(millis() - timer[3] > 250 && timer[3] && AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2B){ DO_HYD_XV557_DCV2_B = false; }
         

@@ -280,6 +280,16 @@ void i2cTransceive(int ptInterval){
           }
         }
       }
+      if(PTdata[i].overPressure){
+        if(!PTdata[i].maxPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE;}
+        else if(PTdata[i].maxPause == 1){SUB_STATE1 = PAUSE;}
+        else if(PTdata[i].maxPause == 2){SUB_STATE2 = PAUSE;}
+      }
+      if(PTdata[i].underPressure){
+        if(!PTdata[i].minPause){ SUB_STATE1 = PAUSE; SUB_STATE2 = PAUSE; }
+        else if(PTdata[i].minPause == 1){SUB_STATE1 = PAUSE;}
+        else if(PTdata[i].minPause == 2){SUB_STATE2 = PAUSE;}
+      }
     }
   }
   PTdata[6].mapped = map((int)PTdata[6].raw, PTdata[6].mapA, PTdata[6].mapB, PTdata[6].mapC, PTdata[6].mapD) + PTdata[6].offset; //read hydraulics quickly
