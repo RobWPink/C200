@@ -118,7 +118,7 @@ double Stage1_Compression_RATIO = 6.5;
 double lowCPMCnt_, highCPMCnt_, lowCPMCnt, highCPMCnt = 0;
 
 unsigned long CPMlowTimer,CPMhighTimer = 0;
-double CPMlow,CPMhigh = 0;
+
 
 double MOVING_AVG_SIZE = 0.02; //equivilent to 200 samples
 double HYD_MOVING_AVG_SIZE = 0.95;
@@ -139,8 +139,10 @@ double switchingTimeHigh = 0;
 double switchingTimeLow_Override = 0;
 double switchingTimeHigh_Override = 0;
 
-double highCPM = 15;
-double lowCPM = 15;
+double CPMlow,CPMhigh = 0;
+
+double idealHighCPM = 15;
+double idealLowCPM = 15;
 
 double lowOverHeat = 80;
 double highOverHeat = 100;
@@ -156,8 +158,8 @@ struct var{
 };
 
 var VARdata[] = {
-  {"Ideal_Low_CPM","LCPM",&lowCPM,15,0},
-  {"Ideal_High_CPM","HCPM",&highCPM,15,0},
+  {"Ideal_Low_CPM","LCPM",&idealLowCPM,15,0},
+  {"Ideal_High_CPM","HCPM",&idealHighCPM,15,0},
   {"NonHydraulic_MovingAverage_size","NHMAS",&MOVING_AVG_SIZE,0.02,0},
   {"Hydraulic_MovingAverage_size","HYMAS",&HYD_MOVING_AVG_SIZE,0.95,0},
   {"Print_Delay_Time","PRDTM",&delayTime,100,0},

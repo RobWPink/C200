@@ -431,10 +431,6 @@ void dataPrint(unsigned long dly){
       Serial.print("STATE: ");
       Serial.println(STATE);
 
-      Serial.print("SUBSTATE:1/2: ");
-      Serial.print(SUB_STATE1);Serial.print(", ");
-      Serial.println(SUB_STATE2);
-
       Serial.print("stateHistory1: ");
       if(stateHistory1.length() > 30){
         stateHistory1.remove(0,3);
