@@ -134,7 +134,7 @@ double switchingPsi2A_Override = 0;
 double switchingPsi2B_Override = 0;
 
 double switchingTimeLow = 0;
-double switchingTimeHigh = 0;
+double switchingTimeHigh = 3000;
 
 double switchingTimeLow_Override = 0;
 double switchingTimeHigh_Override = 0;

@@ -57,11 +57,11 @@ void loop() {
   PTdata[2].max = (PTdata[2].max > 1400)?1400:PTdata[2].max;
   PTdata[2].maxRecovery =  PTdata[2].max - 50;
 
-  // lowMax = max(AI_H2_C_TT917_Stage1_SuctionTank, max(AI_H2_C_TT701_Stage1_DischargePreTank, max(AI_H2_C_TT809_Stage1_Discharge1, AI_H2_C_TT810_Stage1_Discharge2)));
-  // lowMax = (0 < lowMax < 800)?lowMax:0;
+  lowMax = max(AI_H2_C_TT917_Stage1_SuctionTank, max(AI_H2_C_TT701_Stage1_DischargePreTank, max(AI_H2_C_TT809_Stage1_Discharge1, AI_H2_C_TT810_Stage1_Discharge2)));
+  lowMax = (0 < lowMax < 800)?lowMax:0;
 
-  // highMax = max(AI_H2_C_TT715_Stage2_SuctionTank,max(AI_H2_C_TT520_Stage2_Discharge,max(AI_H2_C_TT521_Stage3_Suction,AI_H2_C_TT522_Stage3_Discharge)));
-  // highMax = (0 < highMax < 800)?highMax:0;
+  highMax = max(AI_H2_C_TT715_Stage2_SuctionTank,max(AI_H2_C_TT520_Stage2_Discharge,max(AI_H2_C_TT521_Stage3_Suction,AI_H2_C_TT522_Stage3_Discharge)));
+  highMax = (0 < highMax < 800)?highMax:0;
 
   if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;
