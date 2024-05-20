@@ -58,13 +58,30 @@ void SerialCLI() {
         Stage1_Compression_RATIO = argStrVal.toDouble();
       }
 
-      else if(argStr.equalsIgnoreCase("swlow")) {
+      else if(argStr.equalsIgnoreCase("swtmlow")) {
         String argStrVal = argBuf[++n];
-        switchingTimeLow = argStrVal.toDouble();
+        switchingTimeLow_Override = argStrVal.toDouble();
       }
-      else if(argStr.equalsIgnoreCase("swhigh")) {
+      else if(argStr.equalsIgnoreCase("swtmhigh")) {
         String argStrVal = argBuf[++n];
-        switchingTimeHigh = argStrVal.toDouble();
+        switchingTimeHigh_Override = argStrVal.toDouble();
+      }
+
+      else if(argStr.equalsIgnoreCase("swpsi1a")) {
+        String argStrVal = argBuf[++n];
+        switchingPsi1A_Override = argStrVal.toDouble();
+      }
+      else if(argStr.equalsIgnoreCase("swpsi1b")) {
+        String argStrVal = argBuf[++n];
+        switchingPsi1B_Override = argStrVal.toDouble();
+      }
+      else if(argStr.equalsIgnoreCase("swpsi2a")) {
+        String argStrVal = argBuf[++n];
+        switchingPsi2A_Override = argStrVal.toDouble();
+      }
+      else if(argStr.equalsIgnoreCase("swpsi2b")) {
+        String argStrVal = argBuf[++n];
+        switchingPsi2B_Override = argStrVal.toDouble();
       }
    
       else if(argStr.equalsIgnoreCase("help") || argStr.equalsIgnoreCase("h")){
@@ -73,11 +90,6 @@ void SerialCLI() {
       
       else if(argStr.equalsIgnoreCase("raw")){
         rawPrint = !rawPrint;
-      }
-
-      else if(argStr.equalsIgnoreCase("S3")){
-        String argStrVal = argBuf[++n];
-        switchingPsi2A = argStrVal.toDouble();
       }
 
       else if(argStr.equalsIgnoreCase("packet")){
@@ -474,11 +486,11 @@ void dataPrint(unsigned long dly){
       Serial.print(CPMlow);Serial.print(", ");
       Serial.println(CPMhigh);
 
-      Serial.print("max: ");
+      Serial.print("TTmax: ");
       Serial.print(lowMax);Serial.print(", ");
       Serial.println(highMax);
 
-      Serial.print("Stage1 Max: ");
+      Serial.print("Stage1PT Max: ");
       Serial.println(PTdata[2].max);
 
       Serial.print("inlets: ");

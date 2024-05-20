@@ -29,7 +29,8 @@ void intensifier1Operation(){
         else{ CPMlow = 60 / (millis() - CPMlowTimer);CPMlowTimer = millis(); }  
       }
 
-      switchingPsi1A = getStage1SwitchingPsi();
+      if(switchingPsi1A_Override){switchingPsi1A = switchingPsi1A_Override;}
+      else{switchingPsi1A = getStage1SwitchingPsi_90_63();}
 
       if(millis() - timer[2] > 250 && timer[2] && AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){ DO_HYD_XV460_DCV1_A = false; temp = millis() - timer[2]; }
 
@@ -44,7 +45,8 @@ void intensifier1Operation(){
     case SIDE_B:
       if(!timer[2]){ timer[2] = millis(); DO_HYD_XV463_DCV1_B = true; stateHistory1 = stateHistory1 + "-";}
 
-      switchingPsi1B = getStage1SwitchingPsi();
+      if(switchingPsi1B_Override){switchingPsi1B = switchingPsi1B_Override;}
+      else{switchingPsi1B = getStage1SwitchingPsi_90_63();}
 
       if(millis() - timer[2] > 250 && timer[2] && AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B){ DO_HYD_XV463_DCV1_B = false; temp = millis() - timer[2];}
         
@@ -103,7 +105,8 @@ void intensifier2Operation(){
         else{ CPMhigh = 60 / (millis() - CPMhighTimer);CPMhighTimer = millis(); }
       }
 
-      switchingPsi2A = (!switchingPsi2A)?getStage2SwitchingPsi():switchingPsi2A;
+      if(switchingPsi2A_Override){switchingPsi2A = switchingPsi2A_Override;}
+      else{switchingPsi2A = getStage2SwitchingPsi_150_90();}
 
       if(millis() - timer[3] > 250 && timer[3] && AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2A){ DO_HYD_XV554_DCV2_A = false; }
 
@@ -117,7 +120,8 @@ void intensifier2Operation(){
     case SIDE_B:
       if(!timer[3]){ timer[3] = millis(); DO_HYD_XV557_DCV2_B = true; stateHistory2 = stateHistory2 + "-";}
 
-      switchingPsi2B = getStage3SwitchingPsi();
+      if(switchingPsi2B_Override){switchingPsi2B = switchingPsi2B_Override;}
+      else{switchingPsi2B = getStage3SwitchingPsi_150_90();}
 
       if(millis() - timer[3] > 250 && timer[3] && AI_HYD_psig_PT561_HydraulicInlet2 >= switchingPsi2B){ DO_HYD_XV557_DCV2_B = false; }
         

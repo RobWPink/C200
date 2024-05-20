@@ -128,8 +128,16 @@ double switchingPsi1B = 0;
 double switchingPsi2A = 0;
 double switchingPsi2B = 0;
 
+double switchingPsi1A_Override = 0;
+double switchingPsi1B_Override = 0;
+double switchingPsi2A_Override = 0;
+double switchingPsi2B_Override = 0;
+
 double switchingTimeLow = 0;
 double switchingTimeHigh = 0;
+
+double switchingTimeLow_Override = 0;
+double switchingTimeHigh_Override = 0;
 
 double highCPM = 15;
 double lowCPM = 15;
@@ -154,9 +162,15 @@ var VARdata[] = {
   {"Hydraulic_MovingAverage_size","HYMAS",&HYD_MOVING_AVG_SIZE,0.95,0},
   {"Print_Delay_Time","PRDTM",&delayTime,100,0},
   {"Stage1_Compression_Ratio","S1CRO",&Stage1_Compression_RATIO,6.5,0},
-  {"lowOverHeat","LOWOH",&lowOverHeat,80,0},
-  {"highOverHeat","HIHOH",&highOverHeat,100,0}
-};int VARsize = 8;
+  {"LowOverHeat","LOWOH",&lowOverHeat,80,0},
+  {"HighOverHeat","HIHOH",&highOverHeat,100,0},
+  {"SwitchingPsi1A_Override","SWP1AO",&switchingPsi1A_Override,0,0},
+  {"SwitchingPsi1B_Override","SWP1BO",&switchingPsi1B_Override,0,0},
+  {"SwitchingPsi2A_Override","SWP2AO",&switchingPsi2A_Override,0,0},
+  {"SwitchingPsi2B_Override","SWP2BO",&switchingPsi2B_Override,0,0},
+  {"SwitchingTimeLow_Override","SWTLO",&switchingTimeLow_Override,0,0},
+  {"SwitchingTimeHigh_Override","SWTHO",&switchingTimeHigh_Override,0,0}
+};int VARsize = 14;
 
 
 double peakPsi1A = 0;
@@ -356,7 +370,7 @@ struct pt {
   { "AI_H2_psig_PT716_Stage1_Discharge", "PT716", 0, 0, 0, avgPT716, &AI_H2_psig_PT716_Stage1_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 2000, adc2, 4, 0, 0},
   { "AI_H2_psig_PT712_Stage1_DischargeTank", "PT712", 0, 0, 0, avgPT712, &AI_H2_psig_PT712_Stage1_DischargeTank, 0, 400, 450, 2, -1, -1, 1, 820, 4096, 0, 2000, adc2, 5, 0, 0},
   { "AI_H2_psig_PT519_Stage2_Discharge", "PT519", 0, 0, 0, avgPT519, &AI_H2_psig_PT519_Stage2_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc2, 6, 0, 0},
-  { "AI_H2_psig_PT407_Stage3_Discharge", "PT407", 0, 0, 0, avgPT407, &AI_H2_psig_PT407_Stage3_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 20000, adc2, 7, 0, 0},
+  { "AI_H2_psig_PT407_Stage3_Discharge", "PT407", 0, 0, 0, avgPT407, &AI_H2_psig_PT407_Stage3_Discharge, 0, -1, -1, -1, -1, -1, 2,  820, 4096, 0, 20000, adc2, 7, 0, 0},
   { "AI_H2_psig_PT410_Stage3_DischargeTank", "PT410", 0, 0, 0, avgPT410, &AI_H2_psig_PT410_Stage3_DischargeTank, 0, -1, -1, -1, 8100, 7500, 0,  820, 4096, 0, 20000, adc3, 0, 0, 0},
   { "AI_HYD_psig_PT467_HydraulicInlet1", "PT467", 0, 0, 0, avgPT467, &AI_HYD_psig_PT467_HydraulicInlet1, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc3, 1, 0, 0},
   { "AI_HYD_psig_PT561_HydraulicInlet2", "PT561", 0, 0, 0, avgPT561, &AI_HYD_psig_PT561_HydraulicInlet2, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc3, 2, 0, 0},
