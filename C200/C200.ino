@@ -66,6 +66,7 @@ void loop() {
   if(lowMax > 100){ //40 degree gradiant until forceful pause
     CPMlowTemp = map(lowMax - CPMlowTempDelayBegin,0,CPMlowTempDelayEnd - CPMlowTempDelayBegin,0,CPMlowTempMaxDelay*1000);
   }
+  else{CPMlowTemp = 0;}
 
   highMax = max(AI_H2_C_TT715_Stage2_SuctionTank,max(AI_H2_C_TT520_Stage2_Discharge,max(AI_H2_C_TT521_Stage3_Suction,AI_H2_C_TT522_Stage3_Discharge)));
   highMax = (0 < highMax < 800)?highMax:0;
@@ -73,6 +74,7 @@ void loop() {
   if(highMax > 100){ //40 degree gradiant until forceful pause
     CPMhighTemp = map(highMax - CPMhighTempDelayBegin,0,CPMhighTempDelayEnd - CPMhighTempDelayBegin,0,CPMhighTempMaxDelay*1000);
   }
+  else{CPMhighTemp = 0;}
 
   if(STATE != MANUAL_CONTROL){
     DO_Encl_PilotAmber = DI_Comm_LSR_Local;

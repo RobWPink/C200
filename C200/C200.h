@@ -93,7 +93,9 @@ String errMsg[30] = { "" };
 String stateHistory1 = "";
 String stateHistory2 = "";
 
-
+RunningAverage avgLow(10);
+RunningAverage avgHigh(10);
+double stdLow, stdHigh = 0;
 uint8_t mcpExist = 0;
 int scrollCnt, errCnt = 0;
 int flashGreen, flashAmber, flashRed = 0;
@@ -112,7 +114,8 @@ double lowMax,highMax = 0;
 double loopTime = 0;
 
 
-
+float accelLow = 0;
+float accelHigh = 0;
 
 
 double MOVING_AVG_SIZE = 0.02; //equivilent to 200 samples
@@ -130,7 +133,8 @@ double switchingPsi2B_Override = 0;
 
 double switchingTimeLow = 0;
 double switchingTimeHigh = 0;
-
+double prevLow = 0;
+double prevHigh = 0;
 double switchingTimeLow_Override = 0;
 double switchingTimeHigh_Override = 0;
 double CPMlowTempDelayBegin = 0; //what temp to begin to slow down CPM

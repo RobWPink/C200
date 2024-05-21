@@ -263,7 +263,24 @@ void dataPrint(unsigned long dly){
   //   Serial.print(msgE);
   //   Serial.print(msgF);
   //   Serial.println(msgG);
-
+  Serial.print("DCV1A:");
+  Serial.print(DO_HYD_XV460_DCV1_A*500);
+  Serial.print(",");
+  Serial.print("DCV1B:");
+  Serial.print(DO_HYD_XV463_DCV1_B*500);
+  Serial.print(",");
+  Serial.print("DCV2A:");
+  Serial.print(DO_HYD_XV554_DCV2_A*1000);
+  Serial.print(",");
+  Serial.print("DCV2B:");
+  Serial.print(DO_HYD_XV557_DCV2_B*1000);
+  Serial.print(",");
+  Serial.print("accelLow:");
+  Serial.print(accelLow);
+  Serial.print(",");
+  Serial.print("accelHigh:");
+  Serial.print(accelHigh);
+  Serial.print(",");
   Serial.print("low:");
   Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);
   Serial.print(",");
