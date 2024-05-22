@@ -93,9 +93,16 @@ String errMsg[30] = { "" };
 String stateHistory1 = "";
 String stateHistory2 = "";
 
-RunningAverage avgLow(10);
-RunningAverage avgHigh(10);
-
+struct vals{
+  double x[3];
+  double y[3];
+  int size;
+  int cnt;
+}low,high;
+low.size = 3;
+high.size = 3;
+low.cnt = 0;
+high.cnt = 0;
 double stdLow, stdHigh = 0;
 uint8_t mcpExist = 0;
 int scrollCnt, errCnt = 0;

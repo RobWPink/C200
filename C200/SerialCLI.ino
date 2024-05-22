@@ -275,11 +275,11 @@ void dataPrint(unsigned long dly){
   // Serial.print("DCV2B:");
   // Serial.print(DO_HYD_XV557_DCV2_B*switchingPsi2B);
   // Serial.print(",");
-  // Serial.print("accelLow:");
-  // Serial.print(accelLow);
-  // Serial.print(",");
-  // Serial.print("accelHigh:");
-  // Serial.print(accelHigh);
+  Serial.print("lowSlope:");
+  Serial.print(slope(low));
+  Serial.print(",");
+  // Serial.print("highSlope:");
+  // Serial.print(slope(high));
   // Serial.print(",");
   Serial.print("low:");
   Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);

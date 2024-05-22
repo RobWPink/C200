@@ -5,8 +5,9 @@ void intensifier1Operation(){
     DO_HYD_XV463_DCV1_B = false;
     stateHistory1 = stateHistory1 + String(SUB_STATE1);
     PREV1 = SUB_STATE1;
-    prevLow = 0;
-    accelLow = 0;
+    memset(low.x,0,low.size);
+    memset(low.y,0,low.size);
+    low.cnt = 0;
     return;
   }
   switch(SUB_STATE1){
@@ -29,6 +30,9 @@ void intensifier1Operation(){
         stateHistory1 = stateHistory1 + "+";
         CPMlowTimer = millis();
       }
+      low.x[low.cnt] = AI_HYD_psig_PT467_HydraulicInlet1;
+      low.y[low.cnt++] = millis()-timer[2];
+      if(low.cnt > low.size){low.cnt = 0;}
 
       if(switchingPsi1A_Override){switchingPsi1A = switchingPsi1A_Override;}
       else{switchingPsi1A = getStage1SwitchingPsi_90_63()-offset1A;}
@@ -46,6 +50,10 @@ void intensifier1Operation(){
 
     case SIDE_B:
       if(!timer[2]){ timer[2] = millis(); DO_HYD_XV463_DCV1_B = true; stateHistory1 = stateHistory1 + "-";}
+
+      low.x[low.cnt] = AI_HYD_psig_PT467_HydraulicInlet1;
+      low.y[low.cnt++] = millis()-timer[2];
+      if(low.cnt > low.size){low.cnt = 0;}
 
       if(switchingPsi1B_Override){switchingPsi1B = switchingPsi1B_Override;}
       else{switchingPsi1B = getStage1SwitchingPsi_90_63()-offset1B;}

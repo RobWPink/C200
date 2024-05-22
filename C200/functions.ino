@@ -143,6 +143,23 @@ void RPCtransceive(){
   }
 }
 
+double slope(vals a){
+  double sum_x = 0;
+  double sum_y = 0;
+  double sum_x2 = 0;
+  double sum_y2 = 0;
+  double sum_xy = 0;
+  for(int i = 0; i < a.size; i++){
+    sum_x += a.x[i];
+    sum_y += a.y[i];
+    sum_x2 += a.x[i] * a.x[i];
+    sum_y2 += a.y[i] * a.y[i];
+    sum_xy = sum_xy + a.x[i] * a.y[i];
+  }
+  
+  return (a.size * sum_xy - sum_x * sum_y) / (a.size * sum_x2 - sum_x * sum_x);
+}
+
 void i2cTransceive(int ptInterval){
   errCnt = 0;
   for(int i = 0; i < 30; i++){
