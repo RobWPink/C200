@@ -4,7 +4,7 @@ void setup() {
   RPC.begin(); //boots M4
   pinModeSetup();
   Wire.begin();
-  matrixSetup("C200v2_Longview", "V0.6.9");
+  matrixSetup("C200v2_Longview", "V0.7.1");
   i2cSetup();
   for(int i = 0; i < VARsize; i++){
     *VARdata[i].value = VARdata[i].defaultValue;

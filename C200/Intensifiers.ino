@@ -35,9 +35,9 @@ void intensifier1Operation(){
 
       if(millis() - timer[2] > 250 && timer[2]){
         accelLow = AI_HYD_psig_PT467_HydraulicInlet1/pow((millis()-timer[2])/1000,2);
-        if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){ DO_HYD_XV460_DCV1_A = false;}
-        else if(prevLow && accelLow - prevLow >= 200){ DO_HYD_XV460_DCV1_A = false; }
-        prevLow = accelLow;
+        if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A - 100){
+          if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A || accelLow < 100){DO_HYD_XV460_DCV1_A = false;}
+        }
       }
 
       if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = faultString + "|1A Timeout|";}
@@ -58,9 +58,9 @@ void intensifier1Operation(){
 
       if(millis() - timer[2] > 250 && timer[2]){
         accelLow = AI_HYD_psig_PT467_HydraulicInlet1/pow((millis()-timer[2])/1000,2);
-        if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B){ DO_HYD_XV463_DCV1_B = false;}
-        else if(prevLow && accelLow - prevLow >= 200){ DO_HYD_XV463_DCV1_B = false; }
-        prevLow = accelLow;
+        if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B - 100){
+          if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B || accelLow < 100){DO_HYD_XV460_DCV1_A = false;}
+        }
       }
         
       if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = faultString + "|1B Timeout|";}
