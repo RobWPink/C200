@@ -96,6 +96,7 @@ String stateHistory2 = "";
 struct vals{
   double x[3];
   double y[3];
+  double slope;
   int size;
   int cnt;
 }low,high;

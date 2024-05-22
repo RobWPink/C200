@@ -164,6 +164,10 @@ void loop() {
       if(manualPause){ smallMatrix[2].displayPause(false); }
       else{ smallMatrix[2].displayQuadrants(DO_HYD_XV460_DCV1_A,DO_HYD_XV463_DCV1_B,DO_HYD_XV554_DCV2_A,DO_HYD_XV557_DCV2_B,(SUB_STATE1==PAUSE),(SUB_STATE2==PAUSE)); }
 
+      low.x[low.cnt] = AI_HYD_psig_PT467_HydraulicInlet1;
+      low.y[low.cnt++] = millis()-timer[2];
+      if(low.cnt > low.size){low.cnt = 0;}
+      
       //Main operation of compressing
       if(tog[2]){SUB_STATE1 = PAUSE;}
       if(tog[3]){SUB_STATE2 = PAUSE;}
