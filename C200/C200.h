@@ -118,6 +118,10 @@ double loopTime = 0;
 float accelLow = 0;
 float accelHigh = 0;
 
+double offset1A = 0;
+double offset1B = 0;
+double offset2A = 0;
+double offset2B = 0;
 
 double MOVING_AVG_SIZE = 0.02; //equivilent to 200 samples
 double HYD_MOVING_AVG_SIZE = 0.95;
@@ -176,8 +180,12 @@ var VARdata[] = {
   {"SwitchingPsi2A_Override","SWP2AO",&switchingPsi2A_Override,0,0},
   {"SwitchingPsi2B_Override","SWP2BO",&switchingPsi2B_Override,0,0},
   {"SwitchingTimeLow_Override","SWTLO",&switchingTimeLow_Override,0,0},
-  {"SwitchingTimeHigh_Override","SWTHO",&switchingTimeHigh_Override,0,0}
-};int VARsize = 16;
+  {"SwitchingTimeHigh_Override","SWTHO",&switchingTimeHigh_Override,0,0},
+  {"offset1A","OFS1A",&offset1A,100,0},
+  {"offset1B","OFS1B",&offset1B,100,0},
+  {"offset2A","OFS2A",&offset2A,0,0},
+  {"offset2B","OFS2B",&offset2B,0,0}
+};int VARsize = 20;
 
 
 double peakPsi1A = 0;
@@ -375,7 +383,7 @@ struct pt {
 } PTdata[] = {
   { "AI_H2_psig_PT911_Stage1_SuctionTank", "PT911", 0, 0, 0, avgPT911, &AI_H2_psig_PT911_Stage1_SuctionTank, 0, 75, 85, 1, 400, 390, 0, 820, 4096, 0, 500, adc2, 3, 0, 0},
   { "AI_H2_psig_PT716_Stage1_Discharge", "PT716", 0, 0, 0, avgPT716, &AI_H2_psig_PT716_Stage1_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 2000, adc2, 4, 0, 0},
-  { "AI_H2_psig_PT712_Stage1_DischargeTank", "PT712", 0, 0, 0, avgPT712, &AI_H2_psig_PT712_Stage1_DischargeTank, 0, 400, 450, 2, -1, -1, 1, 820, 4096, 0, 2000, adc2, 5, 0, 0},
+  { "AI_H2_psig_PT712_Stage1_DischargeTank", "PT712", 0, 0, 0, avgPT712, &AI_H2_psig_PT712_Stage1_DischargeTank, 0, 450, 500, 2, -1, -1, 1, 820, 4096, 0, 2000, adc2, 5, 0, 0},
   { "AI_H2_psig_PT519_Stage2_Discharge", "PT519", 0, 0, 0, avgPT519, &AI_H2_psig_PT519_Stage2_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc2, 6, 0, 0},
   { "AI_H2_psig_PT407_Stage3_Discharge", "PT407", 0, 0, 0, avgPT407, &AI_H2_psig_PT407_Stage3_Discharge, 0, -1, -1, -1, -1, -1, 2,  820, 4096, 0, 20000, adc2, 7, 0, 0},
   { "AI_H2_psig_PT410_Stage3_DischargeTank", "PT410", 0, 0, 0, avgPT410, &AI_H2_psig_PT410_Stage3_DischargeTank, 0, -1, -1, -1, 8100, 7500, 0,  820, 4096, 0, 20000, adc3, 0, 0, 0},

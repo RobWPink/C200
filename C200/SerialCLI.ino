@@ -36,15 +36,15 @@ void SerialCLI() {
           break;
         }
       }
-      // for(int i = 0; i < VARsize; i++){
-      //   if(argStr.equalsIgnoreCase(VARdata[i].key)){
-      //     String argStrVal = argBuf[++n];
-      //     argVal = argStrVal.toDouble();
-      //     *VARdata[i].value = argVal;
-      //     digital = true;
-      //     break;
-      //   }
-      // }
+      for(int i = 0; i < VARsize; i++){
+        if(argStr.equalsIgnoreCase(VARdata[i].key)){
+          String argStrVal = argBuf[++n];
+          argVal = argStrVal.toDouble();
+          *VARdata[i].value = argVal;
+          digital = true;
+          break;
+        }
+      }
       if(digital){;}
 
       else if(argStr.equalsIgnoreCase("delay")) {
@@ -275,12 +275,12 @@ void dataPrint(unsigned long dly){
   // Serial.print("DCV2B:");
   // Serial.print(DO_HYD_XV557_DCV2_B*switchingPsi2B);
   // Serial.print(",");
-  Serial.print("accelLow:");
-  Serial.print(accelLow);
-  Serial.print(",");
-  Serial.print("accelHigh:");
-  Serial.print(accelHigh);
-  Serial.print(",");
+  // Serial.print("accelLow:");
+  // Serial.print(accelLow);
+  // Serial.print(",");
+  // Serial.print("accelHigh:");
+  // Serial.print(accelHigh);
+  // Serial.print(",");
   Serial.print("low:");
   Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);
   Serial.print(",");
