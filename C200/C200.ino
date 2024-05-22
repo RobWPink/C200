@@ -95,7 +95,14 @@ void loop() {
     timer[3] = 0;
     SUB_STATE1 = START;
     SUB_STATE2 = START;
-
+    low.size = 3;
+    high.size = 3;
+    low.cnt = 0;
+    high.cnt = 0;
+    memset(low.x,0,low.size);
+    memset(low.y,0,low.size);
+    memset(high.x,0,high.size);
+    memset(high.y,0,high.size);
     DO_Encl_PilotRed = false;
     DO_Encl_PilotGreen = false;
     DO_Encl_PilotAmber = false;
