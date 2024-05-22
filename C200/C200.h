@@ -95,6 +95,7 @@ String stateHistory2 = "";
 
 RunningAverage avgLow(10);
 RunningAverage avgHigh(10);
+
 double stdLow, stdHigh = 0;
 uint8_t mcpExist = 0;
 int scrollCnt, errCnt = 0;
