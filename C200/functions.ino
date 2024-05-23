@@ -156,8 +156,7 @@ double slope(vals a){
     sum_y2 += a.y[i] * a.y[i];
     sum_xy = sum_xy + a.x[i] * a.y[i];
   }
-  
-  a.slope = (a.size * sum_xy - sum_x * sum_y) / (a.size * sum_x2 - sum_x * sum_x);
+  return (a.size * sum_xy - sum_x * sum_y) / (a.size * sum_x2 - sum_x * sum_x);
 }
 
 void i2cTransceive(int ptInterval){

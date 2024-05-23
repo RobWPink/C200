@@ -30,7 +30,7 @@ void intensifier1Operation(){
         stateHistory1 = stateHistory1 + "+";
         CPMlowTimer = millis();
       }
-
+      mLow = slope(low);
       if(switchingPsi1A_Override){switchingPsi1A = switchingPsi1A_Override;}
       else{switchingPsi1A = getStage1SwitchingPsi_90_63()-offset1A;}
 
@@ -48,7 +48,7 @@ void intensifier1Operation(){
 
     case SIDE_B:
       if(!timer[2]){ timer[2] = millis(); DO_HYD_XV463_DCV1_B = true; stateHistory1 = stateHistory1 + "-";}
-
+      mLow = slope(low);
       if(switchingPsi1B_Override){switchingPsi1B = switchingPsi1B_Override;}
       else{switchingPsi1B = getStage1SwitchingPsi_90_63()-offset1B;}
 
@@ -109,7 +109,7 @@ void intensifier2Operation(){
         stateHistory2 = stateHistory2 + "+";
         CPMhighTimer = millis();
       }
-
+      mHigh = slope(high);
       if(switchingPsi2A_Override){switchingPsi2A = switchingPsi2A_Override;}
       else{switchingPsi2A = getStage2SwitchingPsi_150_90()-offset2A;}
 
@@ -126,7 +126,8 @@ void intensifier2Operation(){
 
     case SIDE_B:
       if(!timer[3]){ timer[3] = millis(); DO_HYD_XV557_DCV2_B = true; stateHistory2 = stateHistory2 + "-";}
-
+      
+      mHigh = slope(high);
       if(switchingPsi2B_Override){switchingPsi2B = switchingPsi2B_Override;}
       else{switchingPsi2B = getStage3SwitchingPsi_150_90()-offset2B;}
 

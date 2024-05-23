@@ -167,12 +167,14 @@ void loop() {
       low.x[low.cnt] = AI_HYD_psig_PT467_HydraulicInlet1;
       low.y[low.cnt++] = millis()-timer[2];
       if(low.cnt > low.size){low.cnt = 0;}
+      
 
       high.x[high.cnt] = AI_HYD_psig_PT561_HydraulicInlet2;
       high.y[high.cnt++] = millis()-timer[3];
       if(high.cnt > high.size){high.cnt = 0;}
       
       
+
       //Main operation of compressing
       if(tog[2]){SUB_STATE1 = PAUSE;}
       if(tog[3]){SUB_STATE2 = PAUSE;}

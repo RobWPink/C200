@@ -95,14 +95,13 @@ String stateHistory2 = "";
 
 struct vals{
   double x[3];
-  double y[3];
-  double slope;
+  unsigned long y[3];
   int size;
   int cnt;
 }low,high;
 
 
-double stdLow, stdHigh = 0;
+double mHigh, mLow = 0;
 uint8_t mcpExist = 0;
 int scrollCnt, errCnt = 0;
 int flashGreen, flashAmber, flashRed = 0;
