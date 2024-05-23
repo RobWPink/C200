@@ -278,9 +278,9 @@ void dataPrint(unsigned long dly){
   Serial.print("lowSlope:");
   Serial.print(slope(low));
   Serial.print(",");
-  // Serial.print("highSlope:");
-  // Serial.print(slope(high));
-  // Serial.print(",");
+  Serial.print("highSlope:");
+  Serial.print(slope(high));
+  Serial.print(",");
   Serial.print("low:");
   Serial.print(AI_HYD_psig_PT467_HydraulicInlet1);
   Serial.print(",");
