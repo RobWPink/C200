@@ -94,14 +94,14 @@ String stateHistory1 = "";
 String stateHistory2 = "";
 
 struct vals{
-  double x[3];
-  unsigned long y[3];
+  double x[10];
+  unsigned long y[10];
   int size;
   int cnt;
 }low,high;
 
 
-double mHigh, mLow = 0;
+float mHigh, mLow = 0;
 uint8_t mcpExist = 0;
 int scrollCnt, errCnt = 0;
 int flashGreen, flashAmber, flashRed = 0;
@@ -388,7 +388,7 @@ struct pt {
 } PTdata[] = {
   { "AI_H2_psig_PT911_Stage1_SuctionTank", "PT911", 0, 0, 0, avgPT911, &AI_H2_psig_PT911_Stage1_SuctionTank, 0, 75, 85, 1, 400, 390, 0, 820, 4096, 0, 500, adc2, 3, 0, 0},
   { "AI_H2_psig_PT716_Stage1_Discharge", "PT716", 0, 0, 0, avgPT716, &AI_H2_psig_PT716_Stage1_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 2000, adc2, 4, 0, 0},
-  { "AI_H2_psig_PT712_Stage1_DischargeTank", "PT712", 0, 0, 0, avgPT712, &AI_H2_psig_PT712_Stage1_DischargeTank, 0, 450, 500, 2, -1, -1, 1, 820, 4096, 0, 2000, adc2, 5, 0, 0},
+  { "AI_H2_psig_PT712_Stage1_DischargeTank", "PT712", 0, 0, 0, avgPT712, &AI_H2_psig_PT712_Stage1_DischargeTank, 0, 500, 550, 2, -1, -1, 1, 820, 4096, 0, 2000, adc2, 5, 0, 0},
   { "AI_H2_psig_PT519_Stage2_Discharge", "PT519", 0, 0, 0, avgPT519, &AI_H2_psig_PT519_Stage2_Discharge, 0, -1, -1, -1, -1, -1, -1,  820, 4096, 0, 5000, adc2, 6, 0, 0},
   { "AI_H2_psig_PT407_Stage3_Discharge", "PT407", 0, 0, 0, avgPT407, &AI_H2_psig_PT407_Stage3_Discharge, 0, -1, -1, -1, -1, -1, 2,  820, 4096, 0, 20000, adc2, 7, 0, 0},
   { "AI_H2_psig_PT410_Stage3_DischargeTank", "PT410", 0, 0, 0, avgPT410, &AI_H2_psig_PT410_Stage3_DischargeTank, 0, -1, -1, -1, 8100, 7500, 0,  820, 4096, 0, 20000, adc3, 0, 0, 0},

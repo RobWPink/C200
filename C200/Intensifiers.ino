@@ -35,7 +35,7 @@ void intensifier1Operation(){
       else{switchingPsi1A = getStage1SwitchingPsi_90_63()-offset1A;}
 
       if(millis() - timer[2] > 250 && timer[2]){
-        if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A){DO_HYD_XV460_DCV1_A = false;}
+        if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1A ){DO_HYD_XV460_DCV1_A = false;}
         
       }
 
@@ -56,7 +56,7 @@ void intensifier1Operation(){
       //else{switchingTimeLow = (60/CPMlowIdeal)*1000;}
 
       if(millis() - timer[2] > 250 && timer[2]){
-        if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B){DO_HYD_XV463_DCV1_B = false;}
+        if(AI_HYD_psig_PT467_HydraulicInlet1 >= switchingPsi1B ){DO_HYD_XV463_DCV1_B = false;}
       }
         
       if(millis() - timer[2] > 30000 && timer[2]){STATE = FAULT; faultString = faultString + "|1B Timeout|";}

@@ -95,8 +95,8 @@ void loop() {
     timer[3] = 0;
     SUB_STATE1 = START;
     SUB_STATE2 = START;
-    low.size = 3;
-    high.size = 3;
+    low.size = 9;
+    high.size = 9;
     low.cnt = 0;
     high.cnt = 0;
     memset(low.x,0,low.size);
@@ -166,12 +166,12 @@ void loop() {
 
       low.x[low.cnt] = AI_HYD_psig_PT467_HydraulicInlet1;
       low.y[low.cnt++] = millis()-timer[2];
-      if(low.cnt > low.size){low.cnt = 0;}
+      if(low.cnt > low.size-1){low.cnt = 0;}
       
 
       high.x[high.cnt] = AI_HYD_psig_PT561_HydraulicInlet2;
       high.y[high.cnt++] = millis()-timer[3];
-      if(high.cnt > high.size){high.cnt = 0;}
+      if(high.cnt > high.size-1){high.cnt = 0;}
       
       
 
